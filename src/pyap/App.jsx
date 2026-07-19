@@ -392,13 +392,19 @@ function Dashboard({ members, events, attendance, announcements, finance }) {
       </div>
       <div className="bg-white rounded-xl border border-stone-200 p-5">
         <h3 className="font-semibold text-emerald-900 text-sm mb-3">📢 Recent Announcements</h3>
-        {announcements.slice(0, 3).map(a => (
-          <div key={a.id} className="border-l-4 border-amber-400 bg-amber-50/50 rounded-r-lg p-3 mb-2">
-            <div className="text-[11px] text-stone-400">{a.date}</div>
-            <div className="font-semibold text-sm">{a.title}</div>
-            <p className="text-xs text-stone-600 mt-0.5">{a.content}</p>
-          </div>
-        ))}
+        {announcements.slice(0, 3).map(a => {
+          const u = getUrgency(a);
+          return (
+            <div key={a.id} className={`border-l-4 ${u.border} ${u.bg} rounded-r-lg p-3 mb-2`}>
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-[11px] text-stone-400">{a.date}</div>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${u.badge}`}>{u.label}</span>
+              </div>
+              <div className="font-semibold text-sm">{a.title}</div>
+              <p className="text-xs text-stone-600 mt-0.5">{a.content}</p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
