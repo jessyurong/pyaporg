@@ -149,7 +149,7 @@ export default function App() {
   const featureAccess = isGuest
     ? { dashboard: true, announcements: true, suggestions: true, donate: true }
     : session?.role === "superadmin"
-    ? { dashboard: true, members: true, attendance: true, events: true, announcements: true, finance: true, certificates: true, achievements: true, users: true, suggestions: true }
+    ? { dashboard: true, members: true, attendance: true, events: true, announcements: true, finance: true, certificates: true, achievements: true, users: true, suggestions: true, welcome: true }
     : session?.features || PRESETS[session?.role] || {};
 
   function handleLogin(e) {
