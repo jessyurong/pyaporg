@@ -100,6 +100,7 @@ const NAV = [
   { key: "suggestions", label: "Suggestions", icon: MessageSquare },
   { key: "donate", label: "Donate", icon: Wallet },
   { key: "users", label: "User Management", icon: Settings },
+  { key: "welcome", label: "Welcome Page", icon: Home },
 ];
 
 function Badge({ children, tone = "neutral" }) {
