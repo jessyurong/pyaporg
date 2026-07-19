@@ -77,14 +77,18 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
+      { title: "PYAP Barangay Samac" },
+      { name: "description", content: "Pag-asa Youth Association of the Philippines — Barangay Samac management system." },
       { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { property: "og:title", content: "PYAP Barangay Samac" },
+      { property: "og:description", content: "Pag-asa Youth Association of the Philippines — Barangay Samac management system." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:site", content: "@Lovable" },
+      { name: "twitter:title", content: "PYAP Barangay Samac" },
+      { name: "twitter:description", content: "Pag-asa Youth Association of the Philippines — Barangay Samac management system." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/35596de9-3173-4e87-8d5d-f5bd6b9066f9" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/attachments/og-images/35596de9-3173-4e87-8d5d-f5bd6b9066f9" },
     ],
     links: [
       {
