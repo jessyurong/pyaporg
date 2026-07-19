@@ -114,17 +114,17 @@ function Badge({ children, tone = "neutral" }) {
 }
 
 export default function App() {
-  const [session, setSession] = useState(null); // { name, role } or { guest: true }
+  const [session, setSession] = usePersistentState("session", null); // { name, role } or { guest: true }
   const [screen, setScreen] = useState("dashboard");
-  const [members, setMembers] = useState(seedMembers);
-  const [events, setEvents] = useState(seedEvents);
-  const [attendance, setAttendance] = useState(seedAttendance);
-  const [attendanceNotes, setAttendanceNotes] = useState({});
-  const [announcements, setAnnouncements] = useState(seedAnnouncements);
-  const [finance, setFinance] = useState(seedFinance);
-  const [users, setUsers] = useState(seedUsers);
-  const [suggestions, setSuggestions] = useState(seedSuggestions);
-  const [achievements, setAchievements] = useState(seedAchievements);
+  const [members, setMembers] = usePersistentState("members", seedMembers);
+  const [events, setEvents] = usePersistentState("events", seedEvents);
+  const [attendance, setAttendance] = usePersistentState("attendance", seedAttendance);
+  const [attendanceNotes, setAttendanceNotes] = usePersistentState("attendanceNotes", {});
+  const [announcements, setAnnouncements] = usePersistentState("announcements", seedAnnouncements);
+  const [finance, setFinance] = usePersistentState("finance", seedFinance);
+  const [users, setUsers] = usePersistentState("users", seedUsers);
+  const [suggestions, setSuggestions] = usePersistentState("suggestions", seedSuggestions);
+  const [achievements, setAchievements] = usePersistentState("achievements", seedAchievements);
   const [selectedMember, setSelectedMember] = useState(null);
   const [selectedEventForAttendance, setSelectedEventForAttendance] = useState(null);
   const [viewHistoryEvent, setViewHistoryEvent] = useState(null);
