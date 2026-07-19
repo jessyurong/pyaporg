@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Users, Calendar, Award, Megaphone, Heart, Target, Sparkles, Mail, Phone, Facebook, MapPin, X, Edit3, ChevronDown } from "lucide-react";
+import { Users, Calendar, Award, Megaphone, Heart, Target, Sparkles, Mail, Phone, MapPin, X, Edit3, ChevronDown } from "lucide-react";
 
 export const DEFAULT_WELCOME = {
   heroTitle: "PYAP – Barangay Samac",
