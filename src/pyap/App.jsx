@@ -842,9 +842,6 @@ function Finance({ finance, onAdd, onDelete }) {
 }
 
 function UserManagement({ users, onAdd, onToggle, onDelete, onEditAccess }) {
-  const [visiblePw, setVisiblePw] = useState({});
-  const togglePw = (id) => setVisiblePw(v => ({ ...v, [id]: !v[id] }));
-
   return (
     <div>
       <div className="flex justify-between items-center mb-5">
@@ -853,19 +850,13 @@ function UserManagement({ users, onAdd, onToggle, onDelete, onEditAccess }) {
       </div>
       <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto">
         <table className="w-full text-sm min-w-[680px]">
-          <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Name</th><th className="p-3">Username</th><th className="p-3">Password</th><th className="p-3">Role</th><th className="p-3">Status</th><th className="p-3"></th></tr></thead>
-          <tbody>{users.map(u => (
+          <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Name</th><th className="p-3">Username</th><th className="p-3">Role</th><th className="p-3">Status</th><th className="p-3"></th></tr></thead>
+          <tbody>{users.length === 0 ? (
+            <tr><td colSpan={5} className="p-6 text-center text-stone-400 text-xs">No local user records. Real accounts are managed via secure sign-up and stored in the backend.</td></tr>
+          ) : users.map(u => (
             <tr key={u.id} className="border-t border-stone-100">
               <td className="p-3">{u.name}</td>
               <td className="p-3 text-stone-500">{u.username}</td>
-              <td className="p-3 text-stone-500">
-                <div className="flex items-center gap-1.5">
-                  <span className="font-mono">{visiblePw[u.id] ? u.password : "••••••••"}</span>
-                  <button onClick={() => togglePw(u.id)} className="text-stone-400 hover:text-emerald-700">
-                    {visiblePw[u.id] ? <EyeOff size={13} /> : <Eye size={13} />}
-                  </button>
-                </div>
-              </td>
               <td className="p-3">{u.role}</td>
               <td className="p-3"><Badge tone={u.active ? "active" : "inactive"}>{u.active ? "Active" : "Inactive"}</Badge></td>
               <td className="p-3 space-x-2 whitespace-nowrap">
@@ -882,6 +873,7 @@ function UserManagement({ users, onAdd, onToggle, onDelete, onEditAccess }) {
     </div>
   );
 }
+
 
 const FLAGGED_WORDS = ["bobo", "gago", "tanga", "putangina", "ulol"]; // basic placeholder filter — expand as needed
 
