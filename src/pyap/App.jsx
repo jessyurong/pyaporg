@@ -21,9 +21,16 @@ const seedAttendance = {
   2: { 1: "present", 2: "absent", 3: "present", 4: "absent" },
 };
 
+const URGENCY = {
+  normal:    { label: "Normal",    badge: "bg-emerald-100 text-emerald-800", border: "border-emerald-500", bg: "bg-emerald-50/60", dot: "bg-emerald-500" },
+  important: { label: "Important", badge: "bg-orange-100 text-orange-800",   border: "border-orange-500",  bg: "bg-orange-50/60",  dot: "bg-orange-500" },
+  urgent:    { label: "Urgent",    badge: "bg-rose-100 text-rose-800",       border: "border-rose-600",    bg: "bg-rose-50/60",    dot: "bg-rose-600" },
+};
+const getUrgency = (a) => URGENCY[a?.urgency] || URGENCY.normal;
+
 const seedAnnouncements = [
-  { id: 1, title: "Reminder: General Assembly this Sunday", content: "Lahat ng officers at active members, dumalo po tayo sa meeting sa Barangay Hall, 2PM.", date: "2026-07-10" },
-  { id: 2, title: "Feeding Program - Salamat!", content: "Maraming salamat sa lahat ng volunteers sa successful feeding program natin last week!", date: "2026-06-15" },
+  { id: 1, title: "Reminder: General Assembly this Sunday", content: "Lahat ng officers at active members, dumalo po tayo sa meeting sa Barangay Hall, 2PM.", date: "2026-07-10", urgency: "important" },
+  { id: 2, title: "Feeding Program - Salamat!", content: "Maraming salamat sa lahat ng volunteers sa successful feeding program natin last week!", date: "2026-06-15", urgency: "normal" },
 ];
 
 const seedFinance = [
@@ -385,13 +392,19 @@ function Dashboard({ members, events, attendance, announcements, finance }) {
       </div>
       <div className="bg-white rounded-xl border border-stone-200 p-5">
         <h3 className="font-semibold text-emerald-900 text-sm mb-3">📢 Recent Announcements</h3>
-        {announcements.slice(0, 3).map(a => (
-          <div key={a.id} className="border-l-4 border-amber-400 bg-amber-50/50 rounded-r-lg p-3 mb-2">
-            <div className="text-[11px] text-stone-400">{a.date}</div>
-            <div className="font-semibold text-sm">{a.title}</div>
-            <p className="text-xs text-stone-600 mt-0.5">{a.content}</p>
-          </div>
-        ))}
+        {announcements.slice(0, 3).map(a => {
+          const u = getUrgency(a);
+          return (
+            <div key={a.id} className={`border-l-4 ${u.border} ${u.bg} rounded-r-lg p-3 mb-2`}>
+              <div className="flex items-center justify-between gap-2">
+                <div className="text-[11px] text-stone-400">{a.date}</div>
+                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${u.badge}`}>{u.label}</span>
+              </div>
+              <div className="font-semibold text-sm">{a.title}</div>
+              <p className="text-xs text-stone-600 mt-0.5">{a.content}</p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -404,18 +417,26 @@ function Announcements({ announcements, isGuest, onAdd, onDelete }) {
         <h1 className="text-xl font-bold text-emerald-900">Announcements</h1>
         {!isGuest && <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Post Announcement</button>}
       </div>
-      {announcements.map(a => (
-        <div key={a.id} className="border-l-4 border-amber-400 bg-amber-50/50 rounded-r-lg p-4 mb-3">
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="text-[11px] text-stone-400">{a.date}</div>
-              <div className="font-semibold text-sm">{a.title}</div>
-              <p className="text-sm text-stone-600 mt-1">{a.content}</p>
+      {announcements.map(a => {
+        const u = getUrgency(a);
+        return (
+          <div key={a.id} className={`border-l-4 ${u.border} ${u.bg} rounded-r-lg p-4 mb-3`}>
+            <div className="flex justify-between items-start gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="text-[11px] text-stone-400">{a.date}</div>
+                  <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${u.badge}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${u.dot}`}></span>{u.label}
+                  </span>
+                </div>
+                <div className="font-semibold text-sm mt-0.5">{a.title}</div>
+                <p className="text-sm text-stone-600 mt-1 whitespace-pre-wrap break-words">{a.content}</p>
+              </div>
+              {!isGuest && <button onClick={() => onDelete(a.id)} className="text-rose-600 shrink-0"><Trash2 size={14} /></button>}
             </div>
-            {!isGuest && <button onClick={() => onDelete(a.id)} className="text-rose-600"><Trash2 size={14} /></button>}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -963,12 +984,30 @@ function EventFormModal({ onClose, onSave }) {
 }
 
 function AnnounceFormModal({ onClose, onSave }) {
-  const [f, setF] = useState({ title: "", content: "" });
+  const [f, setF] = useState({ title: "", content: "", urgency: "normal" });
   return (
     <ModalShell title="Post Announcement" onClose={onClose}>
       <div className="space-y-3">
         <input className={inputCls} placeholder="Title" value={f.title} onChange={e => setF({ ...f, title: e.target.value })} />
         <textarea className={inputCls} rows={4} placeholder="Content" value={f.content} onChange={e => setF({ ...f, content: e.target.value })} />
+        <div>
+          <label className="text-xs font-semibold text-stone-600 block mb-1.5">Urgency Level</label>
+          <div className="grid grid-cols-3 gap-2">
+            {Object.entries(URGENCY).map(([key, u]) => {
+              const active = f.urgency === key;
+              return (
+                <button
+                  type="button"
+                  key={key}
+                  onClick={() => setF({ ...f, urgency: key })}
+                  className={`flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-lg border-2 transition ${active ? `${u.badge} ${u.border}` : "bg-white border-stone-200 text-stone-500"}`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${u.dot}`}></span>{u.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <button onClick={() => f.title && onSave(f)} className="w-full bg-emerald-700 text-white text-sm py-2 rounded-lg">Post</button>
       </div>
     </ModalShell>
