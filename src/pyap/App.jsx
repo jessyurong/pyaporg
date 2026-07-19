@@ -126,7 +126,7 @@ export default function App() {
     const match = users.find(x => x.username === u && x.password === p);
 
     if (!match) {
-      setLoginError("Invalid username or password. (Preview hint: admin / admin123)");
+      setLoginError("Invalid username or password.");
       return;
     }
     if (!match.active) {
@@ -162,8 +162,8 @@ export default function App() {
           {loginError && <div className="bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4">{loginError}</div>}
 
           <form onSubmit={handleLogin} className="space-y-3">
-            <input name="username" placeholder="Username" defaultValue="admin" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
-            <input name="password" type="password" placeholder="Password" defaultValue="admin123" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+            <input name="username" placeholder="Username" autoComplete="off" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+            <input name="password" type="password" placeholder="Password" autoComplete="new-password" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
             <button className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm py-2.5 rounded-lg transition">Login</button>
           </form>
 
