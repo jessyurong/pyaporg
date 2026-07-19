@@ -115,6 +115,52 @@ export default function App() {
   const [loginError, setLoginError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [authMode, setAuthMode] = useState("login"); // "login" | "signup"
+  const [authBusy, setAuthBusy] = useState(false);
+
+  // Load role + profile for the currently authenticated user
+  async function loadUserSession(authUser) {
+    const { data: roleRow } = await supabase
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", authUser.id)
+      .order("role", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("user_id", authUser.id)
+      .maybeSingle();
+    setSession({
+      userId: authUser.id,
+      email: authUser.email,
+      name: profile?.full_name || authUser.email || "Member",
+      role: roleRow?.role || "member",
+      features: null,
+    });
+  }
+
+  useEffect(() => {
+    // Listener first (avoid missing events)
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
+      if (s?.user) {
+        // Defer async work to avoid deadlock inside the callback
+        setTimeout(() => loadUserSession(s.user), 0);
+      } else {
+        setSession(null);
+      }
+    });
+    supabase.auth.getSession().then(({ data }) => {
+      if (data.session?.user) {
+        loadUserSession(data.session.user).finally(() => setAuthLoading(false));
+      } else {
+        setAuthLoading(false);
+      }
+    });
+    return () => sub.subscription.unsubscribe();
+  }, []);
 
   const isGuest = session?.guest;
   const featureAccess = isGuest
@@ -123,26 +169,38 @@ export default function App() {
     ? { dashboard: true, members: true, attendance: true, events: true, announcements: true, finance: true, certificates: true, achievements: true, users: true, suggestions: true }
     : session?.features || PRESETS[session?.role] || {};
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
-    const fd = new FormData(e.target);
-    const u = (fd.get("username") || "").trim();
-    const p = fd.get("password") || "";
-
-    const match = users.find(x => x.username === u && x.password === p);
-
-    if (!match) {
-      setLoginError("Invalid username or password.");
-      return;
-    }
-    if (!match.active) {
-      setLoginError("This account has been deactivated. Contact Super Admin.");
-      return;
-    }
-
-    setSession({ name: match.name, role: match.role, features: match.features });
-    setScreen("dashboard");
     setLoginError("");
+    setAuthBusy(true);
+    const fd = new FormData(e.target);
+    const email = (fd.get("email") || "").trim();
+    const password = fd.get("password") || "";
+    const fullName = (fd.get("fullName") || "").trim();
+
+    try {
+      if (authMode === "signup") {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: fullName ? { full_name: fullName } : undefined,
+          },
+        });
+        if (error) throw error;
+        setLoginError("Account created. Check your email if confirmation is required, then log in.");
+        setAuthMode("login");
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        setScreen("dashboard");
+      }
+    } catch (err) {
+      setLoginError(err?.message || "Authentication failed.");
+    } finally {
+      setAuthBusy(false);
+    }
   }
 
   function handleGuest() {
@@ -150,13 +208,22 @@ export default function App() {
     setScreen("dashboard");
   }
 
-  function handleLogout() {
+  async function handleLogout() {
+    await supabase.auth.signOut();
     setSession(null);
     setScreen("dashboard");
     setSelectedMember(null);
   }
 
   // ---------- LOGIN SCREEN ----------
+  if (authLoading) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-emerald-800 to-emerald-600">
+        <div className="text-white text-sm">Loading…</div>
+      </div>
+    );
+  }
+
   if (!session) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-emerald-800 to-emerald-600 p-4">
@@ -168,20 +235,34 @@ export default function App() {
           {loginError && <div className="bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4">{loginError}</div>}
 
           <form onSubmit={handleLogin} className="space-y-3">
-            <input name="username" placeholder="Username" autoComplete="off" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
-            <input name="password" type="password" placeholder="Password" autoComplete="new-password" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
-            <button className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm py-2.5 rounded-lg transition">Login</button>
+            {authMode === "signup" && (
+              <input name="fullName" placeholder="Full name" autoComplete="name" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+            )}
+            <input name="email" type="email" required placeholder="Email" autoComplete="email" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+            <input name="password" type="password" required minLength={6} placeholder="Password" autoComplete={authMode === "signup" ? "new-password" : "current-password"} className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+            <button disabled={authBusy} className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white font-semibold text-sm py-2.5 rounded-lg transition">
+              {authBusy ? "Please wait…" : authMode === "signup" ? "Create Account" : "Login"}
+            </button>
           </form>
 
-          <button onClick={handleGuest} className="w-full mt-3 border border-emerald-700 text-emerald-700 hover:bg-emerald-700 hover:text-white font-semibold text-sm py-2.5 rounded-lg transition">
-            Login as Guest
+          <button
+            type="button"
+            onClick={() => { setAuthMode(m => m === "login" ? "signup" : "login"); setLoginError(""); }}
+            className="w-full mt-3 text-emerald-700 text-xs font-medium"
+          >
+            {authMode === "login" ? "No account yet? Sign up" : "Have an account? Log in"}
           </button>
 
-          <p className="text-[11px] text-stone-400 mt-5">Frontend preview lang ito — mock data, walang totoong database.</p>
+          <button onClick={handleGuest} className="w-full mt-2 border border-emerald-700 text-emerald-700 hover:bg-emerald-700 hover:text-white font-semibold text-sm py-2.5 rounded-lg transition">
+            Continue as Guest
+          </button>
+
+          <p className="text-[11px] text-stone-400 mt-5">Ang unang mag-sign up ay awtomatikong magiging Super Admin.</p>
         </div>
       </div>
     );
   }
+
 
   // ---------- SHELL ----------
   const sidebarInner = (closeOnClick) => (
