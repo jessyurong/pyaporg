@@ -984,12 +984,30 @@ function EventFormModal({ onClose, onSave }) {
 }
 
 function AnnounceFormModal({ onClose, onSave }) {
-  const [f, setF] = useState({ title: "", content: "" });
+  const [f, setF] = useState({ title: "", content: "", urgency: "normal" });
   return (
     <ModalShell title="Post Announcement" onClose={onClose}>
       <div className="space-y-3">
         <input className={inputCls} placeholder="Title" value={f.title} onChange={e => setF({ ...f, title: e.target.value })} />
         <textarea className={inputCls} rows={4} placeholder="Content" value={f.content} onChange={e => setF({ ...f, content: e.target.value })} />
+        <div>
+          <label className="text-xs font-semibold text-stone-600 block mb-1.5">Urgency Level</label>
+          <div className="grid grid-cols-3 gap-2">
+            {Object.entries(URGENCY).map(([key, u]) => {
+              const active = f.urgency === key;
+              return (
+                <button
+                  type="button"
+                  key={key}
+                  onClick={() => setF({ ...f, urgency: key })}
+                  className={`flex items-center justify-center gap-1.5 text-xs font-semibold py-2 rounded-lg border-2 transition ${active ? `${u.badge} ${u.border}` : "bg-white border-stone-200 text-stone-500"}`}
+                >
+                  <span className={`w-2 h-2 rounded-full ${u.dot}`}></span>{u.label}
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <button onClick={() => f.title && onSave(f)} className="w-full bg-emerald-700 text-white text-sm py-2 rounded-lg">Post</button>
       </div>
     </ModalShell>
