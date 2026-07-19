@@ -48,10 +48,8 @@ const seedAchievements = [
   { id: 2, memberId: 3, title: "Most Active Volunteer", description: "Pinaka-aktibo sa feeding program at outreach.", badge: "🌟", date: "2026-06-14" },
 ];
 
-const seedUsers = [
-  { id: 1, name: "Jessie M. Yurong Jr.", username: "admin", password: "admin123", role: "superadmin", active: true, features: null },
-  { id: 2, name: "Maria Santos", username: "secretary1", password: "temp123", role: "secretary", active: true, features: { dashboard: true, members: true, attendance: true, events: false, announcements: true, finance: false, certificates: true, suggestions: false } },
-];
+const seedUsers = [];
+
 
 const FEATURE_KEYS = ["dashboard", "members", "attendance", "events", "announcements", "finance", "certificates", "achievements", "suggestions"];
 const FEATURE_LABELS = { dashboard: "Dashboard", members: "Members", attendance: "Attendance", events: "Events", announcements: "Announcements", finance: "Finance", certificates: "Certificates", achievements: "Achievements", suggestions: "Suggestions Inbox" };
