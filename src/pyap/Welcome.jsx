@@ -255,7 +255,7 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
                 rel="noreferrer"
                 className="mt-3 inline-flex items-center gap-2 text-sm text-emerald-100 hover:text-white"
               >
-                <Facebook size={15} /> {content.contactFB}
+                <span className="w-4 h-4 rounded-sm bg-emerald-300 text-emerald-900 text-[10px] font-bold flex items-center justify-center">f</span> {content.contactFB}
               </a>
             )}
           </div>
