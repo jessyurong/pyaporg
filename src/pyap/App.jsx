@@ -126,7 +126,7 @@ export default function App() {
     const match = users.find(x => x.username === u && x.password === p);
 
     if (!match) {
-      setLoginError("Invalid username or password. (Preview hint: admin / admin123)");
+      setLoginError("Invalid username or password.");
       return;
     }
     if (!match.active) {
