@@ -141,6 +141,8 @@ export default function App() {
   const [loginError, setLoginError] = useState("");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
+  const [welcomeContent, setWelcomeContent] = usePersistentState("welcomeContent", DEFAULT_WELCOME);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const isGuest = session?.guest;
   const featureAccess = isGuest
