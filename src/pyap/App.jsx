@@ -192,13 +192,13 @@ export default function App() {
 
           {loginError && <div className="bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4">{loginError}</div>}
 
-          <form onSubmit={handleLogin} className="space-y-3">
+          <form onSubmit={handleLogin} className="space-y-3" autoComplete="off">
             <input name="username" placeholder="Username" autoComplete="off" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
             <input name="password" type="password" placeholder="Password" autoComplete="new-password" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
-            <button className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm py-2.5 rounded-lg transition">Login</button>
+            <button type="submit" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm py-2.5 rounded-lg transition">Login</button>
           </form>
 
-          <button onClick={handleGuest} className="w-full mt-3 border border-emerald-700 text-emerald-700 hover:bg-emerald-700 hover:text-white font-semibold text-sm py-2.5 rounded-lg transition">
+          <button type="button" onClick={handleGuest} className="w-full mt-3 border border-emerald-700 text-emerald-700 hover:bg-emerald-700 hover:text-white font-semibold text-sm py-2.5 rounded-lg transition">
             Login as Guest
           </button>
 
