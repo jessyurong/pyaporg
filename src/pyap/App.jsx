@@ -184,32 +184,58 @@ export default function App() {
     setSelectedMember(null);
   }
 
-  // ---------- LOGIN SCREEN ----------
+  // ---------- WELCOME / LOGIN SCREEN ----------
   if (!session) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-emerald-800 to-emerald-600 p-4">
-        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-9 text-center">
-          <img src={LOGO_B64} alt="PYAP Samac Logo" className="w-24 h-24 mx-auto mb-4" />
-          <h1 className="text-lg font-bold text-emerald-900">PYAP – Barangay Samac</h1>
-          <p className="text-xs text-stone-500 mt-1 mb-6">Pag-asa Youth Association of the Philippines</p>
+      <>
+        <Welcome
+          content={welcomeContent}
+          logo={LOGO_B64}
+          isSuperAdmin={false}
+          onLoginClick={() => { setLoginError(""); setShowLoginModal(true); }}
+          onGuestClick={handleGuest}
+          onSave={setWelcomeContent}
+        />
+        {showLoginModal && (
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowLoginModal(false)}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-9 text-center relative" onClick={(e) => e.stopPropagation()}>
+              <button type="button" onClick={() => setShowLoginModal(false)} className="absolute top-3 right-3 text-stone-400 hover:text-stone-700"><X size={18} /></button>
+              <img src={LOGO_B64} alt="PYAP Samac Logo" className="w-20 h-20 mx-auto mb-4" />
+              <h1 className="text-lg font-bold text-emerald-900">Member Login</h1>
+              <p className="text-xs text-stone-500 mt-1 mb-6">PYAP – Barangay Samac</p>
 
-          {loginError && <div className="bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4">{loginError}</div>}
+              {loginError && <div className="bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4">{loginError}</div>}
 
-          <form onSubmit={handleLogin} className="space-y-3" autoComplete="off">
-            <input name="username" placeholder="Username" autoComplete="off" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
-            <input name="password" type="password" placeholder="Password" autoComplete="new-password" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
-            <button type="submit" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm py-2.5 rounded-lg transition">Login</button>
-          </form>
+              <form onSubmit={handleLogin} className="space-y-3" autoComplete="off">
+                <input name="username" placeholder="Username" autoComplete="off" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+                <input name="password" type="password" placeholder="Password" autoComplete="new-password" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+                <button type="submit" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm py-2.5 rounded-lg transition">Login</button>
+              </form>
 
-          <button type="button" onClick={handleGuest} className="w-full mt-3 border border-emerald-700 text-emerald-700 hover:bg-emerald-700 hover:text-white font-semibold text-sm py-2.5 rounded-lg transition">
-            Login as Guest
-          </button>
-
-          <p className="text-[11px] text-stone-400 mt-5">Frontend preview lang ito — mock data, walang totoong database.</p>
-        </div>
-      </div>
+              <button type="button" onClick={() => { setShowLoginModal(false); handleGuest(); }} className="w-full mt-3 border border-emerald-700 text-emerald-700 hover:bg-emerald-700 hover:text-white font-semibold text-sm py-2.5 rounded-lg transition">
+                Continue as Guest
+              </button>
+            </div>
+          </div>
+        )}
+      </>
     );
   }
+
+  // ---------- WELCOME PAGE (when superadmin opens it after login) ----------
+  if (screen === "welcome") {
+    return (
+      <Welcome
+        content={welcomeContent}
+        logo={LOGO_B64}
+        isSuperAdmin={session?.role === "superadmin"}
+        onLoginClick={() => setScreen("dashboard")}
+        onGuestClick={() => setScreen("dashboard")}
+        onSave={setWelcomeContent}
+      />
+    );
+  }
+
 
   // ---------- SHELL ----------
   const sidebarInner = (closeOnClick) => (
