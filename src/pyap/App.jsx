@@ -417,18 +417,26 @@ function Announcements({ announcements, isGuest, onAdd, onDelete }) {
         <h1 className="text-xl font-bold text-emerald-900">Announcements</h1>
         {!isGuest && <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Post Announcement</button>}
       </div>
-      {announcements.map(a => (
-        <div key={a.id} className="border-l-4 border-amber-400 bg-amber-50/50 rounded-r-lg p-4 mb-3">
-          <div className="flex justify-between items-start">
-            <div>
-              <div className="text-[11px] text-stone-400">{a.date}</div>
-              <div className="font-semibold text-sm">{a.title}</div>
-              <p className="text-sm text-stone-600 mt-1">{a.content}</p>
+      {announcements.map(a => {
+        const u = getUrgency(a);
+        return (
+          <div key={a.id} className={`border-l-4 ${u.border} ${u.bg} rounded-r-lg p-4 mb-3`}>
+            <div className="flex justify-between items-start gap-3">
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <div className="text-[11px] text-stone-400">{a.date}</div>
+                  <span className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${u.badge}`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${u.dot}`}></span>{u.label}
+                  </span>
+                </div>
+                <div className="font-semibold text-sm mt-0.5">{a.title}</div>
+                <p className="text-sm text-stone-600 mt-1 whitespace-pre-wrap break-words">{a.content}</p>
+              </div>
+              {!isGuest && <button onClick={() => onDelete(a.id)} className="text-rose-600 shrink-0"><Trash2 size={14} /></button>}
             </div>
-            {!isGuest && <button onClick={() => onDelete(a.id)} className="text-rose-600"><Trash2 size={14} /></button>}
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
