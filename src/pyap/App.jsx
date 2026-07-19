@@ -21,9 +21,16 @@ const seedAttendance = {
   2: { 1: "present", 2: "absent", 3: "present", 4: "absent" },
 };
 
+const URGENCY = {
+  normal:    { label: "Normal",    badge: "bg-emerald-100 text-emerald-800", border: "border-emerald-500", bg: "bg-emerald-50/60", dot: "bg-emerald-500" },
+  important: { label: "Important", badge: "bg-orange-100 text-orange-800",   border: "border-orange-500",  bg: "bg-orange-50/60",  dot: "bg-orange-500" },
+  urgent:    { label: "Urgent",    badge: "bg-rose-100 text-rose-800",       border: "border-rose-600",    bg: "bg-rose-50/60",    dot: "bg-rose-600" },
+};
+const getUrgency = (a) => URGENCY[a?.urgency] || URGENCY.normal;
+
 const seedAnnouncements = [
-  { id: 1, title: "Reminder: General Assembly this Sunday", content: "Lahat ng officers at active members, dumalo po tayo sa meeting sa Barangay Hall, 2PM.", date: "2026-07-10" },
-  { id: 2, title: "Feeding Program - Salamat!", content: "Maraming salamat sa lahat ng volunteers sa successful feeding program natin last week!", date: "2026-06-15" },
+  { id: 1, title: "Reminder: General Assembly this Sunday", content: "Lahat ng officers at active members, dumalo po tayo sa meeting sa Barangay Hall, 2PM.", date: "2026-07-10", urgency: "important" },
+  { id: 2, title: "Feeding Program - Salamat!", content: "Maraming salamat sa lahat ng volunteers sa successful feeding program natin last week!", date: "2026-06-15", urgency: "normal" },
 ];
 
 const seedFinance = [
