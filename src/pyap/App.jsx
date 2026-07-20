@@ -411,7 +411,7 @@ export default function App() {
             announcements={announcements}
             isGuest={isGuest}
             onAdd={() => setShowAnnounceForm(true)}
-            onDelete={(id) => setAnnouncements(a => a.filter(x => x.id !== id))}
+            onDelete={announce.remove}
           />
         )}
         {screen === "members" && !selectedMember && (
