@@ -184,13 +184,14 @@ function Badge({ children, tone = "neutral" }) {
 }
 
 export default function App() {
-  const [session, setSession] = usePersistentState("session", null); // { name, role } or { guest: true }
+  const auth = useAuthSession();
+  const announce = useAnnouncements();
+  const [guestMode, setGuestMode] = useState(false);
   const [screen, setScreen] = useState("dashboard");
   const [members, setMembers] = usePersistentState("members", seedMembers);
   const [events, setEvents] = usePersistentState("events", seedEvents);
   const [attendance, setAttendance] = usePersistentState("attendance", seedAttendance);
   const [attendanceNotes, setAttendanceNotes] = usePersistentState("attendanceNotes", {});
-  const [announcements, setAnnouncements] = usePersistentState("announcements", seedAnnouncements);
   const [finance, setFinance] = usePersistentState("finance", seedFinance);
   const [users, setUsers] = usePersistentState("users", seedUsers);
   const [suggestions, setSuggestions] = usePersistentState("suggestions", seedSuggestions);
@@ -208,49 +209,75 @@ export default function App() {
   const [showAchievementForm, setShowAchievementForm] = useState(false);
   const [certPreview, setCertPreview] = useState(null);
   const [loginError, setLoginError] = useState("");
+  const [loginBusy, setLoginBusy] = useState(false);
+  const [authMode, setAuthMode] = useState("signin"); // signin | signup
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [welcomeContent, setWelcomeContent] = usePersistentState("welcomeContent", DEFAULT_WELCOME);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  const isGuest = session?.guest;
+  const isSignedIn = !!auth.session;
+  const isGuest = !isSignedIn && guestMode;
+  const role = auth.role;
+  const displayName = auth.name || auth.session?.user?.email?.split("@")[0] || "";
+  const session = isSignedIn ? { name: displayName, role } : (isGuest ? { guest: true } : null);
+
+  const announcements = announce.items;
+
   const featureAccess = isGuest
     ? { dashboard: true, announcements: true, suggestions: true, donate: true }
-    : session?.role === "superadmin"
-    ? { dashboard: true, members: true, attendance: true, events: true, announcements: true, finance: true, certificates: true, achievements: true, users: true, suggestions: true, welcome: true }
-    : session?.features || PRESETS[session?.role] || {};
+    : role === "superadmin"
+    ? { dashboard: true, members: true, attendance: true, events: true, announcements: true, finance: true, certificates: true, achievements: true, users: true, suggestions: true, welcome: true, donate: true }
+    : PRESETS[role] || {};
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
-    const fd = new FormData(e.target);
-    const u = (fd.get("username") || "").trim();
-    const p = fd.get("password") || "";
-
-    const match = users.find(x => x.username === u && x.password === p);
-
-    if (!match) {
-      setLoginError("Invalid username or password.");
-      return;
-    }
-    if (!match.active) {
-      setLoginError("This account has been deactivated. Contact Super Admin.");
-      return;
-    }
-
-    setSession({ name: match.name, role: match.role, features: match.features });
-    setScreen("dashboard");
     setLoginError("");
+    setLoginBusy(true);
+    const fd = new FormData(e.target);
+    const email = (fd.get("email") || "").trim();
+    const password = fd.get("password") || "";
+    const fullName = (fd.get("fullName") || "").trim();
+    try {
+      if (authMode === "signup") {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: fullName || email.split("@")[0] },
+            emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+          },
+        });
+        if (error) { setLoginError(error.message); return; }
+        setShowLoginModal(false);
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) { setLoginError(error.message); return; }
+        setShowLoginModal(false);
+        setScreen("dashboard");
+      }
+    } finally {
+      setLoginBusy(false);
+    }
   }
 
   function handleGuest() {
-    setSession({ guest: true });
+    setGuestMode(true);
     setScreen("dashboard");
   }
 
-  function handleLogout() {
-    setSession(null);
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    setGuestMode(false);
     setScreen("dashboard");
     setSelectedMember(null);
+  }
+
+  // Loading state while auth boots
+  if (auth.loading && !isSignedIn && !isGuest) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 text-stone-500 text-sm">Loading…</div>
+    );
   }
 
   // ---------- WELCOME / LOGIN SCREEN ----------
@@ -261,25 +288,34 @@ export default function App() {
           content={welcomeContent}
           logo={LOGO_B64}
           isSuperAdmin={false}
-          onLoginClick={() => { setLoginError(""); setShowLoginModal(true); }}
+          onLoginClick={() => { setLoginError(""); setAuthMode("signin"); setShowLoginModal(true); }}
           onGuestClick={handleGuest}
           onSave={setWelcomeContent}
         />
         {showLoginModal && (
           <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowLoginModal(false)}>
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-9 text-center relative" onClick={(e) => e.stopPropagation()}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center relative" onClick={(e) => e.stopPropagation()}>
               <button type="button" onClick={() => setShowLoginModal(false)} className="absolute top-3 right-3 text-stone-400 hover:text-stone-700"><X size={18} /></button>
               <img src={LOGO_B64} alt="PYAP Samac Logo" className="w-20 h-20 mx-auto mb-4" />
-              <h1 className="text-lg font-bold text-emerald-900">Member Login</h1>
-              <p className="text-xs text-stone-500 mt-1 mb-6">PYAP – Barangay Samac</p>
+              <h1 className="text-lg font-bold text-emerald-900">{authMode === "signup" ? "Create Account" : "Member Login"}</h1>
+              <p className="text-xs text-stone-500 mt-1 mb-5">PYAP – Barangay Samac</p>
 
-              {loginError && <div className="bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4">{loginError}</div>}
+              {loginError && <div className="bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4 text-left">{loginError}</div>}
 
-              <form onSubmit={handleLogin} className="space-y-3" autoComplete="off">
-                <input name="username" placeholder="Username" autoComplete="off" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
-                <input name="password" type="password" placeholder="Password" autoComplete="new-password" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
-                <button type="submit" className="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm py-2.5 rounded-lg transition">Login</button>
+              <form onSubmit={handleLogin} className="space-y-3 text-left" autoComplete="off">
+                {authMode === "signup" && (
+                  <input name="fullName" placeholder="Full name" autoComplete="off" required className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+                )}
+                <input name="email" type="email" placeholder="Email" required autoComplete="email" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+                <input name="password" type="password" placeholder="Password" required minLength={6} autoComplete={authMode === "signup" ? "new-password" : "current-password"} className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+                <button type="submit" disabled={loginBusy} className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white font-semibold text-sm py-2.5 rounded-lg transition">
+                  {loginBusy ? "Please wait…" : (authMode === "signup" ? "Sign up" : "Login")}
+                </button>
               </form>
+
+              <button type="button" onClick={() => { setAuthMode(authMode === "signup" ? "signin" : "signup"); setLoginError(""); }} className="w-full mt-3 text-xs text-emerald-700 hover:underline">
+                {authMode === "signup" ? "Already have an account? Sign in" : "New member? Create an account"}
+              </button>
 
               <button type="button" onClick={() => { setShowLoginModal(false); handleGuest(); }} className="w-full mt-3 border border-emerald-700 text-emerald-700 hover:bg-emerald-700 hover:text-white font-semibold text-sm py-2.5 rounded-lg transition">
                 Continue as Guest
@@ -290,6 +326,8 @@ export default function App() {
       </>
     );
   }
+
+
 
   // ---------- WELCOME PAGE (when superadmin opens it after login) ----------
   if (screen === "welcome") {
