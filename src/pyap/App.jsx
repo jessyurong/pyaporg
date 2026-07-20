@@ -487,7 +487,7 @@ export default function App() {
       {/* Modals */}
       {showMemberForm && <MemberFormModal onClose={() => setShowMemberForm(false)} onSave={(m) => { setMembers(prev => [...prev, { ...m, id: Date.now() }]); setShowMemberForm(false); }} />}
       {showEventForm && <EventFormModal onClose={() => setShowEventForm(false)} onSave={(ev) => { setEvents(prev => [...prev, { ...ev, id: Date.now() }]); setShowEventForm(false); }} />}
-      {showAnnounceForm && <AnnounceFormModal onClose={() => setShowAnnounceForm(false)} onSave={(a) => { setAnnouncements(prev => [{ ...a, id: Date.now(), date: new Date().toISOString().slice(0, 10) }, ...prev]); setShowAnnounceForm(false); }} />}
+      {showAnnounceForm && <AnnounceFormModal onClose={() => setShowAnnounceForm(false)} onSave={async (a) => { const ok = await announce.add(a); if (ok) setShowAnnounceForm(false); }} />}
       {showFinanceForm && <FinanceFormModal onClose={() => setShowFinanceForm(false)} onSave={(f) => { setFinance(prev => [{ ...f, id: Date.now(), date: new Date().toISOString().slice(0, 10) }, ...prev]); setShowFinanceForm(false); }} />}
       {showUserForm && <UserFormModal onClose={() => setShowUserForm(false)} onSave={(u) => { setUsers(prev => [...prev, { ...u, id: Date.now(), active: true }]); setShowUserForm(false); }} />}
       {editAccessUser && (
