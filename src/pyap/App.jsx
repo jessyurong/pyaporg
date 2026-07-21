@@ -214,6 +214,7 @@ export default function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [welcomeContent, setWelcomeContent] = usePersistentState("welcomeContent", DEFAULT_WELCOME);
+  const [dashboardWidgets, setDashboardWidgets] = usePersistentState("dashboardWidgets", { totalMembers: true, activeMembers: true, totalEvents: true, attendanceRate: true, fundBalance: true, birthdays: true, birthdayList: true, recentAnnouncements: true });
   const [showLoginModal, setShowLoginModal] = useState(false);
 
   const isSignedIn = !!auth.session;
