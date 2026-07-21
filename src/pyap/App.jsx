@@ -405,11 +405,12 @@ export default function App() {
 
       {/* Main content */}
       <div className="flex-1 p-5 md:p-8 pt-20 md:pt-8 max-w-5xl overflow-y-auto w-full">
-        {screen === "dashboard" && <Dashboard members={members} events={events} attendance={attendance} announcements={announcements} finance={finance} />}
+        {screen === "dashboard" && <Dashboard members={members} events={events} attendance={attendance} announcements={announcements} finance={finance} isSuperAdmin={role === "superadmin"} widgets={dashboardWidgets} onSaveWidgets={setDashboardWidgets} />}
         {screen === "announcements" && (
           <Announcements
             announcements={announcements}
             isGuest={isGuest}
+            canPost={!isGuest && role !== "member"}
             onAdd={() => setShowAnnounceForm(true)}
             onDelete={announce.remove}
           />
