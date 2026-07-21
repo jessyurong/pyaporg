@@ -527,7 +527,20 @@ function StatCard({ num, label }) {
   );
 }
 
-function Dashboard({ members, events, attendance, announcements, finance }) {
+const WIDGET_LABELS = {
+  totalMembers: "Total Members",
+  activeMembers: "Active Members",
+  totalEvents: "Total Events",
+  attendanceRate: "Attendance Rate",
+  fundBalance: "Fund Balance",
+  birthdays: "Birthdays Count",
+  birthdayList: "Birthday List",
+  recentAnnouncements: "Recent Announcements",
+};
+
+function Dashboard({ members, events, attendance, announcements, finance, isSuperAdmin, widgets, onSaveWidgets }) {
+  const [editing, setEditing] = useState(false);
+  const w = widgets || {};
   const active = members.filter(m => m.status === "active").length;
   const income = finance.filter(f => f.type === "income").reduce((s, f) => s + f.amount, 0);
   const expense = finance.filter(f => f.type === "expense").reduce((s, f) => s + f.amount, 0);
@@ -535,49 +548,93 @@ function Dashboard({ members, events, attendance, announcements, finance }) {
   const rate = allRecords.length ? Math.round((allRecords.filter(s => s === "present").length / allRecords.length) * 100) : 0;
   const thisMonth = new Date().getMonth();
   const birthdays = members.filter(m => new Date(m.birthday).getMonth() === thisMonth);
+  const anyStat = w.totalMembers || w.activeMembers || w.totalEvents || w.attendanceRate || w.fundBalance || w.birthdays;
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-emerald-900 mb-5">Dashboard</h1>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
-        <StatCard num={members.length} label="Total Members" />
-        <StatCard num={active} label="Active Members" />
-        <StatCard num={events.length} label="Total Events" />
-        <StatCard num={`${rate}%`} label="Attendance Rate" />
-        <StatCard num={`₱${(income - expense).toFixed(0)}`} label="Fund Balance" />
-        <StatCard num={birthdays.length} label="Birthdays This Month" />
+      <div className="flex items-center justify-between mb-5">
+        <h1 className="text-xl font-bold text-emerald-900">Dashboard</h1>
+        {isSuperAdmin && (
+          <button onClick={() => setEditing(true)} className="text-xs bg-emerald-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1">
+            <Settings size={12} /> Customize
+          </button>
+        )}
       </div>
-      <div className="bg-white rounded-xl border border-stone-200 p-5 mb-5">
-        <h3 className="font-semibold text-emerald-900 text-sm mb-2">🎂 Birthdays This Month</h3>
-        {birthdays.length === 0 ? <p className="text-sm text-stone-400">No birthdays this month.</p> :
-          <ul className="text-sm space-y-1">{birthdays.map(b => <li key={b.id}>{b.name} — {new Date(b.birthday).toLocaleDateString("en-US", { month: "long", day: "numeric" })}</li>)}</ul>}
-      </div>
-      <div className="bg-white rounded-xl border border-stone-200 p-5">
-        <h3 className="font-semibold text-emerald-900 text-sm mb-3">📢 Recent Announcements</h3>
-        {announcements.slice(0, 3).map(a => {
-          const u = getUrgency(a);
-          return (
-            <div key={a.id} className={`border-l-4 ${u.border} ${u.bg} rounded-r-lg p-3 mb-2`}>
-              <div className="flex items-center justify-between gap-2">
-                <div className="text-[11px] text-stone-400">{a.date}</div>
-                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${u.badge}`}>{u.label}</span>
+      {anyStat && (
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
+          {w.totalMembers && <StatCard num={members.length} label="Total Members" />}
+          {w.activeMembers && <StatCard num={active} label="Active Members" />}
+          {w.totalEvents && <StatCard num={events.length} label="Total Events" />}
+          {w.attendanceRate && <StatCard num={`${rate}%`} label="Attendance Rate" />}
+          {w.fundBalance && <StatCard num={`₱${(income - expense).toFixed(0)}`} label="Fund Balance" />}
+          {w.birthdays && <StatCard num={birthdays.length} label="Birthdays This Month" />}
+        </div>
+      )}
+      {w.birthdayList && (
+        <div className="bg-white rounded-xl border border-stone-200 p-5 mb-5">
+          <h3 className="font-semibold text-emerald-900 text-sm mb-2">🎂 Birthdays This Month</h3>
+          {birthdays.length === 0 ? <p className="text-sm text-stone-400">No birthdays this month.</p> :
+            <ul className="text-sm space-y-1">{birthdays.map(b => <li key={b.id}>{b.name} — {new Date(b.birthday).toLocaleDateString("en-US", { month: "long", day: "numeric" })}</li>)}</ul>}
+        </div>
+      )}
+      {w.recentAnnouncements && (
+        <div className="bg-white rounded-xl border border-stone-200 p-5">
+          <h3 className="font-semibold text-emerald-900 text-sm mb-3">📢 Recent Announcements</h3>
+          {announcements.slice(0, 3).map(a => {
+            const u = getUrgency(a);
+            return (
+              <div key={a.id} className={`border-l-4 ${u.border} ${u.bg} rounded-r-lg p-3 mb-2`}>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="text-[11px] text-stone-400">{a.date}</div>
+                  <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${u.badge}`}>{u.label}</span>
+                </div>
+                <div className="font-semibold text-sm">{a.title}</div>
+                <p className="text-xs text-stone-600 mt-0.5">{a.content}</p>
               </div>
-              <div className="font-semibold text-sm">{a.title}</div>
-              <p className="text-xs text-stone-600 mt-0.5">{a.content}</p>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
+      )}
+      {editing && (
+        <DashboardCustomizeModal current={w} onClose={() => setEditing(false)} onSave={(v) => { onSaveWidgets(v); setEditing(false); }} />
+      )}
+    </div>
+  );
+}
+
+function DashboardCustomizeModal({ current, onClose, onSave }) {
+  const [v, setV] = useState(current);
+  return (
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-2xl p-5 w-full max-w-md" onClick={e => e.stopPropagation()}>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-bold text-emerald-900">Customize Dashboard</h3>
+          <button onClick={onClose}><X size={18} /></button>
+        </div>
+        <p className="text-xs text-stone-500 mb-3">Pick what to show on the dashboard.</p>
+        <div className="space-y-2 mb-4">
+          {Object.keys(WIDGET_LABELS).map(k => (
+            <label key={k} className="flex items-center gap-2 text-sm p-2 rounded-lg hover:bg-stone-50 cursor-pointer">
+              <input type="checkbox" checked={!!v[k]} onChange={e => setV({ ...v, [k]: e.target.checked })} />
+              {WIDGET_LABELS[k]}
+            </label>
+          ))}
+        </div>
+        <div className="flex gap-2">
+          <button onClick={onClose} className="flex-1 border border-stone-300 rounded-lg py-2 text-sm">Cancel</button>
+          <button onClick={() => onSave(v)} className="flex-1 bg-emerald-700 text-white rounded-lg py-2 text-sm">Save</button>
+        </div>
       </div>
     </div>
   );
 }
 
-function Announcements({ announcements, isGuest, onAdd, onDelete }) {
+function Announcements({ announcements, isGuest, canPost, onAdd, onDelete }) {
   return (
     <div>
       <div className="flex justify-between items-center mb-5">
         <h1 className="text-xl font-bold text-emerald-900">Announcements</h1>
-        {!isGuest && <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Post Announcement</button>}
+        {canPost && <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Post Announcement</button>}
       </div>
       {announcements.map(a => {
         const u = getUrgency(a);
@@ -594,7 +651,7 @@ function Announcements({ announcements, isGuest, onAdd, onDelete }) {
                 <div className="font-semibold text-sm mt-0.5">{a.title}</div>
                 <p className="text-sm text-stone-600 mt-1 whitespace-pre-wrap break-words">{a.content}</p>
               </div>
-              {!isGuest && <button onClick={() => onDelete(a.id)} className="text-rose-600 shrink-0"><Trash2 size={14} /></button>}
+              {canPost && <button onClick={() => onDelete(a.id)} className="text-rose-600 shrink-0"><Trash2 size={14} /></button>}
             </div>
           </div>
         );
