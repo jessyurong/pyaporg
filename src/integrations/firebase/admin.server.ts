@@ -1,31 +1,60 @@
 import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getAuth } from "firebase-admin/auth";
+import { getFirestore } from "firebase-admin/firestore";
 
-const projectId = process.env.FIREBASE_PROJECT_ID;
-const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-let privateKey = process.env.FIREBASE_PRIVATE_KEY;
+function ensureAdminInitialized() {
+  const projectId = process.env.FIREBASE_PROJECT_ID;
+  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+  let privateKey = process.env.FIREBASE_PRIVATE_KEY;
 
-if (!projectId || !clientEmail || !privateKey) {
-  throw new Error(
-    "Missing Firebase admin environment variables. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY.",
-  );
-}
+  if (!projectId || !clientEmail || !privateKey) {
+    return null;
+  }
 
-privateKey = privateKey.replace(/\\n/g, "\n");
-
-if (!getApps().length) {
-  initializeApp({
-    credential: cert({
+  if (!getApps().length) {
+    privateKey = privateKey.replace(/\\n/g, "\n");
+    initializeApp({
+      credential: cert({
+        projectId,
+        clientEmail,
+        privateKey,
+      }),
       projectId,
-      clientEmail,
-      privateKey,
-    }),
-    projectId,
-  });
+    });
+  }
+
+  return {
+    auth: getAuth(),
+    db: getFirestore(),
+  };
 }
 
-const adminAuth = getAuth();
+export function getAdminFirestore() {
+  const admin = ensureAdminInitialized();
+  if (!admin) {
+    throw new Error(
+      "Firebase Admin SDK not configured. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY to enable server-side Firestore access.",
+    );
+  }
+  return admin.db;
+}
 
 export async function verifyFirebaseIdToken(idToken: string) {
-  return adminAuth.verifyIdToken(idToken);
+  const admin = ensureAdminInitialized();
+  if (!admin) {
+    throw new Error(
+      "Firebase Admin SDK not configured. Set FIREBASE_PROJECT_ID, FIREBASE_CLIENT_EMAIL, and FIREBASE_PRIVATE_KEY to enable server-side token verification.",
+    );
+  }
+
+  return admin.auth.verifyIdToken(idToken);
+}
+
+export async function getUserProfileStatus(userId) {
+  const db = getAdminFirestore();
+  const docRef = db.doc(`profiles/${userId}`);
+  const docSnap = await docRef.get();
+  if (!docSnap.exists) return null;
+  const data = docSnap.data();
+  return data?.status ?? null;
 }

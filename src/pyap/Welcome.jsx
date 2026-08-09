@@ -33,7 +33,7 @@ export const DEFAULT_WELCOME = {
 
 const iconMap = { users: Users, calendar: Calendar, award: Award, megaphone: Megaphone };
 
-export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onGuestClick, onSave }) {
+export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onGuestClick, onRequestClick, onSave }) {
   const [editing, setEditing] = useState(false);
 
   const scrollTo = (id) => {
@@ -102,6 +102,12 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
               className="bg-white text-emerald-800 hover:bg-emerald-50 font-semibold text-sm px-6 py-3 rounded-lg transition shadow-lg"
             >
               Learn More
+            </button>
+            <button
+              onClick={onRequestClick}
+              className="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm px-6 py-3 rounded-lg transition shadow-lg"
+            >
+              Request Account
             </button>
             <button
               onClick={onGuestClick}

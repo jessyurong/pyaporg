@@ -39,3 +39,27 @@ export async function attachFirebaseAuthHeader(headers = new Headers()) {
   headers.set("Authorization", `Bearer ${token}`);
   return headers;
 }
+
+export async function firebaseFetch(input: RequestInfo, init: RequestInit = {}) {
+  const headers = await attachFirebaseAuthHeader(new Headers(init.headers));
+  const response = await fetch(input, { ...init, headers });
+
+  if (response.status === 403) {
+    let errorMessage = "Access forbidden.";
+    try {
+      const body = await response.json();
+      if (body?.error) {
+        errorMessage = body.error;
+      }
+    } catch {
+      const text = await response.text();
+      if (text) errorMessage = text;
+    }
+
+    const error = new Error(errorMessage);
+    Object.assign(error, { status: 403 });
+    throw error;
+  }
+
+  return response;
+}

@@ -46,7 +46,7 @@ import {
 
 // ============ Firebase-backed hooks ============
 function useAuthSession() {
-  const [state, setState] = useState({ loading: true, session: null, role: null, name: null });
+  const [state, setState] = useState({ loading: true, session: null, role: null, name: null, status: null });
   useEffect(() => {
     let mounted = true;
 
@@ -55,25 +55,56 @@ function useAuthSession() {
       const profileQuery = query(collection(db, "profiles"), where("user_id", "==", userId));
       const [roleSnap, profileSnap] = await Promise.all([getDocs(roleQuery), getDocs(profileQuery)]);
 
-      const roleData = roleSnap.docs[0]?.data();
+      let role = roleSnap.docs[0]?.data()?.role;
       const profileData = profileSnap.docs[0]?.data();
+      role = typeof role === "string" ? role.toLowerCase() : null;
+
+      const superadminQuery = query(collection(db, "user_roles"), where("role", "==", "superadmin"));
+      const superadminSnap = await getDocs(superadminQuery);
+      const noSuperadmin = superadminSnap.empty;
+
+      if (!role) {
+        if (noSuperadmin) {
+          role = "superadmin";
+          await setDoc(doc(db, "user_roles", userId), {
+            user_id: userId,
+            role,
+          });
+        } else {
+          role = "member";
+        }
+      } else if (role !== "superadmin" && noSuperadmin) {
+        role = "superadmin";
+        await setDoc(doc(db, "user_roles", userId), {
+          user_id: userId,
+          role,
+        });
+      }
 
       return {
-        role: roleData?.role || "member",
+        role: role || "member",
         name: profileData?.full_name || null,
+        status: profileData?.status ?? "active",
       };
     }
 
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!mounted) return;
       if (!user) {
-        setState({ loading: false, session: null, role: null, name: null });
+        setState({ loading: false, session: null, role: null, name: null, status: null });
         return;
       }
       setState((prev) => ({ ...prev, loading: true, session: { user } }));
-      const { role, name } = await loadProfile(user.uid);
-      if (mounted) {
-        setState({ loading: false, session: { user }, role, name });
+      try {
+        const { role, name, status } = await loadProfile(user.uid);
+        if (mounted) {
+          setState({ loading: false, session: { user }, role, name, status });
+        }
+      } catch (error) {
+        console.error("Failed to load user profile:", error);
+        if (mounted) {
+          setState({ loading: false, session: { user }, role: "member", name: null, status: "active" });
+        }
       }
     });
 
@@ -227,6 +258,8 @@ const NAV = [
   { key: "finance", label: "Finance", icon: Wallet },
   { key: "suggestions", label: "Suggestions", icon: MessageSquare },
   { key: "donate", label: "Donate", icon: Wallet },
+  { key: "pendingUsers", label: "Pending Users", icon: Users },
+  { key: "accountRequests", label: "Account Requests", icon: MessageSquare },
   { key: "users", label: "User Management", icon: Settings },
   { key: "welcome", label: "Welcome Page", icon: Home },
 ];
@@ -244,7 +277,7 @@ function Badge({ children, tone = "neutral" }) {
 }
 
 export default function App() {
-  const auth = useAuthSession();
+  const authSession = useAuthSession();
   const announce = useAnnouncements();
   const [guestMode, setGuestMode] = useState(false);
   const [screen, setScreen] = useState("dashboard");
@@ -270,26 +303,42 @@ export default function App() {
   const [certPreview, setCertPreview] = useState(null);
   const [loginError, setLoginError] = useState("");
   const [loginBusy, setLoginBusy] = useState(false);
-  const [authMode, setAuthMode] = useState("signin"); // signin | signup
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [requestError, setRequestError] = useState("");
+  const [requestBusy, setRequestBusy] = useState(false);
+  const [requestSuccess, setRequestSuccess] = useState("");
+  const [accountRequests, setAccountRequests] = useState([]);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [welcomeContent, setWelcomeContent] = usePersistentState("welcomeContent", DEFAULT_WELCOME);
   const [dashboardWidgets, setDashboardWidgets] = usePersistentState("dashboardWidgets", { totalMembers: true, activeMembers: true, totalEvents: true, attendanceRate: true, fundBalance: true, birthdays: true, birthdayList: true, recentAnnouncements: true });
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [pendingUsers, setPendingUsers] = useState([]);
+  const [pendingRoleSelection, setPendingRoleSelection] = useState({});
+  const [pendingLoading, setPendingLoading] = useState(true);
 
-  const isSignedIn = !!auth.session;
+  const isSignedIn = !!authSession.session;
   const isGuest = !isSignedIn && guestMode;
-  const role = auth.role;
-  const displayName = auth.name || auth.session?.user?.email?.split("@")[0] || "";
+  const role = authSession.role || "member";
+  const displayName = authSession.name || authSession.session?.user?.email?.split("@")[0] || "";
   const session = isSignedIn ? { name: displayName, role } : (isGuest ? { guest: true } : null);
 
   const announcements = announce.items;
+  const suggestionCount = suggestions.length;
+  const pendingCount = pendingUsers.length;
+  const accountRequestCount = accountRequests.length;
+  const isLeader = ["superadmin", "president", "secretary", "organizer"].includes(role);
 
   const featureAccess = isGuest
     ? { dashboard: true, announcements: true, suggestions: true, donate: true }
     : role === "superadmin"
     ? { dashboard: true, members: true, attendance: true, events: true, announcements: true, finance: true, certificates: true, achievements: true, users: true, suggestions: true, welcome: true, donate: true }
     : PRESETS[role] || {};
+
+  if (isLeader) {
+    featureAccess.pendingUsers = true;
+    featureAccess.accountRequests = true;
+  }
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -298,26 +347,11 @@ export default function App() {
     const fd = new FormData(e.target);
     const email = (fd.get("email") || "").trim();
     const password = fd.get("password") || "";
-    const fullName = (fd.get("fullName") || "").trim();
 
     try {
-      if (authMode === "signup") {
-        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-        const userId = userCredential.user.uid;
-        await setDoc(doc(db, "profiles", userId), {
-          user_id: userId,
-          full_name: fullName || email.split("@")[0],
-        });
-        await setDoc(doc(db, "user_roles", userId), {
-          user_id: userId,
-          role: "member",
-        });
-        setShowLoginModal(false);
-      } else {
-        await signInWithEmailAndPassword(auth, email, password);
-        setShowLoginModal(false);
-        setScreen("dashboard");
-      }
+      await signInWithEmailAndPassword(auth, email, password);
+      setShowLoginModal(false);
+      setScreen("dashboard");
     } catch (error) {
       setLoginError(error?.message || "Authentication failed.");
     } finally {
@@ -330,12 +364,162 @@ export default function App() {
     setScreen("dashboard");
   }
 
+  async function handleRequestAccount(e) {
+    e.preventDefault();
+    setRequestError("");
+    setRequestSuccess("");
+    setRequestBusy(true);
+    const fd = new FormData(e.target);
+    const name = (fd.get("requestName") || "").trim();
+    const email = (fd.get("requestEmail") || "").trim();
+    const password = (fd.get("requestPassword") || "").trim();
+    const age = (fd.get("requestAge") || "").trim();
+    const sex = (fd.get("requestSex") || "").trim();
+    const address = (fd.get("requestAddress") || "").trim();
+
+    if (!name || !email || !password || !age || !sex || !address) {
+      setRequestError("Please fill out all fields before sending the request.");
+      setRequestBusy(false);
+      return;
+    }
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const userId = userCredential.user.uid;
+
+      let isFirstSuperadmin = false;
+      try {
+        const rolesSnap = await getDocs(collection(db, "user_roles"));
+        isFirstSuperadmin = rolesSnap.empty;
+      } catch (error) {
+        console.error("Failed to check existing roles:", error);
+      }
+
+      await setDoc(doc(db, "profiles", userId), {
+        user_id: userId,
+        full_name: name,
+        email,
+        age,
+        sex,
+        address,
+        status: isFirstSuperadmin ? "active" : "pending",
+        created_at: new Date().toISOString(),
+      });
+
+      if (isFirstSuperadmin) {
+        await setDoc(doc(db, "user_roles", userId), {
+          user_id: userId,
+          role: "superadmin",
+        });
+      }
+
+      await addDoc(collection(db, "account_requests"), {
+        user_id: userId,
+        name,
+        email,
+        age,
+        sex,
+        address,
+        status: isFirstSuperadmin ? "accepted" : "new",
+        notified_roles: ["superadmin", "president", "secretary"],
+        created_at: new Date().toISOString(),
+      });
+
+      if (isFirstSuperadmin) {
+        await signOut(auth);
+        setRequestSuccess("Your account was created as the first superadmin. Please log in again.");
+        setShowRequestModal(false);
+        setShowLoginModal(true);
+      } else {
+        setRequestSuccess("Your account request has been sent successfully. Wait for leader approval.");
+        setShowRequestModal(false);
+      }
+    } catch (error) {
+      const errorMessage = error?.code
+        ? `${error.code}: ${error.message}`
+        : error?.message || "Failed to send request.";
+      console.error("Failed to send account request:", error);
+      setRequestError(`Account request failed: ${errorMessage}`);
+    } finally {
+      setRequestBusy(false);
+    }
+  }
+
   async function handleLogout() {
     await signOut(auth);
     setGuestMode(false);
     setScreen("dashboard");
     setSelectedMember(null);
   }
+
+  async function fetchPendingUsers() {
+    if (!isLeader) {
+      setPendingUsers([]);
+      setPendingLoading(false);
+      return;
+    }
+    setPendingLoading(true);
+    try {
+      const q = query(collection(db, "profiles"), where("status", "==", "pending"));
+      const snap = await getDocs(q);
+      setPendingUsers(snap.docs.map(docSnap => ({ id: docSnap.id, ...(docSnap.data() || {}) })));
+    } catch (error) {
+      console.error("Failed to load pending users:", error);
+      setPendingUsers([]);
+    }
+    setPendingLoading(false);
+  }
+
+  async function fetchAccountRequests() {
+    if (!isLeader) {
+      setAccountRequests([]);
+      return;
+    }
+
+    try {
+      const q = query(collection(db, "account_requests"), orderBy("created_at", "desc"));
+      const snap = await getDocs(q);
+      setAccountRequests(snap.docs.map(docSnap => ({ id: docSnap.id, ...(docSnap.data() || {}) })));
+    } catch (error) {
+      console.error("Failed to load account requests:", error);
+      setAccountRequests([]);
+    }
+  }
+
+  useEffect(() => {
+    fetchPendingUsers();
+    fetchAccountRequests();
+  }, [role]);
+
+  async function approvePendingUser(userId, roleSelection) {
+    const roleToSet = roleSelection || "member";
+    try {
+      await setDoc(doc(db, "user_roles", userId), {
+        user_id: userId,
+        role: roleToSet,
+      });
+      await setDoc(doc(db, "profiles", userId), {
+        status: "active",
+      }, { merge: true });
+      await fetchPendingUsers();
+    } catch (error) {
+      console.error("Failed to approve pending user:", error);
+    }
+  }
+
+  async function rejectPendingUser(userId) {
+    try {
+      await setDoc(doc(db, "profiles", userId), {
+        status: "rejected",
+      }, { merge: true });
+      await fetchPendingUsers();
+    } catch (error) {
+      console.error("Failed to reject pending user:", error);
+    }
+  }
+
+  const isPending = authSession.status === "pending";
+  const isRejected = authSession.status === "rejected";
 
   // Loading state while auth boots
   if (auth.loading && !isSignedIn && !isGuest) {
@@ -352,7 +536,8 @@ export default function App() {
           content={welcomeContent}
           logo={LOGO_B64}
           isSuperAdmin={false}
-          onLoginClick={() => { setLoginError(""); setAuthMode("signin"); setShowLoginModal(true); }}
+          onLoginClick={() => { setLoginError(""); setShowLoginModal(true); }}
+          onRequestClick={() => { setShowLoginModal(false); setShowRequestModal(true); }}
           onGuestClick={handleGuest}
           onSave={setWelcomeContent}
         />
@@ -361,24 +546,21 @@ export default function App() {
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center relative" onClick={(e) => e.stopPropagation()}>
               <button type="button" onClick={() => setShowLoginModal(false)} className="absolute top-3 right-3 text-stone-400 hover:text-stone-700"><X size={18} /></button>
               <img src={LOGO_B64} alt="PYAP Samac Logo" className="w-20 h-20 mx-auto mb-4" />
-              <h1 className="text-lg font-bold text-emerald-900">{authMode === "signup" ? "Create Account" : "Member Login"}</h1>
-              <p className="text-xs text-stone-500 mt-1 mb-5">PYAP – Barangay Samac</p>
+              <h1 className="text-lg font-bold text-emerald-900">Member Login</h1>
+              <p className="text-xs text-stone-500 mt-1 mb-5">Existing members only. New users should request access.</p>
 
               {loginError && <div className="bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4 text-left">{loginError}</div>}
 
               <form onSubmit={handleLogin} className="space-y-3 text-left" autoComplete="off">
-                {authMode === "signup" && (
-                  <input name="fullName" placeholder="Full name" autoComplete="off" required className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
-                )}
                 <input name="email" type="email" placeholder="Email" required autoComplete="email" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
-                <input name="password" type="password" placeholder="Password" required minLength={6} autoComplete={authMode === "signup" ? "new-password" : "current-password"} className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+                <input name="password" type="password" placeholder="Password" required minLength={6} autoComplete="current-password" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
                 <button type="submit" disabled={loginBusy} className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white font-semibold text-sm py-2.5 rounded-lg transition">
-                  {loginBusy ? "Please wait…" : (authMode === "signup" ? "Sign up" : "Login")}
+                  {loginBusy ? "Please wait…" : "Login"}
                 </button>
               </form>
 
-              <button type="button" onClick={() => { setAuthMode(authMode === "signup" ? "signin" : "signup"); setLoginError(""); }} className="w-full mt-3 text-xs text-emerald-700 hover:underline">
-                {authMode === "signup" ? "Already have an account? Sign in" : "New member? Create an account"}
+              <button type="button" onClick={() => { setShowLoginModal(false); setShowRequestModal(true); }} className="w-full mt-3 text-xs text-emerald-700 hover:underline">
+                New member? Request account access
               </button>
 
               <button type="button" onClick={() => { setShowLoginModal(false); handleGuest(); }} className="w-full mt-3 border border-emerald-700 text-emerald-700 hover:bg-emerald-700 hover:text-white font-semibold text-sm py-2.5 rounded-lg transition">
@@ -387,11 +569,52 @@ export default function App() {
             </div>
           </div>
         )}
+        {showRequestModal && (
+          <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowRequestModal(false)}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center relative" onClick={(e) => e.stopPropagation()}>
+              <button type="button" onClick={() => setShowRequestModal(false)} className="absolute top-3 right-3 text-stone-400 hover:text-stone-700"><X size={18} /></button>
+              <h1 className="text-lg font-bold text-emerald-900">Request Account Access</h1>
+              <p className="text-xs text-stone-500 mt-1 mb-5">Send a request to the leaders. Superadmin, President, and Secretary will be notified.</p>
+
+              {requestError && <div className="bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4 text-left">{requestError}</div>}
+              {requestSuccess && <div className="bg-emerald-50 text-emerald-700 text-xs rounded-lg p-2.5 mb-4 text-left">{requestSuccess}</div>}
+
+              <form onSubmit={handleRequestAccount} className="space-y-3 text-left" autoComplete="off">
+                <input name="requestName" type="text" placeholder="Full name" required className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+                <input name="requestEmail" type="email" placeholder="Email" required autoComplete="email" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+                <input name="requestPassword" type="password" placeholder="Password" required minLength={6} autoComplete="new-password" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+                <input name="requestAge" type="number" placeholder="Age" required min="10" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+                <input name="requestSex" type="text" placeholder="Sex / Gender" required className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+                <textarea name="requestAddress" placeholder="Address" required rows="3" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm"></textarea>
+                <button type="submit" disabled={requestBusy} className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white font-semibold text-sm py-2.5 rounded-lg transition">
+                  {requestBusy ? "Sending request…" : "Send Request"}
+                </button>
+              </form>
+            </div>
+          </div>
+        )}
       </>
     );
   }
 
 
+
+  if (isPending || isRejected) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-stone-50 p-6">
+        <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-8 max-w-xl text-center">
+          <div className="text-emerald-900 text-3xl font-bold mb-4">{isPending ? "Account Pending Approval" : "Account Rejected"}</div>
+          <p className="text-sm text-stone-600 mb-5">
+            {isPending
+              ? "Your account is currently pending approval. Please wait for a leader to activate your account before accessing the dashboard."
+              : "Your account has been rejected. Please contact a leader if you believe this is a mistake."
+            }
+          </p>
+          <button onClick={handleLogout} className="bg-emerald-700 text-white rounded-full px-6 py-3 text-sm font-semibold">Logout</button>
+        </div>
+      </div>
+    );
+  }
 
   // ---------- WELCOME PAGE (when superadmin opens it after login) ----------
   if (screen === "welcome") {
@@ -421,13 +644,22 @@ export default function App() {
       <nav className="flex-1 overflow-y-auto">
         {NAV.filter(n => featureAccess[n.key]).map(n => {
           const Icon = n.icon;
+          const badgeCount = n.key === "suggestions" ? suggestionCount
+            : n.key === "pendingUsers" ? pendingCount
+            : n.key === "accountRequests" ? accountRequestCount
+            : 0;
+          const badge = badgeCount > 0
+            ? <span className="ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-2 text-[11px] font-semibold text-white">{badgeCount}</span>
+            : null;
           return (
             <button
               key={n.key}
               onClick={() => { setScreen(n.key); setSelectedMember(null); setSelectedEventForAttendance(null); setSidebarOpen(false); }}
               className={`w-full flex items-center gap-2.5 px-5 py-2.5 text-sm text-left transition ${screen === n.key ? "bg-white/15 text-white" : "text-white/80 hover:bg-white/10"}`}
             >
-              <Icon size={15} /> {n.label}
+              <Icon size={15} />
+              <span className="flex-1 text-left">{n.label}</span>
+              {badge}
             </button>
           );
         })}
@@ -545,6 +777,24 @@ export default function App() {
             onToggle={(id) => setUsers(u => u.map(x => x.id === id ? { ...x, active: !x.active } : x))}
             onDelete={(id) => setUsers(u => u.filter(x => x.id !== id))}
             onEditAccess={(u) => setEditAccessUser(u)}
+          />
+        )}
+        {screen === "pendingUsers" && isLeader && (
+          <PendingUsers
+            pendingUsers={pendingUsers}
+            loading={pendingLoading}
+            roleSelection={pendingRoleSelection}
+            onRoleChange={(userId, roleValue) => setPendingRoleSelection(prev => ({ ...prev, [userId]: roleValue }))}
+            onApprove={(userId) => approvePendingUser(userId, pendingRoleSelection[userId] || "member")}
+            onReject={rejectPendingUser}
+          />
+        )}
+        {screen === "accountRequests" && isLeader && (
+          <AccountRequests requests={accountRequests} />
+        )}
+        {screen === "accountRequests" && isLeader && (
+          <AccountRequests
+            requests={accountRequests}
           />
         )}
       </div>
@@ -1037,6 +1287,88 @@ function Finance({ finance, onAdd, onDelete }) {
               <td className="p-3"><button onClick={() => onDelete(f.id)} className="text-rose-600"><Trash2 size={14} /></button></td>
             </tr>
           ))}</tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function PendingUsers({ pendingUsers, loading, roleSelection, onRoleChange, onApprove, onReject }) {
+  const roleOptions = ["superadmin", "president", "secretary", "treasurer", "organizer", "member"];
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-5">
+        <div>
+          <h1 className="text-xl font-bold text-emerald-900">Pending User Approvals</h1>
+          <p className="text-sm text-stone-500">Approve new signups and assign them a role before they can access the dashboard.</p>
+        </div>
+      </div>
+      <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto">
+        <table className="w-full text-sm min-w-[680px]">
+          <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Name</th><th className="p-3">Email</th><th className="p-3">Requested</th><th className="p-3">Role</th><th className="p-3">Actions</th></tr></thead>
+          <tbody>
+            {loading ? (
+              <tr><td colSpan="5" className="p-4 text-stone-500">Loading pending users…</td></tr>
+            ) : pendingUsers.length === 0 ? (
+              <tr><td colSpan="5" className="p-4 text-stone-500">No pending users at the moment.</td></tr>
+            ) : pendingUsers.map(u => (
+              <tr key={u.id} className="border-t border-stone-100">
+                <td className="p-3 font-medium">{u.full_name || "Unknown"}</td>
+                <td className="p-3 text-stone-500">{u.email || "-"}</td>
+                <td className="p-3 text-stone-500">{u.created_at ? new Date(u.created_at).toLocaleDateString() : "-"}</td>
+                <td className="p-3">
+                  <select className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm" value={roleSelection[u.id] || "member"} onChange={(e) => onRoleChange(u.id, e.target.value)}>
+                    {roleOptions.map(role => <option key={role} value={role}>{role.charAt(0).toUpperCase() + role.slice(1)}</option>)}
+                  </select>
+                </td>
+                <td className="p-3 space-x-2">
+                  <button onClick={() => onApprove(u.id)} className="bg-emerald-700 text-white text-xs px-3 py-2 rounded-lg">Approve</button>
+                  <button onClick={() => onReject(u.id)} className="bg-rose-50 text-rose-700 text-xs px-3 py-2 rounded-lg">Reject</button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+function AccountRequests({ requests }) {
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-5">
+        <div>
+          <h1 className="text-xl font-bold text-emerald-900">Account Requests</h1>
+          <p className="text-sm text-stone-500">Requests sent by new members. Notify leaders to approve them manually.</p>
+        </div>
+      </div>
+      <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto">
+        <table className="w-full text-sm min-w-[700px]">
+          <thead>
+            <tr className="bg-emerald-50 text-emerald-900 text-left">
+              <th className="p-3">Name</th>
+              <th className="p-3">Age</th>
+              <th className="p-3">Sex</th>
+              <th className="p-3">Address</th>
+              <th className="p-3">Requested</th>
+              <th className="p-3">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {requests.length === 0 ? (
+              <tr><td colSpan="6" className="p-4 text-stone-500">No account requests yet.</td></tr>
+            ) : requests.map((req) => (
+              <tr key={req.id} className="border-t border-stone-100">
+                <td className="p-3 font-medium">{req.name}</td>
+                <td className="p-3 text-stone-500">{req.age}</td>
+                <td className="p-3 text-stone-500">{req.sex}</td>
+                <td className="p-3 text-stone-500">{req.address}</td>
+                <td className="p-3 text-stone-500">{req.created_at ? new Date(req.created_at).toLocaleDateString() : "-"}</td>
+                <td className="p-3 text-stone-500">{req.status || "new"}</td>
+              </tr>
+            ))}
+          </tbody>
         </table>
       </div>
     </div>
