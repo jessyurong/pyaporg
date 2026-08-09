@@ -25,72 +25,132 @@ function usePersistentState(key, initial) {
 }
 import { LayoutDashboard, Users, CheckSquare, Calendar, Award, Wallet, Megaphone, Settings, LogOut, Plus, X, Trash2, User, MessageSquare, Menu, Eye, EyeOff, Trophy, Home } from "lucide-react";
 import Welcome, { DEFAULT_WELCOME } from "./Welcome.jsx";
-import { supabase } from "@/integrations/supabase/client";
+import { auth, db } from "@/lib/firebase";
+import {
+  onAuthStateChanged,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  signOut,
+} from "firebase/auth";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDocs,
+  orderBy,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
 
-// ============ Supabase-backed hooks ============
+// ============ Firebase-backed hooks ============
 function useAuthSession() {
   const [state, setState] = useState({ loading: true, session: null, role: null, name: null });
   useEffect(() => {
     let mounted = true;
+
     async function loadProfile(userId) {
-      const [{ data: rr }, { data: pp }] = await Promise.all([
-        supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
-        supabase.from("profiles").select("full_name").eq("user_id", userId).maybeSingle(),
-      ]);
-      return { role: rr?.role || "member", name: pp?.full_name || null };
+      const roleQuery = query(collection(db, "user_roles"), where("user_id", "==", userId));
+      const profileQuery = query(collection(db, "profiles"), where("user_id", "==", userId));
+      const [roleSnap, profileSnap] = await Promise.all([getDocs(roleQuery), getDocs(profileQuery)]);
+
+      const roleData = roleSnap.docs[0]?.data();
+      const profileData = profileSnap.docs[0]?.data();
+
+      return {
+        role: roleData?.role || "member",
+        name: profileData?.full_name || null,
+      };
     }
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (!mounted) return;
-      if (!s) { setState({ loading: false, session: null, role: null, name: null }); return; }
-      setState((prev) => ({ ...prev, loading: true, session: s }));
-      setTimeout(async () => {
-        const { role, name } = await loadProfile(s.user.id);
-        if (mounted) setState({ loading: false, session: s, role, name });
-      }, 0);
+      if (!user) {
+        setState({ loading: false, session: null, role: null, name: null });
+        return;
+      }
+      setState((prev) => ({ ...prev, loading: true, session: { user } }));
+      const { role, name } = await loadProfile(user.uid);
+      if (mounted) {
+        setState({ loading: false, session: { user }, role, name });
+      }
     });
-    supabase.auth.getSession().then(async ({ data }) => {
-      if (!mounted) return;
-      if (!data.session) { setState({ loading: false, session: null, role: null, name: null }); return; }
-      const { role, name } = await loadProfile(data.session.user.id);
-      if (mounted) setState({ loading: false, session: data.session, role, name });
-    });
-    return () => { mounted = false; sub.subscription.unsubscribe(); };
+
+    return () => {
+      mounted = false;
+      unsubscribe();
+    };
   }, []);
+
   return state;
 }
 
 function useAnnouncements() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+
   const refresh = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from("announcements").select("*").order("created_at", { ascending: false });
-    if (!error) {
-      setItems((data || []).map((a) => ({
-        id: a.id,
-        title: a.title,
-        content: a.body,
-        urgency: a.urgency || "normal",
-        date: (a.created_at || "").slice(0, 10),
-      })));
+    try {
+      const q = query(
+        collection(db, "announcements"),
+        orderBy("created_at", "desc"),
+      );
+      const snap = await getDocs(q);
+      setItems(snap.docs.map((docSnap) => {
+        const data = docSnap.data();
+        const createdAt = data.created_at;
+        const date = typeof createdAt === "string"
+          ? createdAt.slice(0, 10)
+          : createdAt?.toDate?.()?.toISOString().slice(0, 10) || "";
+
+        return {
+          id: docSnap.id,
+          title: data.title,
+          content: data.body,
+          urgency: data.urgency || "normal",
+          date,
+        };
+      }));
+    } catch (error) {
+      console.error("Failed to load announcements:", error);
+      setItems([]);
     }
     setLoading(false);
   };
+
   useEffect(() => { refresh(); }, []);
+
   const add = async ({ title, content, urgency }) => {
-    const { data: u } = await supabase.auth.getUser();
-    const { error } = await supabase.from("announcements").insert({
-      title, body: content || "", urgency: urgency || "normal", created_by: u?.user?.id ?? null,
-    });
-    if (error) { alert("Failed to post announcement: " + error.message); return false; }
-    await refresh();
-    return true;
+    try {
+      const userId = auth.currentUser?.uid ?? null;
+      await addDoc(collection(db, "announcements"), {
+        title,
+        body: content || "",
+        urgency: urgency || "normal",
+        created_by: userId,
+        created_at: new Date().toISOString(),
+      });
+      await refresh();
+      return true;
+    } catch (error) {
+      console.error("Failed to post announcement:", error);
+      alert("Failed to post announcement: " + (error?.message || "Unknown error"));
+      return false;
+    }
   };
+
   const remove = async (id) => {
-    const { error } = await supabase.from("announcements").delete().eq("id", id);
-    if (error) { alert("Failed to delete: " + error.message); return; }
-    await refresh();
+    try {
+      await deleteDoc(doc(db, "announcements", id));
+      await refresh();
+    } catch (error) {
+      console.error("Failed to delete announcement:", error);
+      alert("Failed to delete: " + (error?.message || "Unknown error"));
+    }
   };
+
   return { items, loading, add, remove, refresh };
 }
 
@@ -239,24 +299,27 @@ export default function App() {
     const email = (fd.get("email") || "").trim();
     const password = fd.get("password") || "";
     const fullName = (fd.get("fullName") || "").trim();
+
     try {
       if (authMode === "signup") {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            data: { full_name: fullName || email.split("@")[0] },
-            emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
-          },
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        const userId = userCredential.user.uid;
+        await setDoc(doc(db, "profiles", userId), {
+          user_id: userId,
+          full_name: fullName || email.split("@")[0],
         });
-        if (error) { setLoginError(error.message); return; }
+        await setDoc(doc(db, "user_roles", userId), {
+          user_id: userId,
+          role: "member",
+        });
         setShowLoginModal(false);
       } else {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) { setLoginError(error.message); return; }
+        await signInWithEmailAndPassword(auth, email, password);
         setShowLoginModal(false);
         setScreen("dashboard");
       }
+    } catch (error) {
+      setLoginError(error?.message || "Authentication failed.");
     } finally {
       setLoginBusy(false);
     }
@@ -268,7 +331,7 @@ export default function App() {
   }
 
   async function handleLogout() {
-    await supabase.auth.signOut();
+    await signOut(auth);
     setGuestMode(false);
     setScreen("dashboard");
     setSelectedMember(null);
