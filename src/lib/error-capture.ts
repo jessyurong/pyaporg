@@ -23,5 +23,15 @@ export function consumeLastCapturedError(): unknown {
   }
   const { error } = lastCapturedError;
   lastCapturedError = undefined;
-  return error;
+  if (error instanceof Error) {
+    return error;
+  }
+  if (typeof error === "object" && error !== null) {
+    try {
+      return new Error(`Recovered non-Error throw: ${JSON.stringify(error, null, 2)}`);
+    } catch {
+      return new Error(`Recovered non-Error throw: ${String(error)}`);
+    }
+  }
+  return new Error(`Recovered non-Error throw: ${String(error)}`);
 }
