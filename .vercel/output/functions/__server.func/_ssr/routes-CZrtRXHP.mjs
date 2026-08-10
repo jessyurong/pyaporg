@@ -1,11 +1,11 @@
 import { o as __toESM } from "../_runtime.mjs";
 import { n as require_jsx_runtime, r as require_react } from "../_libs/react+tanstack__react-query.mjs";
 import { C as Eye, D as Award, E as Calendar, S as Heart, T as ChevronDown, _ as MapPin, a as Trophy, b as LayoutDashboard, c as SquareCheckBig, d as Plus, f as Phone, g as Megaphone, h as Menu, i as User, l as Sparkles, m as MessageSquare, n as Wallet, o as Trash2, p as PenLine, r as Users, s as Target, t as X, u as Settings, v as Mail, w as EyeOff, x as House, y as LogOut } from "../_libs/lucide-react.mjs";
-import { o as initializeApp } from "../_libs/@firebase/app+[...].mjs";
+import { a as getApp, o as getApps, s as initializeApp } from "../_libs/@firebase/app+[...].mjs";
 import "../_libs/firebase.mjs";
 import { a as signOut, i as signInWithEmailAndPassword, n as getAuth, r as onAuthStateChanged, t as createUserWithEmailAndPassword } from "../_libs/firebase__auth+undici.mjs";
 import { a as getDocs, c as query, i as doc, l as setDoc, n as collection, o as getFirestore, r as deleteDoc, s as orderBy, t as addDoc, u as where } from "../_libs/@firebase/firestore+[...].mjs";
-//#region node_modules/.nitro/vite/services/ssr/assets/routes-Cq2czCxL.js
+//#region node_modules/.nitro/vite/services/ssr/assets/routes-CZrtRXHP.js
 var import_react = /* @__PURE__ */ __toESM(require_react());
 var import_jsx_runtime = require_jsx_runtime();
 var DEFAULT_WELCOME = {
@@ -65,7 +65,7 @@ var iconMap = {
 	award: Award,
 	megaphone: Megaphone
 };
-function Welcome({ content, logo, isSuperAdmin, onLoginClick, onGuestClick, onSave }) {
+function Welcome({ content, logo, isSuperAdmin, onLoginClick, onGuestClick, onRequestClick, onSave }) {
 	const [editing, setEditing] = (0, import_react.useState)(false);
 	const scrollTo = (id) => {
 		const el = document.getElementById(id);
@@ -172,15 +172,23 @@ function Welcome({ content, logo, isSuperAdmin, onLoginClick, onGuestClick, onSa
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
 							className: "mt-8 flex flex-wrap gap-3 justify-center",
-							children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: () => scrollTo("about"),
-								className: "bg-white text-emerald-800 hover:bg-emerald-50 font-semibold text-sm px-6 py-3 rounded-lg transition shadow-lg",
-								children: "Learn More"
-							}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-								onClick: onGuestClick,
-								className: "bg-emerald-950/40 hover:bg-emerald-950/60 border border-white/30 text-white font-semibold text-sm px-6 py-3 rounded-lg transition",
-								children: "Continue as Guest"
-							})]
+							children: [
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									onClick: () => scrollTo("about"),
+									className: "bg-white text-emerald-800 hover:bg-emerald-50 font-semibold text-sm px-6 py-3 rounded-lg transition shadow-lg",
+									children: "Learn More"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									onClick: onRequestClick,
+									className: "bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm px-6 py-3 rounded-lg transition shadow-lg",
+									children: "Request Account"
+								}),
+								/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+									onClick: onGuestClick,
+									className: "bg-emerald-950/40 hover:bg-emerald-950/60 border border-white/30 text-white font-semibold text-sm px-6 py-3 rounded-lg transition",
+									children: "Continue as Guest"
+								})
+							]
 						}),
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
 							onClick: () => scrollTo("about"),
@@ -776,15 +784,16 @@ function EditWelcomeModal({ content, onClose, onSave }) {
 	});
 }
 var firebaseConfig = {
-	apiKey: "",
-	authDomain: "",
-	projectId: "",
-	storageBucket: "",
-	messagingSenderId: "",
-	appId: ""
+	apiKey: "AIzaSyBcKSbSPrtJ6VuaTwZDvw8v6coaRGFRF-Y",
+	authDomain: "pyap-7cb31.firebaseapp.com",
+	projectId: "pyap-7cb31",
+	storageBucket: "pyap-7cb31.firebasestorage.app",
+	messagingSenderId: "515554542151",
+	appId: "1:515554542151:web:0d9daed7c309303da9e762"
 };
 if (!firebaseConfig.apiKey || !firebaseConfig.authDomain || !firebaseConfig.projectId || !firebaseConfig.storageBucket || !firebaseConfig.messagingSenderId || !firebaseConfig.appId) throw new Error("Missing Firebase environment variables. Set VITE_FIREBASE_API_KEY, VITE_FIREBASE_AUTH_DOMAIN, VITE_FIREBASE_PROJECT_ID, VITE_FIREBASE_STORAGE_BUCKET, VITE_FIREBASE_MESSAGING_SENDER_ID, and VITE_FIREBASE_APP_ID.");
-var app = initializeApp(firebaseConfig);
+var app = !getApps().length ? initializeApp(firebaseConfig) : getApp();
+console.log("[Firebase Init] config:", firebaseConfig, "apps:", getApps().length);
 var auth = getAuth(app);
 var db = getFirestore(app);
 var STORAGE_KEY = "pyap_samac_state_v1";
@@ -817,7 +826,8 @@ function useAuthSession() {
 		loading: true,
 		session: null,
 		role: null,
-		name: null
+		name: null,
+		status: null
 	});
 	(0, import_react.useEffect)(() => {
 		let mounted = true;
@@ -825,11 +835,30 @@ function useAuthSession() {
 			const roleQuery = query(collection(db, "user_roles"), where("user_id", "==", userId));
 			const profileQuery = query(collection(db, "profiles"), where("user_id", "==", userId));
 			const [roleSnap, profileSnap] = await Promise.all([getDocs(roleQuery), getDocs(profileQuery)]);
-			const roleData = roleSnap.docs[0]?.data();
+			let role = roleSnap.docs[0]?.data()?.role;
 			const profileData = profileSnap.docs[0]?.data();
+			role = typeof role === "string" ? role.toLowerCase() : null;
+			const superadminQuery = query(collection(db, "user_roles"), where("role", "==", "superadmin"));
+			const noSuperadmin = (await getDocs(superadminQuery)).empty;
+			if (!role) {
+				if (noSuperadmin) {
+					role = "superadmin";
+					await setDoc(doc(db, "user_roles", userId), {
+						user_id: userId,
+						role
+					});
+				} else role = "member";
+			} else if (role !== "superadmin" && noSuperadmin) {
+				role = "superadmin";
+				await setDoc(doc(db, "user_roles", userId), {
+					user_id: userId,
+					role
+				});
+			}
 			return {
-				role: roleData?.role || "member",
-				name: profileData?.full_name || null
+				role: role || "member",
+				name: profileData?.full_name || null,
+				status: profileData?.status ?? "active"
 			};
 		}
 		const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -839,7 +868,8 @@ function useAuthSession() {
 					loading: false,
 					session: null,
 					role: null,
-					name: null
+					name: null,
+					status: null
 				});
 				return;
 			}
@@ -848,13 +878,25 @@ function useAuthSession() {
 				loading: true,
 				session: { user }
 			}));
-			const { role, name } = await loadProfile(user.uid);
-			if (mounted) setState({
-				loading: false,
-				session: { user },
-				role,
-				name
-			});
+			try {
+				const { role, name, status } = await loadProfile(user.uid);
+				if (mounted) setState({
+					loading: false,
+					session: { user },
+					role,
+					name,
+					status
+				});
+			} catch (error) {
+				console.error("Failed to load user profile:", error);
+				if (mounted) setState({
+					loading: false,
+					session: { user },
+					role: "member",
+					name: null,
+					status: "active"
+				});
+			}
 		});
 		return () => {
 			mounted = false;
@@ -1211,6 +1253,16 @@ var NAV = [
 		icon: Wallet
 	},
 	{
+		key: "pendingUsers",
+		label: "Pending Users",
+		icon: Users
+	},
+	{
+		key: "accountRequests",
+		label: "Account Requests",
+		icon: MessageSquare
+	},
+	{
 		key: "users",
 		label: "User Management",
 		icon: Settings
@@ -1236,7 +1288,7 @@ function Badge({ children, tone = "neutral" }) {
 	});
 }
 function App() {
-	const auth = useAuthSession();
+	const authSession = useAuthSession();
 	const announce = useAnnouncements();
 	const [guestMode, setGuestMode] = (0, import_react.useState)(false);
 	const [screen, setScreen] = (0, import_react.useState)("dashboard");
@@ -1262,7 +1314,11 @@ function App() {
 	const [certPreview, setCertPreview] = (0, import_react.useState)(null);
 	const [loginError, setLoginError] = (0, import_react.useState)("");
 	const [loginBusy, setLoginBusy] = (0, import_react.useState)(false);
-	const [authMode, setAuthMode] = (0, import_react.useState)("signin");
+	const [showRequestModal, setShowRequestModal] = (0, import_react.useState)(false);
+	const [requestError, setRequestError] = (0, import_react.useState)("");
+	const [requestBusy, setRequestBusy] = (0, import_react.useState)(false);
+	const [requestSuccess, setRequestSuccess] = (0, import_react.useState)("");
+	const [accountRequests, setAccountRequests] = (0, import_react.useState)([]);
 	const [sidebarOpen, setSidebarOpen] = (0, import_react.useState)(false);
 	const [showAbout, setShowAbout] = (0, import_react.useState)(false);
 	const [welcomeContent, setWelcomeContent] = usePersistentState("welcomeContent", DEFAULT_WELCOME);
@@ -1277,15 +1333,27 @@ function App() {
 		recentAnnouncements: true
 	});
 	const [showLoginModal, setShowLoginModal] = (0, import_react.useState)(false);
-	const isSignedIn = !!auth.session;
+	const [pendingUsers, setPendingUsers] = (0, import_react.useState)([]);
+	const [pendingRoleSelection, setPendingRoleSelection] = (0, import_react.useState)({});
+	const [pendingLoading, setPendingLoading] = (0, import_react.useState)(true);
+	const isSignedIn = !!authSession.session;
 	const isGuest = !isSignedIn && guestMode;
-	const role = auth.role;
-	const displayName = auth.name || auth.session?.user?.email?.split("@")[0] || "";
+	const role = authSession.role || "member";
+	const displayName = authSession.name || authSession.session?.user?.email?.split("@")[0] || "";
 	const session = isSignedIn ? {
 		name: displayName,
 		role
 	} : isGuest ? { guest: true } : null;
 	const announcements = announce.items;
+	const suggestionCount = suggestions.length;
+	const pendingCount = pendingUsers.length;
+	const accountRequestCount = accountRequests.length;
+	const isLeader = [
+		"superadmin",
+		"president",
+		"secretary",
+		"organizer"
+	].includes(role);
 	const featureAccess = isGuest ? {
 		dashboard: true,
 		announcements: true,
@@ -1305,6 +1373,10 @@ function App() {
 		welcome: true,
 		donate: true
 	} : PRESETS[role] || {};
+	if (isLeader) {
+		featureAccess.pendingUsers = true;
+		featureAccess.accountRequests = true;
+	}
 	async function handleLogin(e) {
 		e.preventDefault();
 		setLoginError("");
@@ -1312,24 +1384,10 @@ function App() {
 		const fd = new FormData(e.target);
 		const email = (fd.get("email") || "").trim();
 		const password = fd.get("password") || "";
-		const fullName = (fd.get("fullName") || "").trim();
 		try {
-			if (authMode === "signup") {
-				const userId = (await createUserWithEmailAndPassword(auth, email, password)).user.uid;
-				await setDoc(doc(db, "profiles", userId), {
-					user_id: userId,
-					full_name: fullName || email.split("@")[0]
-				});
-				await setDoc(doc(db, "user_roles", userId), {
-					user_id: userId,
-					role: "member"
-				});
-				setShowLoginModal(false);
-			} else {
-				await signInWithEmailAndPassword(auth, email, password);
-				setShowLoginModal(false);
-				setScreen("dashboard");
-			}
+			await signInWithEmailAndPassword(auth, email, password);
+			setShowLoginModal(false);
+			setScreen("dashboard");
 		} catch (error) {
 			setLoginError(error?.message || "Authentication failed.");
 		} finally {
@@ -1340,115 +1398,361 @@ function App() {
 		setGuestMode(true);
 		setScreen("dashboard");
 	}
+	async function handleRequestAccount(e) {
+		e.preventDefault();
+		setRequestError("");
+		setRequestSuccess("");
+		setRequestBusy(true);
+		const fd = new FormData(e.target);
+		const name = (fd.get("requestName") || "").trim();
+		const email = (fd.get("requestEmail") || "").trim();
+		const password = (fd.get("requestPassword") || "").trim();
+		const age = (fd.get("requestAge") || "").trim();
+		const sex = (fd.get("requestSex") || "").trim();
+		const address = (fd.get("requestAddress") || "").trim();
+		if (!name || !email || !password || !age || !sex || !address) {
+			setRequestError("Please fill out all fields before sending the request.");
+			setRequestBusy(false);
+			return;
+		}
+		try {
+			const userId = (await createUserWithEmailAndPassword(auth, email, password)).user.uid;
+			let isFirstSuperadmin = false;
+			try {
+				isFirstSuperadmin = (await getDocs(collection(db, "user_roles"))).empty;
+			} catch (error) {
+				console.error("Failed to check existing roles:", error);
+			}
+			await setDoc(doc(db, "profiles", userId), {
+				user_id: userId,
+				full_name: name,
+				email,
+				age,
+				sex,
+				address,
+				status: isFirstSuperadmin ? "active" : "pending",
+				created_at: (/* @__PURE__ */ new Date()).toISOString()
+			});
+			if (isFirstSuperadmin) await setDoc(doc(db, "user_roles", userId), {
+				user_id: userId,
+				role: "superadmin"
+			});
+			await addDoc(collection(db, "account_requests"), {
+				user_id: userId,
+				name,
+				email,
+				age,
+				sex,
+				address,
+				status: isFirstSuperadmin ? "accepted" : "new",
+				notified_roles: [
+					"superadmin",
+					"president",
+					"secretary"
+				],
+				created_at: (/* @__PURE__ */ new Date()).toISOString()
+			});
+			if (isFirstSuperadmin) {
+				await signOut(auth);
+				setRequestSuccess("Your account was created as the first superadmin. Please log in again.");
+				setShowRequestModal(false);
+				setShowLoginModal(true);
+			} else {
+				setRequestSuccess("Your account request has been sent successfully. Wait for leader approval.");
+				setShowRequestModal(false);
+			}
+		} catch (error) {
+			const errorMessage = error?.code ? `${error.code}: ${error.message}` : error?.message || "Failed to send request.";
+			console.error("Failed to send account request:", error);
+			setRequestError(`Account request failed: ${errorMessage}`);
+		} finally {
+			setRequestBusy(false);
+		}
+	}
 	async function handleLogout() {
 		await signOut(auth);
 		setGuestMode(false);
 		setScreen("dashboard");
 		setSelectedMember(null);
 	}
+	async function fetchPendingUsers() {
+		if (!isLeader) {
+			setPendingUsers([]);
+			setPendingLoading(false);
+			return;
+		}
+		setPendingLoading(true);
+		try {
+			const q = query(collection(db, "profiles"), where("status", "==", "pending"));
+			const snap = await getDocs(q);
+			setPendingUsers(snap.docs.map((docSnap) => ({
+				id: docSnap.id,
+				...docSnap.data() || {}
+			})));
+		} catch (error) {
+			console.error("Failed to load pending users:", error);
+			setPendingUsers([]);
+		}
+		setPendingLoading(false);
+	}
+	async function fetchAccountRequests() {
+		if (!isLeader) {
+			setAccountRequests([]);
+			return;
+		}
+		try {
+			const q = query(collection(db, "account_requests"), orderBy("created_at", "desc"));
+			const snap = await getDocs(q);
+			setAccountRequests(snap.docs.map((docSnap) => ({
+				id: docSnap.id,
+				...docSnap.data() || {}
+			})));
+		} catch (error) {
+			console.error("Failed to load account requests:", error);
+			setAccountRequests([]);
+		}
+	}
+	(0, import_react.useEffect)(() => {
+		fetchPendingUsers();
+		fetchAccountRequests();
+	}, [role]);
+	async function approvePendingUser(userId, roleSelection) {
+		const roleToSet = roleSelection || "member";
+		try {
+			await setDoc(doc(db, "user_roles", userId), {
+				user_id: userId,
+				role: roleToSet
+			});
+			await setDoc(doc(db, "profiles", userId), { status: "active" }, { merge: true });
+			await fetchPendingUsers();
+		} catch (error) {
+			console.error("Failed to approve pending user:", error);
+		}
+	}
+	async function rejectPendingUser(userId) {
+		try {
+			await setDoc(doc(db, "profiles", userId), { status: "rejected" }, { merge: true });
+			await fetchPendingUsers();
+		} catch (error) {
+			console.error("Failed to reject pending user:", error);
+		}
+	}
+	const isPending = authSession.status === "pending";
+	const isRejected = authSession.status === "rejected";
 	if (auth.loading && !isSignedIn && !isGuest) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
 		className: "min-h-screen flex items-center justify-center bg-stone-50 text-stone-500 text-sm",
 		children: "Loading…"
 	});
-	if (!session) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Welcome, {
-		content: welcomeContent,
-		logo: LOGO_B64,
-		isSuperAdmin: false,
-		onLoginClick: () => {
-			setLoginError("");
-			setAuthMode("signin");
-			setShowLoginModal(true);
-		},
-		onGuestClick: handleGuest,
-		onSave: setWelcomeContent
-	}), showLoginModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-		className: "fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4",
-		onClick: () => setShowLoginModal(false),
+	if (!session) return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)(import_jsx_runtime.Fragment, { children: [
+		/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Welcome, {
+			content: welcomeContent,
+			logo: LOGO_B64,
+			isSuperAdmin: false,
+			onLoginClick: () => {
+				setLoginError("");
+				setShowLoginModal(true);
+			},
+			onRequestClick: () => {
+				setShowLoginModal(false);
+				setShowRequestModal(true);
+			},
+			onGuestClick: handleGuest,
+			onSave: setWelcomeContent
+		}),
+		showLoginModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4",
+			onClick: () => setShowLoginModal(false),
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center relative",
+				onClick: (e) => e.stopPropagation(),
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						onClick: () => setShowLoginModal(false),
+						className: "absolute top-3 right-3 text-stone-400 hover:text-stone-700",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18 })
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
+						src: LOGO_B64,
+						alt: "PYAP Samac Logo",
+						className: "w-20 h-20 mx-auto mb-4"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+						className: "text-lg font-bold text-emerald-900",
+						children: "Member Login"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-stone-500 mt-1 mb-5",
+						children: "Existing members only. New users should request access."
+					}),
+					loginError && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4 text-left",
+						children: loginError
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+						onSubmit: handleLogin,
+						className: "space-y-3 text-left",
+						autoComplete: "off",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								name: "email",
+								type: "email",
+								placeholder: "Email",
+								required: true,
+								autoComplete: "email",
+								className: "w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								name: "password",
+								type: "password",
+								placeholder: "Password",
+								required: true,
+								minLength: 6,
+								autoComplete: "current-password",
+								className: "w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "submit",
+								disabled: loginBusy,
+								className: "w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white font-semibold text-sm py-2.5 rounded-lg transition",
+								children: loginBusy ? "Please wait…" : "Login"
+							})
+						]
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						onClick: () => {
+							setShowLoginModal(false);
+							setShowRequestModal(true);
+						},
+						className: "w-full mt-3 text-xs text-emerald-700 hover:underline",
+						children: "New member? Request account access"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						onClick: () => {
+							setShowLoginModal(false);
+							handleGuest();
+						},
+						className: "w-full mt-3 border border-emerald-700 text-emerald-700 hover:bg-emerald-700 hover:text-white font-semibold text-sm py-2.5 rounded-lg transition",
+						children: "Continue as Guest"
+					})
+				]
+			})
+		}),
+		showRequestModal && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+			className: "fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4",
+			onClick: () => setShowRequestModal(false),
+			children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
+				className: "bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center relative",
+				onClick: (e) => e.stopPropagation(),
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+						type: "button",
+						onClick: () => setShowRequestModal(false),
+						className: "absolute top-3 right-3 text-stone-400 hover:text-stone-700",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18 })
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+						className: "text-lg font-bold text-emerald-900",
+						children: "Request Account Access"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+						className: "text-xs text-stone-500 mt-1 mb-5",
+						children: "Send a request to the leaders. Superadmin, President, and Secretary will be notified."
+					}),
+					requestError && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4 text-left",
+						children: requestError
+					}),
+					requestSuccess && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+						className: "bg-emerald-50 text-emerald-700 text-xs rounded-lg p-2.5 mb-4 text-left",
+						children: requestSuccess
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
+						onSubmit: handleRequestAccount,
+						className: "space-y-3 text-left",
+						autoComplete: "off",
+						children: [
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								name: "requestName",
+								type: "text",
+								placeholder: "Full name",
+								required: true,
+								className: "w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								name: "requestEmail",
+								type: "email",
+								placeholder: "Email",
+								required: true,
+								autoComplete: "email",
+								className: "w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								name: "requestPassword",
+								type: "password",
+								placeholder: "Password",
+								required: true,
+								minLength: 6,
+								autoComplete: "new-password",
+								className: "w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								name: "requestAge",
+								type: "number",
+								placeholder: "Age",
+								required: true,
+								min: "10",
+								className: "w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
+								name: "requestSex",
+								type: "text",
+								placeholder: "Sex / Gender",
+								required: true,
+								className: "w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("textarea", {
+								name: "requestAddress",
+								placeholder: "Address",
+								required: true,
+								rows: "3",
+								className: "w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm"
+							}),
+							/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+								type: "submit",
+								disabled: requestBusy,
+								className: "w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white font-semibold text-sm py-2.5 rounded-lg transition",
+								children: requestBusy ? "Sending request…" : "Send Request"
+							})
+						]
+					})
+				]
+			})
+		})
+	] });
+	if (isPending || isRejected) return /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "min-h-screen flex items-center justify-center bg-stone-50 p-6",
 		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", {
-			className: "bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center relative",
-			onClick: (e) => e.stopPropagation(),
+			className: "bg-white rounded-3xl border border-stone-200 shadow-sm p-8 max-w-xl text-center",
 			children: [
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					type: "button",
-					onClick: () => setShowLoginModal(false),
-					className: "absolute top-3 right-3 text-stone-400 hover:text-stone-700",
-					children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)(X, { size: 18 })
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("img", {
-					src: LOGO_B64,
-					alt: "PYAP Samac Logo",
-					className: "w-20 h-20 mx-auto mb-4"
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
-					className: "text-lg font-bold text-emerald-900",
-					children: authMode === "signup" ? "Create Account" : "Member Login"
+				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+					className: "text-emerald-900 text-3xl font-bold mb-4",
+					children: isPending ? "Account Pending Approval" : "Account Rejected"
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
-					className: "text-xs text-stone-500 mt-1 mb-5",
-					children: "PYAP – Barangay Samac"
-				}),
-				loginError && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
-					className: "bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4 text-left",
-					children: loginError
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("form", {
-					onSubmit: handleLogin,
-					className: "space-y-3 text-left",
-					autoComplete: "off",
-					children: [
-						authMode === "signup" && /* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-							name: "fullName",
-							placeholder: "Full name",
-							autoComplete: "off",
-							required: true,
-							className: "w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-							name: "email",
-							type: "email",
-							placeholder: "Email",
-							required: true,
-							autoComplete: "email",
-							className: "w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("input", {
-							name: "password",
-							type: "password",
-							placeholder: "Password",
-							required: true,
-							minLength: 6,
-							autoComplete: authMode === "signup" ? "new-password" : "current-password",
-							className: "w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm"
-						}),
-						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-							type: "submit",
-							disabled: loginBusy,
-							className: "w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white font-semibold text-sm py-2.5 rounded-lg transition",
-							children: loginBusy ? "Please wait…" : authMode === "signup" ? "Sign up" : "Login"
-						})
-					]
+					className: "text-sm text-stone-600 mb-5",
+					children: isPending ? "Your account is currently pending approval. Please wait for a leader to activate your account before accessing the dashboard." : "Your account has been rejected. Please contact a leader if you believe this is a mistake."
 				}),
 				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					type: "button",
-					onClick: () => {
-						setAuthMode(authMode === "signup" ? "signin" : "signup");
-						setLoginError("");
-					},
-					className: "w-full mt-3 text-xs text-emerald-700 hover:underline",
-					children: authMode === "signup" ? "Already have an account? Sign in" : "New member? Create an account"
-				}),
-				/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
-					type: "button",
-					onClick: () => {
-						setShowLoginModal(false);
-						handleGuest();
-					},
-					className: "w-full mt-3 border border-emerald-700 text-emerald-700 hover:bg-emerald-700 hover:text-white font-semibold text-sm py-2.5 rounded-lg transition",
-					children: "Continue as Guest"
+					onClick: handleLogout,
+					className: "bg-emerald-700 text-white rounded-full px-6 py-3 text-sm font-semibold",
+					children: "Logout"
 				})
 			]
 		})
-	})] });
+	});
 	if (screen === "welcome") return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Welcome, {
 		content: welcomeContent,
 		logo: LOGO_B64,
@@ -1477,6 +1781,11 @@ function App() {
 			className: "flex-1 overflow-y-auto",
 			children: NAV.filter((n) => featureAccess[n.key]).map((n) => {
 				const Icon = n.icon;
+				const badgeCount = n.key === "suggestions" ? suggestionCount : n.key === "pendingUsers" ? pendingCount : n.key === "accountRequests" ? accountRequestCount : 0;
+				const badge = badgeCount > 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+					className: "ml-auto inline-flex h-5 min-w-[20px] items-center justify-center rounded-full bg-rose-500 px-2 text-[11px] font-semibold text-white",
+					children: badgeCount
+				}) : null;
 				return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("button", {
 					onClick: () => {
 						setScreen(n.key);
@@ -1487,8 +1796,11 @@ function App() {
 					className: `w-full flex items-center gap-2.5 px-5 py-2.5 text-sm text-left transition ${screen === n.key ? "bg-white/15 text-white" : "text-white/80 hover:bg-white/10"}`,
 					children: [
 						/* @__PURE__ */ (0, import_jsx_runtime.jsx)(Icon, { size: 15 }),
-						" ",
-						n.label
+						/* @__PURE__ */ (0, import_jsx_runtime.jsx)("span", {
+							className: "flex-1 text-left",
+							children: n.label
+						}),
+						badge
 					]
 				}, n.key);
 			})
@@ -1641,7 +1953,20 @@ function App() {
 						} : x)),
 						onDelete: (id) => setUsers((u) => u.filter((x) => x.id !== id)),
 						onEditAccess: (u) => setEditAccessUser(u)
-					})
+					}),
+					screen === "pendingUsers" && isLeader && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(PendingUsers, {
+						pendingUsers,
+						loading: pendingLoading,
+						roleSelection: pendingRoleSelection,
+						onRoleChange: (userId, roleValue) => setPendingRoleSelection((prev) => ({
+							...prev,
+							[userId]: roleValue
+						})),
+						onApprove: (userId) => approvePendingUser(userId, pendingRoleSelection[userId] || "member"),
+						onReject: rejectPendingUser
+					}),
+					screen === "accountRequests" && isLeader && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AccountRequests, { requests: accountRequests }),
+					screen === "accountRequests" && isLeader && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(AccountRequests, { requests: accountRequests })
 				]
 			}),
 			showMemberForm && /* @__PURE__ */ (0, import_jsx_runtime.jsx)(MemberFormModal, {
@@ -2768,6 +3093,182 @@ function Finance({ finance, onAdd, onDelete }) {
 			})
 		})
 	] });
+}
+function PendingUsers({ pendingUsers, loading, roleSelection, onRoleChange, onApprove, onReject }) {
+	const roleOptions = [
+		"superadmin",
+		"president",
+		"secretary",
+		"treasurer",
+		"organizer",
+		"member"
+	];
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "flex justify-between items-center mb-5",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+			className: "text-xl font-bold text-emerald-900",
+			children: "Pending User Approvals"
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-sm text-stone-500",
+			children: "Approve new signups and assign them a role before they can access the dashboard."
+		})] })
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "bg-white rounded-xl border border-stone-200 overflow-x-auto",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
+			className: "w-full text-sm min-w-[680px]",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+				className: "bg-emerald-50 text-emerald-900 text-left",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						className: "p-3",
+						children: "Name"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						className: "p-3",
+						children: "Email"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						className: "p-3",
+						children: "Requested"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						className: "p-3",
+						children: "Role"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						className: "p-3",
+						children: "Actions"
+					})
+				]
+			}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: loading ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+				colSpan: "5",
+				className: "p-4 text-stone-500",
+				children: "Loading pending users…"
+			}) }) : pendingUsers.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+				colSpan: "5",
+				className: "p-4 text-stone-500",
+				children: "No pending users at the moment."
+			}) }) : pendingUsers.map((u) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+				className: "border-t border-stone-100",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+						className: "p-3 font-medium",
+						children: u.full_name || "Unknown"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+						className: "p-3 text-stone-500",
+						children: u.email || "-"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+						className: "p-3 text-stone-500",
+						children: u.created_at ? new Date(u.created_at).toLocaleDateString() : "-"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+						className: "p-3",
+						children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("select", {
+							className: "w-full px-3 py-2 border border-stone-200 rounded-lg text-sm",
+							value: roleSelection[u.id] || "member",
+							onChange: (e) => onRoleChange(u.id, e.target.value),
+							children: roleOptions.map((role) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)("option", {
+								value: role,
+								children: role.charAt(0).toUpperCase() + role.slice(1)
+							}, role))
+						})
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsxs)("td", {
+						className: "p-3 space-x-2",
+						children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => onApprove(u.id),
+							className: "bg-emerald-700 text-white text-xs px-3 py-2 rounded-lg",
+							children: "Approve"
+						}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("button", {
+							onClick: () => onReject(u.id),
+							className: "bg-rose-50 text-rose-700 text-xs px-3 py-2 rounded-lg",
+							children: "Reject"
+						})]
+					})
+				]
+			}, u.id)) })]
+		})
+	})] });
+}
+function AccountRequests({ requests }) {
+	return /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "flex justify-between items-center mb-5",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("div", { children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("h1", {
+			className: "text-xl font-bold text-emerald-900",
+			children: "Account Requests"
+		}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("p", {
+			className: "text-sm text-stone-500",
+			children: "Requests sent by new members. Notify leaders to approve them manually."
+		})] })
+	}), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("div", {
+		className: "bg-white rounded-xl border border-stone-200 overflow-x-auto",
+		children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("table", {
+			className: "w-full text-sm min-w-[700px]",
+			children: [/* @__PURE__ */ (0, import_jsx_runtime.jsx)("thead", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+				className: "bg-emerald-50 text-emerald-900 text-left",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						className: "p-3",
+						children: "Name"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						className: "p-3",
+						children: "Age"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						className: "p-3",
+						children: "Sex"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						className: "p-3",
+						children: "Address"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						className: "p-3",
+						children: "Requested"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("th", {
+						className: "p-3",
+						children: "Status"
+					})
+				]
+			}) }), /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tbody", { children: requests.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime.jsx)("tr", { children: /* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+				colSpan: "6",
+				className: "p-4 text-stone-500",
+				children: "No account requests yet."
+			}) }) : requests.map((req) => /* @__PURE__ */ (0, import_jsx_runtime.jsxs)("tr", {
+				className: "border-t border-stone-100",
+				children: [
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+						className: "p-3 font-medium",
+						children: req.name
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+						className: "p-3 text-stone-500",
+						children: req.age
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+						className: "p-3 text-stone-500",
+						children: req.sex
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+						className: "p-3 text-stone-500",
+						children: req.address
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+						className: "p-3 text-stone-500",
+						children: req.created_at ? new Date(req.created_at).toLocaleDateString() : "-"
+					}),
+					/* @__PURE__ */ (0, import_jsx_runtime.jsx)("td", {
+						className: "p-3 text-stone-500",
+						children: req.status || "new"
+					})
+				]
+			}, req.id)) })]
+		})
+	})] });
 }
 function UserManagement({ users, onAdd, onToggle, onDelete, onEditAccess }) {
 	const [visiblePw, setVisiblePw] = (0, import_react.useState)({});

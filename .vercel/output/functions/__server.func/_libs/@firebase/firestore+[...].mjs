@@ -1,5 +1,5 @@
 import { a as __toCommonJS, i as __require, n as __esmMin, o as __toESM, r as __exportAll, t as __commonJSMin } from "../../_runtime.mjs";
-import { E as isSafari, a as getApp, b as getModularInstance, c as LogLevel, f as FirebaseError, i as _registerComponent, l as Logger, m as createMockUserToken, n as _getProvider, s as registerVersion, t as SDK_VERSION$1, u as Component, x as getUA, y as getDefaultEmulatorHostnameAndPort } from "./app+[...].mjs";
+import { D as isSafari, S as getUA, a as getApp, b as getDefaultEmulatorHostnameAndPort, c as registerVersion, d as Component, h as createMockUserToken, i as _registerComponent, l as LogLevel, n as _getProvider, p as FirebaseError, t as SDK_VERSION$1, u as Logger, x as getModularInstance } from "./app+[...].mjs";
 import { TextEncoder, inspect } from "util";
 import { randomBytes } from "crypto";
 //#region node_modules/.pnpm/@firebase+webchannel-wrapper@1.0.1/node_modules/@firebase/webchannel-wrapper/dist/bloom-blob/esm/bloom_blob_es2018.js
@@ -37779,4 +37779,4 @@ function executeWrite(firestore, mutations) {
 */
 registerFirestore("node");
 //#endregion
-export { getDocs as a, query as c, doc as i, setDoc as l, collection as n, getFirestore as o, deleteDoc as r, orderBy as s, addDoc as t, where as u };
+export { require_lodash_camelcase as C, require_umd as S, require_descriptor as _, getDocs as a, require_protobufjs as b, query as c, init_type as d, type_exports as f, init_api as g, api_exports as h, doc as i, setDoc as l, source_context_exports as m, collection as n, getFirestore as o, init_source_context as p, deleteDoc as r, orderBy as s, addDoc as t, where as u, descriptor_exports as v, require_index_minimal as x, init_descriptor as y };

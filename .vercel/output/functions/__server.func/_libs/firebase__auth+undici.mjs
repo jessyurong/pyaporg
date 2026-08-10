@@ -1,5 +1,5 @@
 import { i as __require, t as __commonJSMin } from "../_runtime.mjs";
-import { C as isCloudflareWorker, D as querystring, O as querystringDecode, S as isBrowserExtension, T as isReactNative, _ as extractQuerystring, a as getApp, b as getModularInstance, c as LogLevel, d as ErrorFactory, f as FirebaseError, g as deepEqual, h as createSubscribe, i as _registerComponent, l as Logger, n as _getProvider, p as base64Decode, r as _isFirebaseServerApp, s as registerVersion, t as SDK_VERSION, u as Component, v as getDefaultEmulatorHost, w as isMobileCordova, x as getUA } from "./@firebase/app+[...].mjs";
+import { C as isBrowserExtension, E as isReactNative, O as querystring, S as getUA, T as isMobileCordova, _ as deepEqual, a as getApp, c as registerVersion, d as Component, f as ErrorFactory, g as createSubscribe, i as _registerComponent, k as querystringDecode, l as LogLevel, m as base64Decode, n as _getProvider, p as FirebaseError, r as _isFirebaseServerApp, t as SDK_VERSION, u as Logger, v as extractQuerystring, w as isCloudflareWorker, x as getModularInstance, y as getDefaultEmulatorHost } from "./@firebase/app+[...].mjs";
 import { __rest } from "tslib";
 //#region node_modules/.pnpm/undici@6.19.7/node_modules/undici/lib/core/symbols.js
 var require_symbols$4 = /* @__PURE__ */ __commonJSMin(((exports, module) => {

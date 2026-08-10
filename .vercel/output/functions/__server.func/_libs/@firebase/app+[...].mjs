@@ -2187,6 +2187,13 @@ function getApp(name = DEFAULT_ENTRY_NAME) {
 	return app;
 }
 /**
+* A (read-only) array of all initialized apps.
+* @public
+*/
+function getApps() {
+	return Array.from(_apps.values());
+}
+/**
 * Registers a library's name and version for platform logging purposes.
 * @param library - Name of 1p or 3p library (e.g. firestore, angularfire)
 * @param version - Current version of that library.
@@ -2494,4 +2501,4 @@ function registerCoreComponents(variant) {
 */
 registerCoreComponents("");
 //#endregion
-export { isCloudflareWorker as C, querystring as D, isSafari as E, querystringDecode as O, isBrowserExtension as S, isReactNative as T, extractQuerystring as _, getApp as a, getModularInstance as b, LogLevel as c, ErrorFactory as d, FirebaseError as f, deepEqual as g, createSubscribe as h, _registerComponent as i, Logger as l, createMockUserToken as m, _getProvider as n, initializeApp as o, base64Decode as p, _isFirebaseServerApp as r, registerVersion as s, SDK_VERSION as t, Component as u, getDefaultEmulatorHost as v, isMobileCordova as w, getUA as x, getDefaultEmulatorHostnameAndPort as y };
+export { isBrowserExtension as C, isSafari as D, isReactNative as E, querystring as O, getUA as S, isMobileCordova as T, deepEqual as _, getApp as a, getDefaultEmulatorHostnameAndPort as b, registerVersion as c, Component as d, ErrorFactory as f, createSubscribe as g, createMockUserToken as h, _registerComponent as i, querystringDecode as k, LogLevel as l, base64Decode as m, _getProvider as n, getApps as o, FirebaseError as p, _isFirebaseServerApp as r, initializeApp as s, SDK_VERSION as t, Logger as u, extractQuerystring as v, isCloudflareWorker as w, getModularInstance as x, getDefaultEmulatorHost as y };

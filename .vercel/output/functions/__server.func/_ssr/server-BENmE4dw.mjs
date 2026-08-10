@@ -33,8 +33,8 @@ var createMiddleware = (options, __opts) => {
 	};
 };
 //#endregion
-//#region node_modules/.nitro/vite/services/ssr/assets/server-IPJjiJ69.js
-var server_IPJjiJ69_exports = /* @__PURE__ */ __exportAll({
+//#region node_modules/.nitro/vite/services/ssr/assets/server-BENmE4dw.js
+var server_BENmE4dw_exports = /* @__PURE__ */ __exportAll({
 	createServerEntry: () => createServerEntry,
 	default: () => server_default
 });
@@ -113,7 +113,7 @@ var HEADERS = { TSS_SHELL: "X-TSS_SHELL" };
 * the dev styles URL for route-scoped CSS collection.
 */
 async function getStartManifest(matchedRoutes) {
-	const { tsrStartManifest } = await import("../_tanstack-start-manifest_v-CEcZllDI.mjs");
+	const { tsrStartManifest } = await import("../_tanstack-start-manifest_v-CV_yIgH7.mjs");
 	const startManifest = tsrStartManifest();
 	let routes = startManifest.routes;
 	routes[rootRouteId];
@@ -1194,8 +1194,8 @@ var getBaseManifest = getProdBaseManifest;
 var createEarlyHintsForRequest = createEarlyHintsCollector;
 async function loadEntries() {
 	const [routerEntry, startEntry, pluginAdapters] = await Promise.all([
-		import("./router-BytZh9bO.mjs"),
-		import("./start-CocjDe0W.mjs").then((n) => n.t),
+		import("./router-CVrhapHv.mjs"),
+		import("./start-EDSgh8Q8.mjs").then((n) => n.t),
 		import("./empty-plugin-adapters-dDyO5Jtv.mjs")
 	]);
 	return {
@@ -1640,4 +1640,4 @@ function createServerEntry(entry) {
 }
 var server_default = createServerEntry({ fetch });
 //#endregion
-export { createServerEntry, server_default as default, createMiddleware as n, server_IPJjiJ69_exports as t };
+export { createServerEntry, server_default as default, createMiddleware as n, server_BENmE4dw_exports as t };

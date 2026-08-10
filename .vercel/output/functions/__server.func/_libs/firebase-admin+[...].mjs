@@ -1,1206 +1,7 @@
 import { a as __toCommonJS, i as __require, n as __esmMin, o as __toESM, r as __exportAll, t as __commonJSMin } from "../_runtime.mjs";
-import { t as require_extend } from "./extend.mjs";
-import { t as require_bignumber } from "./bignumber.js.mjs";
-import { t as require_base64_js } from "./base64-js.mjs";
-import { n as require_safe_buffer, t as require_ecdsa_sig_formatter } from "./ecdsa-sig-formatter+[...].mjs";
-import { t as require_buffer_equal_constant_time } from "./buffer-equal-constant-time.mjs";
-import { t as require_fast_deep_equal } from "./fast-deep-equal.mjs";
+import { a as require_base64_js, c as require_src$3, i as require_ecdsa_sig_formatter, n as require_fast_deep_equal, o as require_src$4, r as require_jws, s as require_json_bigint, t as require_src$5 } from "./@google-cloud/firestore+[...].mjs";
 import { t as require_main } from "./fastify__busboy.mjs";
-import { n as require_ms, t as require_src$5 } from "./debug+[...].mjs";
-//#region node_modules/.pnpm/gaxios@7.3.0_supports-color@7.2.0/node_modules/gaxios/package.json
-var package_exports$2 = /* @__PURE__ */ __exportAll({
-	author: () => author$2,
-	default: () => package_default$2,
-	dependencies: () => dependencies$2,
-	description: () => description$2,
-	devDependencies: () => devDependencies$2,
-	engines: () => engines$2,
-	exports: () => exports$2,
-	files: () => files$2,
-	homepage: () => homepage$2,
-	keywords: () => keywords$2,
-	license: () => license$2,
-	main: () => main$2,
-	name: () => name$2,
-	repository: () => repository$2,
-	scripts: () => scripts$2,
-	types: () => types$2,
-	version: () => version$2
-});
-var name$2, version$2, description$2, main$2, types$2, files$2, exports$2, scripts$2, repository$2, keywords$2, engines$2, author$2, license$2, devDependencies$2, dependencies$2, homepage$2, package_default$2;
-var init_package$2 = __esmMin((() => {
-	name$2 = "gaxios";
-	version$2 = "7.3.0";
-	description$2 = "A simple common HTTP client specifically for Google APIs and services.";
-	main$2 = "build/cjs/src/index.js";
-	types$2 = "build/cjs/src/index.d.ts";
-	files$2 = ["build/"];
-	exports$2 = { ".": {
-		"import": {
-			"types": "./build/esm/src/index.d.ts",
-			"default": "./build/esm/src/index.js"
-		},
-		"require": {
-			"types": "./build/cjs/src/index.d.ts",
-			"default": "./build/cjs/src/index.js"
-		}
-	} };
-	scripts$2 = {
-		"lint": "gts check --no-inline-config",
-		"test": "c8 mocha build/esm/test",
-		"presystem-test": "npm run compile",
-		"system-test": "mocha build/esm/system-test --timeout 80000",
-		"compile": "tsc -b ./tsconfig.json ./tsconfig.cjs.json && node utils/enable-esm.mjs",
-		"fix": "gts fix",
-		"prepare": "npm run compile",
-		"pretest": "npm run compile",
-		"webpack": "webpack",
-		"prebrowser-test": "npm run compile",
-		"browser-test": "node build/browser-test/browser-test-runner.js",
-		"docs": "jsdoc -c .jsdoc.js",
-		"samples-test": "cd samples/ && npm link ../ && npm test && cd ../",
-		"prelint": "cd samples; npm link ../; npm install",
-		"clean": "gts clean"
-	};
-	repository$2 = {
-		"type": "git",
-		"directory": "core/packages/gaxios",
-		"url": "https://github.com/googleapis/google-cloud-node.git"
-	};
-	keywords$2 = ["google"];
-	engines$2 = { "node": ">=18" };
-	author$2 = "Google, LLC";
-	license$2 = "Apache-2.0";
-	devDependencies$2 = {
-		"@babel/plugin-proposal-private-methods": "^7.18.6",
-		"@types/cors": "^2.8.6",
-		"@types/express": "^5.0.0",
-		"@types/extend": "^3.0.1",
-		"@types/mocha": "^10.0.10",
-		"@types/multiparty": "4.2.1",
-		"@types/mv": "^2.1.0",
-		"@types/ncp": "^2.0.8",
-		"@types/node": "^24.0.0",
-		"@types/sinon": "^21.0.0",
-		"@types/tmp": "^0.2.6",
-		"assert": "^2.0.0",
-		"browserify": "^17.0.0",
-		"c8": "^10.1.3",
-		"cors": "^2.8.5",
-		"express": "^5.0.0",
-		"gts": "^6.0.2",
-		"is-docker": "^3.0.0",
-		"jsdoc": "^4.0.4",
-		"jsdoc-fresh": "^5.0.0",
-		"jsdoc-region-tag": "^4.0.0",
-		"karma": "^6.0.0",
-		"karma-chrome-launcher": "^3.0.0",
-		"karma-coverage": "^2.0.0",
-		"karma-firefox-launcher": "^2.0.0",
-		"karma-mocha": "^2.0.0",
-		"karma-remap-coverage": "^0.1.5",
-		"karma-sourcemap-loader": "^0.4.0",
-		"karma-webpack": "^5.0.1",
-		"mocha": "^11.1.0",
-		"multiparty": "^4.2.1",
-		"mv": "^2.1.1",
-		"ncp": "^2.0.0",
-		"nock": "14.0.5",
-		"null-loader": "^4.0.1",
-		"pack-n-play": "^4.0.0",
-		"puppeteer": "^24.0.0",
-		"sinon": "21.0.3",
-		"stream-browserify": "^3.0.0",
-		"tmp": "0.2.6",
-		"ts-loader": "^9.5.2",
-		"typescript": "5.8.3",
-		"undici-types": "^7.24.1",
-		"webpack": "^5.97.1",
-		"webpack-cli": "^6.0.1"
-	};
-	dependencies$2 = {
-		"extend": "^3.0.2",
-		"https-proxy-agent": "^7.0.1",
-		"node-fetch": "^3.3.2"
-	};
-	homepage$2 = "https://github.com/googleapis/google-cloud-node/tree/main/core/packages/gaxios";
-	package_default$2 = {
-		name: name$2,
-		version: version$2,
-		description: description$2,
-		main: main$2,
-		types: types$2,
-		files: files$2,
-		exports: exports$2,
-		scripts: scripts$2,
-		repository: repository$2,
-		keywords: keywords$2,
-		engines: engines$2,
-		author: author$2,
-		license: license$2,
-		devDependencies: devDependencies$2,
-		dependencies: dependencies$2,
-		homepage: homepage$2
-	};
-}));
-//#endregion
-//#region node_modules/.pnpm/gaxios@7.3.0_supports-color@7.2.0/node_modules/gaxios/build/cjs/src/util.cjs
-var require_util$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	module.exports = { pkg: (init_package$2(), __toCommonJS(package_exports$2).default) };
-}));
-//#endregion
-//#region node_modules/.pnpm/gaxios@7.3.0_supports-color@7.2.0/node_modules/gaxios/build/cjs/src/common.js
-var require_common = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var __importDefault = exports && exports.__importDefault || function(mod) {
-		return mod && mod.__esModule ? mod : { "default": mod };
-	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.GaxiosError = exports.GAXIOS_ERROR_SYMBOL = void 0;
-	exports.defaultErrorRedactor = defaultErrorRedactor;
-	var extend_1 = __importDefault(require_extend());
-	var pkg = __importDefault(require_util$1()).default.pkg;
-	/**
-	* Support `instanceof` operator for `GaxiosError`s in different versions of this library.
-	*
-	* @see {@link GaxiosError[Symbol.hasInstance]}
-	*/
-	exports.GAXIOS_ERROR_SYMBOL = Symbol.for(`${pkg.name}-gaxios-error`);
-	exports.GaxiosError = class GaxiosError extends Error {
-		config;
-		response;
-		/**
-		* An error code.
-		* Can be a system error code, DOMException error name, or any error's 'code' property where it is a `string`.
-		*
-		* It is only a `number` when the cause is sourced from an API-level error (AIP-193).
-		*
-		* @see {@link https://nodejs.org/api/errors.html#errorcode error.code}
-		* @see {@link https://developer.mozilla.org/en-US/docs/Web/API/DOMException#error_names DOMException#error_names}
-		* @see {@link https://google.aip.dev/193#http11json-representation AIP-193}
-		*
-		* @example
-		* 'ECONNRESET'
-		*
-		* @example
-		* 'TimeoutError'
-		*
-		* @example
-		* 500
-		*/
-		code;
-		/**
-		* An HTTP Status code.
-		* @see {@link https://developer.mozilla.org/en-US/docs/Web/API/Response/status Response#status}
-		*
-		* @example
-		* 500
-		*/
-		status;
-		/**
-		* @deprecated use {@link GaxiosError.cause} instead.
-		*
-		* @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error/cause Error#cause}
-		*
-		* @privateRemarks
-		*
-		* We will want to remove this property later as the modern `cause` property is better suited
-		* for displaying and relaying nested errors. Keeping this here makes the resulting
-		* error log larger than it needs to be.
-		*
-		*/
-		error;
-		/**
-		* Support `instanceof` operator for `GaxiosError` across builds/duplicated files.
-		*
-		* @see {@link GAXIOS_ERROR_SYMBOL}
-		* @see {@link GaxiosError[Symbol.hasInstance]}
-		* @see {@link https://github.com/microsoft/TypeScript/issues/13965#issuecomment-278570200}
-		* @see {@link https://stackoverflow.com/questions/46618852/require-and-instanceof}
-		* @see {@link https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function/@@hasInstance#reverting_to_default_instanceof_behavior}
-		*/
-		[exports.GAXIOS_ERROR_SYMBOL] = pkg.version;
-		/**
-		* Support `instanceof` operator for `GaxiosError` across builds/duplicated files.
-		*
-		* @see {@link GAXIOS_ERROR_SYMBOL}
-		* @see {@link GaxiosError[GAXIOS_ERROR_SYMBOL]}
-		*/
-		static [Symbol.hasInstance](instance) {
-			if (instance && typeof instance === "object" && exports.GAXIOS_ERROR_SYMBOL in instance && instance[exports.GAXIOS_ERROR_SYMBOL] === pkg.version) return true;
-			return Function.prototype[Symbol.hasInstance].call(GaxiosError, instance);
-		}
-		constructor(message, config, response, cause) {
-			super(message, { cause });
-			this.config = config;
-			this.response = response;
-			this.error = cause instanceof Error ? cause : void 0;
-			this.config = (0, extend_1.default)(true, {}, config);
-			if (this.response) this.response.config = (0, extend_1.default)(true, {}, this.response.config);
-			if (this.response) {
-				try {
-					this.response.data = translateData(this.config.responseType, this.response?.bodyUsed ? this.response?.data : void 0);
-				} catch {}
-				this.status = this.response.status;
-			}
-			if (cause instanceof DOMException) this.code = cause.name;
-			else if (cause && typeof cause === "object" && "code" in cause && (typeof cause.code === "string" || typeof cause.code === "number")) this.code = cause.code;
-		}
-		/**
-		* An AIP-193 conforming error extractor.
-		*
-		* @see {@link https://google.aip.dev/193#http11json-representation AIP-193}
-		*
-		* @internal
-		* @expiremental
-		*
-		* @param res the response object
-		* @returns the extracted error information
-		*/
-		static extractAPIErrorFromResponse(res, defaultErrorMessage = "The request failed") {
-			let message = defaultErrorMessage;
-			if (typeof res.data === "string") message = res.data;
-			if (res.data && typeof res.data === "object" && "error" in res.data && res.data.error && !res.ok) {
-				if (typeof res.data.error === "string") return {
-					message: res.data.error,
-					code: res.status,
-					status: res.statusText
-				};
-				if (typeof res.data.error === "object") {
-					message = "message" in res.data.error && typeof res.data.error.message === "string" ? res.data.error.message : message;
-					const status = "status" in res.data.error && typeof res.data.error.status === "string" ? res.data.error.status : res.statusText;
-					const code = "code" in res.data.error && typeof res.data.error.code === "number" ? res.data.error.code : res.status;
-					if ("errors" in res.data.error && Array.isArray(res.data.error.errors)) {
-						const errorMessages = [];
-						for (const e of res.data.error.errors) if (typeof e === "object" && "message" in e && typeof e.message === "string") errorMessages.push(e.message);
-						return Object.assign({
-							message: errorMessages.join("\n") || message,
-							code,
-							status
-						}, res.data.error);
-					}
-					return Object.assign({
-						message,
-						code,
-						status
-					}, res.data.error);
-				}
-			}
-			return {
-				message,
-				code: res.status,
-				status: res.statusText
-			};
-		}
-	};
-	function translateData(responseType, data) {
-		switch (responseType) {
-			case "stream": return data;
-			case "json": return JSON.parse(JSON.stringify(data));
-			case "arraybuffer": return JSON.parse(Buffer.from(data).toString("utf8"));
-			case "blob": return JSON.parse(data.text());
-			default: return data;
-		}
-	}
-	/**
-	* An experimental error redactor.
-	*
-	* @param config Config to potentially redact properties of
-	* @param response Config to potentially redact properties of
-	*
-	* @experimental
-	*/
-	function defaultErrorRedactor(data) {
-		const REDACT = "<<REDACTED> - See `errorRedactor` option in `gaxios` for configuration>.";
-		function redactHeaders(headers) {
-			if (!headers) return;
-			headers.forEach((_, key) => {
-				if (/^authentication$/i.test(key) || /^authorization$/i.test(key) || /secret/i.test(key)) headers.set(key, REDACT);
-			});
-		}
-		function redactString(obj, key) {
-			if (typeof obj === "object" && obj !== null && typeof obj[key] === "string") {
-				const text = obj[key];
-				if (/grant_type=/i.test(text) || /assertion=/i.test(text) || /secret/i.test(text)) obj[key] = REDACT;
-			}
-		}
-		function redactObject(obj) {
-			if (!obj || typeof obj !== "object") return;
-			else if (obj instanceof FormData || obj instanceof URLSearchParams || "forEach" in obj && "set" in obj) obj.forEach((_, key) => {
-				if (["grant_type", "assertion"].includes(key) || /secret/.test(key)) obj.set(key, REDACT);
-			});
-			else {
-				if ("grant_type" in obj) obj["grant_type"] = REDACT;
-				if ("assertion" in obj) obj["assertion"] = REDACT;
-				if ("client_secret" in obj) obj["client_secret"] = REDACT;
-			}
-		}
-		if (data.config) {
-			redactHeaders(data.config.headers);
-			redactString(data.config, "data");
-			redactObject(data.config.data);
-			redactString(data.config, "body");
-			redactObject(data.config.body);
-			if (data.config.url.searchParams.has("token")) data.config.url.searchParams.set("token", REDACT);
-			if (data.config.url.searchParams.has("client_secret")) data.config.url.searchParams.set("client_secret", REDACT);
-		}
-		if (data.response) {
-			defaultErrorRedactor({ config: data.response.config });
-			redactHeaders(data.response.headers);
-			if (data.response.bodyUsed) {
-				redactString(data.response, "data");
-				redactObject(data.response.data);
-			}
-		}
-		return data;
-	}
-}));
-//#endregion
-//#region node_modules/.pnpm/gaxios@7.3.0_supports-color@7.2.0/node_modules/gaxios/build/cjs/src/retry.js
-var require_retry = /* @__PURE__ */ __commonJSMin(((exports) => {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.getRetryConfig = getRetryConfig;
-	async function getRetryConfig(err) {
-		let config = getConfig(err);
-		if (!err || !err.config || !config && !err.config.retry) return { shouldRetry: false };
-		config = config || {};
-		config.currentRetryAttempt = config.currentRetryAttempt || 0;
-		config.retry = config.retry === void 0 || config.retry === null ? 3 : config.retry;
-		config.httpMethodsToRetry = config.httpMethodsToRetry || [
-			"GET",
-			"HEAD",
-			"PUT",
-			"OPTIONS",
-			"DELETE"
-		];
-		config.noResponseRetries = config.noResponseRetries === void 0 || config.noResponseRetries === null ? 2 : config.noResponseRetries;
-		config.retryDelayMultiplier = config.retryDelayMultiplier ? config.retryDelayMultiplier : 2;
-		config.timeOfFirstRequest = config.timeOfFirstRequest ? config.timeOfFirstRequest : Date.now();
-		config.totalTimeout = config.totalTimeout ? config.totalTimeout : Number.MAX_SAFE_INTEGER;
-		config.maxRetryDelay = config.maxRetryDelay ? config.maxRetryDelay : Number.MAX_SAFE_INTEGER;
-		config.statusCodesToRetry = config.statusCodesToRetry || [
-			[100, 199],
-			[408, 408],
-			[429, 429],
-			[500, 599]
-		];
-		err.config.retryConfig = config;
-		if (!await (config.shouldRetry || shouldRetryRequest)(err)) return {
-			shouldRetry: false,
-			config: err.config
-		};
-		const delay = getNextRetryDelay(config);
-		err.config.retryConfig.currentRetryAttempt += 1;
-		const backoff = config.retryBackoff ? config.retryBackoff(err, delay) : new Promise((resolve) => {
-			setTimeout(resolve, delay);
-		});
-		if (config.onRetryAttempt) await config.onRetryAttempt(err);
-		await backoff;
-		return {
-			shouldRetry: true,
-			config: err.config
-		};
-	}
-	/**
-	* Determine based on config if we should retry the request.
-	* @param err The GaxiosError passed to the interceptor.
-	*/
-	function shouldRetryRequest(err) {
-		const config = getConfig(err);
-		if (err.config.signal?.aborted && err.code !== "TimeoutError" || err.code === "AbortError") return false;
-		if (!config || config.retry === 0) return false;
-		if (!err.response && (config.currentRetryAttempt || 0) >= config.noResponseRetries) return false;
-		if (!config.httpMethodsToRetry || !config.httpMethodsToRetry.includes(err.config.method?.toUpperCase() || "GET")) return false;
-		if (err.response && err.response.status) {
-			let isInRange = false;
-			for (const [min, max] of config.statusCodesToRetry) {
-				const status = err.response.status;
-				if (status >= min && status <= max) {
-					isInRange = true;
-					break;
-				}
-			}
-			if (!isInRange) return false;
-		}
-		config.currentRetryAttempt = config.currentRetryAttempt || 0;
-		if (config.currentRetryAttempt >= config.retry) return false;
-		return true;
-	}
-	/**
-	* Acquire the raxConfig object from an GaxiosError if available.
-	* @param err The Gaxios error with a config object.
-	*/
-	function getConfig(err) {
-		if (err && err.config && err.config.retryConfig) return err.config.retryConfig;
-	}
-	/**
-	* Gets the delay to wait before the next retry.
-	*
-	* @param {RetryConfig} config The current set of retry options
-	* @returns {number} the amount of ms to wait before the next retry attempt.
-	*/
-	function getNextRetryDelay(config) {
-		const calculatedDelay = (config.currentRetryAttempt ? 0 : config.retryDelay ?? 100) + (Math.pow(config.retryDelayMultiplier, config.currentRetryAttempt) - 1) / 2 * 1e3;
-		const maxAllowableDelay = config.totalTimeout - (Date.now() - config.timeOfFirstRequest);
-		return Math.min(calculatedDelay, maxAllowableDelay, config.maxRetryDelay);
-	}
-}));
-//#endregion
-//#region node_modules/.pnpm/gaxios@7.3.0_supports-color@7.2.0/node_modules/gaxios/build/cjs/src/interceptor.js
-var require_interceptor$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.GaxiosInterceptorManager = void 0;
-	/**
-	* Class to manage collections of GaxiosInterceptors for both requests and responses.
-	*/
-	var GaxiosInterceptorManager = class extends Set {};
-	exports.GaxiosInterceptorManager = GaxiosInterceptorManager;
-}));
-//#endregion
-//#region node_modules/.pnpm/gaxios@7.3.0_supports-color@7.2.0/node_modules/gaxios/build/cjs/src/gaxios.js
-var require_gaxios = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var __importDefault = exports && exports.__importDefault || function(mod) {
-		return mod && mod.__esModule ? mod : { "default": mod };
-	};
-	var _a;
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.Gaxios = void 0;
-	var extend_1 = __importDefault(require_extend());
-	var https_1 = __require("https");
-	var common_js_1 = require_common();
-	var retry_js_1 = require_retry();
-	var stream_1 = __require("stream");
-	var interceptor_js_1 = require_interceptor$1();
-	var randomUUID = async () => globalThis.crypto?.randomUUID() || (await import("crypto")).randomUUID();
-	var HTTP_STATUS_NO_CONTENT = 204;
-	var Gaxios = class {
-		agentCache = /* @__PURE__ */ new Map();
-		/**
-		* Default HTTP options that will be used for every HTTP request.
-		*/
-		defaults;
-		/**
-		* Interceptors
-		*/
-		interceptors;
-		/**
-		* The Gaxios class is responsible for making HTTP requests.
-		* @param defaults The default set of options to be used for this instance.
-		*/
-		constructor(defaults) {
-			this.defaults = defaults || {};
-			this.interceptors = {
-				request: new interceptor_js_1.GaxiosInterceptorManager(),
-				response: new interceptor_js_1.GaxiosInterceptorManager()
-			};
-		}
-		/**
-		* A {@link fetch `fetch`} compliant API for {@link Gaxios}.
-		*
-		* @remarks
-		*
-		* This is useful as a drop-in replacement for `fetch` API usage.
-		*
-		* @example
-		*
-		* ```ts
-		* const gaxios = new Gaxios();
-		* const myFetch: typeof fetch = (...args) => gaxios.fetch(...args);
-		* await myFetch('https://example.com');
-		* ```
-		*
-		* @param args `fetch` API or `Gaxios#request` parameters
-		* @returns the {@link Response} with Gaxios-added properties
-		*/
-		fetch(...args) {
-			const input = args[0];
-			const init = args[1];
-			let url = void 0;
-			const headers = new Headers();
-			if (typeof input === "string") url = new URL(input);
-			else if (input instanceof URL) url = input;
-			else if (input && input.url) url = new URL(input.url);
-			if (input && typeof input === "object" && "headers" in input) _a.mergeHeaders(headers, input.headers);
-			if (init) _a.mergeHeaders(headers, new Headers(init.headers));
-			if (typeof input === "object" && !(input instanceof URL)) return this.request({
-				...init,
-				...input,
-				headers,
-				url
-			});
-			else return this.request({
-				...init,
-				headers,
-				url
-			});
-		}
-		/**
-		* Perform an HTTP request with the given options.
-		* @param opts Set of HTTP options that will be used for this HTTP request.
-		*/
-		async request(opts = {}) {
-			let prepared = await this.#prepareRequest(opts);
-			prepared = await this.#applyRequestInterceptors(prepared);
-			return this.#applyResponseInterceptors(this._request(prepared));
-		}
-		async _defaultAdapter(config) {
-			const fetchImpl = config.fetchImplementation || this.defaults.fetchImplementation || await _a.#getFetch();
-			const preparedOpts = { ...config };
-			delete preparedOpts.data;
-			const res = await fetchImpl(config.url, preparedOpts);
-			const data = await this.getResponseData(config, res);
-			if (!Object.getOwnPropertyDescriptor(res, "data")?.configurable) Object.defineProperties(res, { data: {
-				configurable: true,
-				writable: true,
-				enumerable: true,
-				value: data
-			} });
-			return Object.assign(res, {
-				config,
-				data
-			});
-		}
-		/**
-		* Internal, retryable version of the `request` method.
-		* @param opts Set of HTTP options that will be used for this HTTP request.
-		*/
-		async _request(opts) {
-			try {
-				let translatedResponse;
-				if (opts.adapter) translatedResponse = await opts.adapter(opts, this._defaultAdapter.bind(this));
-				else translatedResponse = await this._defaultAdapter(opts);
-				if (!opts.validateStatus(translatedResponse.status)) {
-					if (opts.responseType === "stream") {
-						const response = [];
-						for await (const chunk of translatedResponse.data) response.push(chunk);
-						translatedResponse.data = Buffer.concat(response.map((c) => typeof c === "string" ? Buffer.from(c) : c)).toString("utf8");
-					}
-					const errorInfo = common_js_1.GaxiosError.extractAPIErrorFromResponse(translatedResponse, `Request failed with status code ${translatedResponse.status}`);
-					throw new common_js_1.GaxiosError(errorInfo?.message, opts, translatedResponse, errorInfo);
-				}
-				return translatedResponse;
-			} catch (e) {
-				let err;
-				if (e instanceof common_js_1.GaxiosError) err = e;
-				else if (e instanceof Error) err = new common_js_1.GaxiosError(e.message, opts, void 0, e);
-				else err = new common_js_1.GaxiosError("Unexpected Gaxios Error", opts, void 0, e);
-				const { shouldRetry, config } = await (0, retry_js_1.getRetryConfig)(err);
-				if (shouldRetry && config) {
-					err.config.retryConfig.currentRetryAttempt = config.retryConfig.currentRetryAttempt;
-					opts.retryConfig = err.config?.retryConfig;
-					this.#appendTimeoutToSignal(opts);
-					return this._request(opts);
-				}
-				if (opts.errorRedactor) opts.errorRedactor(err);
-				throw err;
-			}
-		}
-		async getResponseData(opts, res) {
-			if (res.status === HTTP_STATUS_NO_CONTENT) return "";
-			if (opts.maxContentLength && res.headers.has("content-length") && opts.maxContentLength < Number.parseInt(res.headers?.get("content-length") || "")) throw new common_js_1.GaxiosError("Response's `Content-Length` is over the limit.", opts, Object.assign(res, { config: opts }));
-			switch (opts.responseType) {
-				case "stream": return res.body;
-				case "json": {
-					const data = await res.text();
-					try {
-						return JSON.parse(data);
-					} catch {
-						return data;
-					}
-				}
-				case "arraybuffer": return res.arrayBuffer();
-				case "blob": return res.blob();
-				case "text": return res.text();
-				default: return this.getResponseDataFromContentType(res);
-			}
-		}
-		#urlMayUseProxy(url, noProxy = []) {
-			const candidate = new URL(url);
-			const noProxyList = [...noProxy];
-			const noProxyEnvList = (process.env.NO_PROXY ?? process.env.no_proxy)?.split(",") || [];
-			for (const rule of noProxyEnvList) noProxyList.push(rule.trim());
-			for (const rule of noProxyList) if (rule instanceof RegExp) {
-				if (rule.test(candidate.toString())) return false;
-			} else if (rule instanceof URL) {
-				if (rule.origin === candidate.origin) return false;
-			} else if (rule.startsWith("*.") || rule.startsWith(".")) {
-				const cleanedRule = rule.replace(/^\*\./, ".");
-				if (candidate.hostname.endsWith(cleanedRule)) return false;
-			} else if (rule === candidate.origin || rule === candidate.hostname || rule === candidate.href) return false;
-			return true;
-		}
-		/**
-		* Applies the request interceptors. The request interceptors are applied after the
-		* call to prepareRequest is completed.
-		*
-		* @param {GaxiosOptionsPrepared} options The current set of options.
-		*
-		* @returns {Promise<GaxiosOptionsPrepared>} Promise that resolves to the set of options or response after interceptors are applied.
-		*/
-		async #applyRequestInterceptors(options) {
-			let promiseChain = Promise.resolve(options);
-			for (const interceptor of this.interceptors.request.values()) if (interceptor) promiseChain = promiseChain.then(interceptor.resolved, interceptor.rejected);
-			return promiseChain;
-		}
-		/**
-		* Applies the response interceptors. The response interceptors are applied after the
-		* call to request is made.
-		*
-		* @param {GaxiosOptionsPrepared} options The current set of options.
-		*
-		* @returns {Promise<GaxiosOptionsPrepared>} Promise that resolves to the set of options or response after interceptors are applied.
-		*/
-		async #applyResponseInterceptors(response) {
-			let promiseChain = Promise.resolve(response);
-			for (const interceptor of this.interceptors.response.values()) if (interceptor) promiseChain = promiseChain.then(interceptor.resolved, interceptor.rejected);
-			return promiseChain;
-		}
-		/**
-		* Validates the options, merges them with defaults, and prepare request.
-		*
-		* @param options The original options passed from the client.
-		* @returns Prepared options, ready to make a request
-		*/
-		async #prepareRequest(options) {
-			const preparedHeaders = new Headers(this.defaults.headers);
-			_a.mergeHeaders(preparedHeaders, options.headers);
-			const opts = (0, extend_1.default)(true, {}, this.defaults, options);
-			if (!opts.url) throw new Error("URL is required.");
-			if (opts.baseURL) opts.url = new URL(opts.url, opts.baseURL);
-			opts.url = new URL(opts.url);
-			if (opts.params) {
-				if (opts.paramsSerializer) {
-					let additionalQueryParams = opts.paramsSerializer(opts.params);
-					if (additionalQueryParams.startsWith("?")) additionalQueryParams = additionalQueryParams.slice(1);
-					const prefix = opts.url.toString().includes("?") ? "&" : "?";
-					opts.url = opts.url + prefix + additionalQueryParams;
-				} else {
-					const url = opts.url instanceof URL ? opts.url : new URL(opts.url);
-					for (const [key, value] of new URLSearchParams(opts.params)) url.searchParams.append(key, value);
-					opts.url = url;
-				}
-			}
-			if (typeof options.maxContentLength === "number") opts.size = options.maxContentLength;
-			if (typeof options.maxRedirects === "number") opts.follow = options.maxRedirects;
-			const shouldDirectlyPassData = typeof opts.data === "string" || opts.data instanceof ArrayBuffer || opts.data instanceof Blob || globalThis.File && opts.data instanceof File || opts.data instanceof FormData || opts.data instanceof stream_1.Readable || opts.data instanceof ReadableStream || opts.data instanceof String || opts.data instanceof URLSearchParams || ArrayBuffer.isView(opts.data) || [
-				"Blob",
-				"File",
-				"FormData"
-			].includes(opts.data?.constructor?.name || "");
-			if (opts.multipart?.length) {
-				const boundary = await randomUUID();
-				preparedHeaders.set("content-type", `multipart/related; boundary=${boundary}`);
-				opts.body = stream_1.Readable.from(this.getMultipartRequest(opts.multipart, boundary));
-			} else if (shouldDirectlyPassData) opts.body = opts.data;
-			else if (typeof opts.data === "object") {
-				if (preparedHeaders.get("Content-Type") === "application/x-www-form-urlencoded") opts.body = opts.paramsSerializer ? opts.paramsSerializer(opts.data) : new URLSearchParams(opts.data);
-				else {
-					if (!preparedHeaders.has("content-type")) preparedHeaders.set("content-type", "application/json");
-					opts.body = JSON.stringify(opts.data);
-				}
-			} else if (opts.data) opts.body = opts.data;
-			opts.validateStatus = opts.validateStatus || this.validateStatus;
-			opts.responseType = opts.responseType || "unknown";
-			if (!preparedHeaders.has("accept") && opts.responseType === "json") preparedHeaders.set("accept", "application/json");
-			const proxy = opts.proxy || process?.env?.HTTPS_PROXY || process?.env?.https_proxy || process?.env?.HTTP_PROXY || process?.env?.http_proxy;
-			if (opts.agent) {} else if (proxy && this.#urlMayUseProxy(opts.url, opts.noProxy)) {
-				const HttpsProxyAgent = await _a.#getProxyAgent();
-				if (this.agentCache.has(proxy)) opts.agent = this.agentCache.get(proxy);
-				else {
-					opts.agent = new HttpsProxyAgent(proxy, {
-						cert: opts.cert,
-						key: opts.key
-					});
-					this.agentCache.set(proxy, opts.agent);
-				}
-			} else if (opts.cert && opts.key) {
-				if (this.agentCache.has(opts.key)) opts.agent = this.agentCache.get(opts.key);
-				else {
-					opts.agent = new https_1.Agent({
-						cert: opts.cert,
-						key: opts.key
-					});
-					this.agentCache.set(opts.key, opts.agent);
-				}
-			}
-			if (typeof opts.errorRedactor !== "function" && opts.errorRedactor !== false) opts.errorRedactor = common_js_1.defaultErrorRedactor;
-			if (opts.body && !("duplex" in opts))
- /**
-			* required for Node.js and the type isn't available today
-			* @link https://github.com/nodejs/node/issues/46221
-			* @link https://github.com/microsoft/TypeScript-DOM-lib-generator/issues/1483
-			*/
-			opts.duplex = "half";
-			this.#appendTimeoutToSignal(opts);
-			return Object.assign(opts, {
-				headers: preparedHeaders,
-				url: opts.url instanceof URL ? opts.url : new URL(opts.url)
-			});
-		}
-		#appendTimeoutToSignal(opts) {
-			if (opts.timeout) {
-				const timeoutSignal = AbortSignal.timeout(opts.timeout);
-				if (opts.signal && !opts.signal.aborted) opts.signal = AbortSignal.any([opts.signal, timeoutSignal]);
-				else opts.signal = timeoutSignal;
-			}
-		}
-		/**
-		* By default, throw for any non-2xx status code
-		* @param status status code from the HTTP response
-		*/
-		validateStatus(status) {
-			return status >= 200 && status < 300;
-		}
-		/**
-		* Attempts to parse a response by looking at the Content-Type header.
-		* @param {Response} response the HTTP response.
-		* @returns a promise that resolves to the response data.
-		*/
-		async getResponseDataFromContentType(response) {
-			let contentType = response.headers.get("Content-Type");
-			if (contentType === null) return response.text();
-			contentType = contentType.toLowerCase();
-			if (contentType.includes("application/json")) {
-				let data = await response.text();
-				try {
-					data = JSON.parse(data);
-				} catch {}
-				return data;
-			} else if (contentType.match(/^text\//)) return response.text();
-			else return response.blob();
-		}
-		/**
-		* Creates an async generator that yields the pieces of a multipart/related request body.
-		* This implementation follows the spec: https://www.ietf.org/rfc/rfc2387.txt. However, recursive
-		* multipart/related requests are not currently supported.
-		*
-		* @param {GaxiosMultipartOptions[]} multipartOptions the pieces to turn into a multipart/related body.
-		* @param {string} boundary the boundary string to be placed between each part.
-		*/
-		async *getMultipartRequest(multipartOptions, boundary) {
-			const finale = `--${boundary}--`;
-			for (const currentPart of multipartOptions) {
-				yield `--${boundary}\r\nContent-Type: ${currentPart.headers.get("Content-Type") || "application/octet-stream"}\r\n\r\n`;
-				if (typeof currentPart.content === "string") yield currentPart.content;
-				else yield* currentPart.content;
-				yield "\r\n";
-			}
-			yield finale;
-		}
-		/**
-		* A cache for the lazily-loaded proxy agent.
-		*
-		* Should use {@link Gaxios[#getProxyAgent]} to retrieve.
-		*/
-		static #proxyAgent;
-		/**
-		* A cache for the lazily-loaded fetch library.
-		*
-		* Should use {@link Gaxios[#getFetch]} to retrieve.
-		*/
-		static #fetch;
-		/**
-		* Imports, caches, and returns a proxy agent - if not already imported
-		*
-		* @returns A proxy agent
-		*/
-		static async #getProxyAgent() {
-			this.#proxyAgent ||= (await import("./https-proxy-agent.mjs").then((n) => /* @__PURE__ */ __toESM(n.t()))).HttpsProxyAgent;
-			return this.#proxyAgent;
-		}
-		static async #getFetch() {
-			const hasWindow = typeof window !== "undefined" && !!window;
-			this.#fetch ||= hasWindow ? window.fetch : (await import("./node-fetch.mjs").then((n) => (n.t(), n.n))).default;
-			return this.#fetch;
-		}
-		/**
-		* Merges headers.
-		* If the base headers do not exist a new `Headers` object will be returned.
-		*
-		* @remarks
-		*
-		* Using this utility can be helpful when the headers are not known to exist:
-		* - if they exist as `Headers`, that instance will be used
-		*   - it improves performance and allows users to use their existing references to their `Headers`
-		* - if they exist in another form (`HeadersInit`), they will be used to create a new `Headers` object
-		* - if the base headers do not exist a new `Headers` object will be created
-		*
-		* @param base headers to append/overwrite to
-		* @param append headers to append/overwrite with
-		* @returns the base headers instance with merged `Headers`
-		*/
-		static mergeHeaders(base, ...append) {
-			base = base instanceof Headers ? base : new Headers(base);
-			for (const headers of append) (headers instanceof Headers ? headers : new Headers(headers)).forEach((value, key) => {
-				key === "set-cookie" ? base.append(key, value) : base.set(key, value);
-			});
-			return base;
-		}
-	};
-	exports.Gaxios = Gaxios;
-	_a = Gaxios;
-}));
-//#endregion
-//#region node_modules/.pnpm/gaxios@7.3.0_supports-color@7.2.0/node_modules/gaxios/build/cjs/src/index.js
-var require_src$4 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
-		if (k2 === void 0) k2 = k;
-		var desc = Object.getOwnPropertyDescriptor(m, k);
-		if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) desc = {
-			enumerable: true,
-			get: function() {
-				return m[k];
-			}
-		};
-		Object.defineProperty(o, k2, desc);
-	}) : (function(o, m, k, k2) {
-		if (k2 === void 0) k2 = k;
-		o[k2] = m[k];
-	}));
-	var __exportStar = exports && exports.__exportStar || function(m, exports$7) {
-		for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports$7, p)) __createBinding(exports$7, m, p);
-	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.instance = exports.Gaxios = exports.GaxiosError = void 0;
-	exports.request = request;
-	var gaxios_js_1 = require_gaxios();
-	Object.defineProperty(exports, "Gaxios", {
-		enumerable: true,
-		get: function() {
-			return gaxios_js_1.Gaxios;
-		}
-	});
-	var common_js_1 = require_common();
-	Object.defineProperty(exports, "GaxiosError", {
-		enumerable: true,
-		get: function() {
-			return common_js_1.GaxiosError;
-		}
-	});
-	__exportStar(require_interceptor$1(), exports);
-	/**
-	* The default instance used when the `request` method is directly
-	* invoked.
-	*/
-	exports.instance = new gaxios_js_1.Gaxios();
-	/**
-	* Make an HTTP request using the given options.
-	* @param opts Options for the request
-	*/
-	async function request(opts) {
-		return exports.instance.request(opts);
-	}
-}));
-//#endregion
-//#region node_modules/.pnpm/json-bigint@1.0.0/node_modules/json-bigint/lib/stringify.js
-var require_stringify = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var BigNumber = require_bignumber();
-	var JSON = module.exports;
-	(function() {
-		"use strict";
-		var escapable = /[\\\"\x00-\x1f\x7f-\x9f\u00ad\u0600-\u0604\u070f\u17b4\u17b5\u200c-\u200f\u2028-\u202f\u2060-\u206f\ufeff\ufff0-\uffff]/g, gap, indent, meta = {
-			"\b": "\\b",
-			"	": "\\t",
-			"\n": "\\n",
-			"\f": "\\f",
-			"\r": "\\r",
-			"\"": "\\\"",
-			"\\": "\\\\"
-		}, rep;
-		function quote(string) {
-			escapable.lastIndex = 0;
-			return escapable.test(string) ? "\"" + string.replace(escapable, function(a) {
-				var c = meta[a];
-				return typeof c === "string" ? c : "\\u" + ("0000" + a.charCodeAt(0).toString(16)).slice(-4);
-			}) + "\"" : "\"" + string + "\"";
-		}
-		function str(key, holder) {
-			var i, k, v, length, mind = gap, partial, value = holder[key], isBigNumber = value != null && (value instanceof BigNumber || BigNumber.isBigNumber(value));
-			if (value && typeof value === "object" && typeof value.toJSON === "function") value = value.toJSON(key);
-			if (typeof rep === "function") value = rep.call(holder, key, value);
-			switch (typeof value) {
-				case "string": if (isBigNumber) return value;
-				else return quote(value);
-				case "number": return isFinite(value) ? String(value) : "null";
-				case "boolean":
-				case "null":
-				case "bigint": return String(value);
-				case "object":
-					if (!value) return "null";
-					gap += indent;
-					partial = [];
-					if (Object.prototype.toString.apply(value) === "[object Array]") {
-						length = value.length;
-						for (i = 0; i < length; i += 1) partial[i] = str(i, value) || "null";
-						v = partial.length === 0 ? "[]" : gap ? "[\n" + gap + partial.join(",\n" + gap) + "\n" + mind + "]" : "[" + partial.join(",") + "]";
-						gap = mind;
-						return v;
-					}
-					if (rep && typeof rep === "object") {
-						length = rep.length;
-						for (i = 0; i < length; i += 1) if (typeof rep[i] === "string") {
-							k = rep[i];
-							v = str(k, value);
-							if (v) partial.push(quote(k) + (gap ? ": " : ":") + v);
-						}
-					} else Object.keys(value).forEach(function(k) {
-						var v = str(k, value);
-						if (v) partial.push(quote(k) + (gap ? ": " : ":") + v);
-					});
-					v = partial.length === 0 ? "{}" : gap ? "{\n" + gap + partial.join(",\n" + gap) + "\n" + mind + "}" : "{" + partial.join(",") + "}";
-					gap = mind;
-					return v;
-			}
-		}
-		if (typeof JSON.stringify !== "function") JSON.stringify = function(value, replacer, space) {
-			var i;
-			gap = "";
-			indent = "";
-			if (typeof space === "number") for (i = 0; i < space; i += 1) indent += " ";
-			else if (typeof space === "string") indent = space;
-			rep = replacer;
-			if (replacer && typeof replacer !== "function" && (typeof replacer !== "object" || typeof replacer.length !== "number")) throw new Error("JSON.stringify");
-			return str("", { "": value });
-		};
-	})();
-}));
-//#endregion
-//#region node_modules/.pnpm/json-bigint@1.0.0/node_modules/json-bigint/lib/parse.js
-var require_parse$1 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var BigNumber = null;
-	var suspectProtoRx = /(?:_|\\u005[Ff])(?:_|\\u005[Ff])(?:p|\\u0070)(?:r|\\u0072)(?:o|\\u006[Ff])(?:t|\\u0074)(?:o|\\u006[Ff])(?:_|\\u005[Ff])(?:_|\\u005[Ff])/;
-	var suspectConstructorRx = /(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)/;
-	var json_parse = function(options) {
-		"use strict";
-		var _options = {
-			strict: false,
-			storeAsString: false,
-			alwaysParseAsBig: false,
-			useNativeBigInt: false,
-			protoAction: "error",
-			constructorAction: "error"
-		};
-		if (options !== void 0 && options !== null) {
-			if (options.strict === true) _options.strict = true;
-			if (options.storeAsString === true) _options.storeAsString = true;
-			_options.alwaysParseAsBig = options.alwaysParseAsBig === true ? options.alwaysParseAsBig : false;
-			_options.useNativeBigInt = options.useNativeBigInt === true ? options.useNativeBigInt : false;
-			if (typeof options.constructorAction !== "undefined") {
-				if (options.constructorAction === "error" || options.constructorAction === "ignore" || options.constructorAction === "preserve") _options.constructorAction = options.constructorAction;
-				else throw new Error(`Incorrect value for constructorAction option, must be "error", "ignore" or undefined but passed ${options.constructorAction}`);
-			}
-			if (typeof options.protoAction !== "undefined") {
-				if (options.protoAction === "error" || options.protoAction === "ignore" || options.protoAction === "preserve") _options.protoAction = options.protoAction;
-				else throw new Error(`Incorrect value for protoAction option, must be "error", "ignore" or undefined but passed ${options.protoAction}`);
-			}
-		}
-		var at, ch, escapee = {
-			"\"": "\"",
-			"\\": "\\",
-			"/": "/",
-			b: "\b",
-			f: "\f",
-			n: "\n",
-			r: "\r",
-			t: "	"
-		}, text, error = function(m) {
-			throw {
-				name: "SyntaxError",
-				message: m,
-				at,
-				text
-			};
-		}, next = function(c) {
-			if (c && c !== ch) error("Expected '" + c + "' instead of '" + ch + "'");
-			ch = text.charAt(at);
-			at += 1;
-			return ch;
-		}, number = function() {
-			var number, string = "";
-			if (ch === "-") {
-				string = "-";
-				next("-");
-			}
-			while (ch >= "0" && ch <= "9") {
-				string += ch;
-				next();
-			}
-			if (ch === ".") {
-				string += ".";
-				while (next() && ch >= "0" && ch <= "9") string += ch;
-			}
-			if (ch === "e" || ch === "E") {
-				string += ch;
-				next();
-				if (ch === "-" || ch === "+") {
-					string += ch;
-					next();
-				}
-				while (ch >= "0" && ch <= "9") {
-					string += ch;
-					next();
-				}
-			}
-			number = +string;
-			if (!isFinite(number)) error("Bad number");
-			else {
-				if (BigNumber == null) BigNumber = require_bignumber();
-				if (string.length > 15) return _options.storeAsString ? string : _options.useNativeBigInt ? BigInt(string) : new BigNumber(string);
-				else return !_options.alwaysParseAsBig ? number : _options.useNativeBigInt ? BigInt(number) : new BigNumber(number);
-			}
-		}, string = function() {
-			var hex, i, string = "", uffff;
-			if (ch === "\"") {
-				var startAt = at;
-				while (next()) {
-					if (ch === "\"") {
-						if (at - 1 > startAt) string += text.substring(startAt, at - 1);
-						next();
-						return string;
-					}
-					if (ch === "\\") {
-						if (at - 1 > startAt) string += text.substring(startAt, at - 1);
-						next();
-						if (ch === "u") {
-							uffff = 0;
-							for (i = 0; i < 4; i += 1) {
-								hex = parseInt(next(), 16);
-								if (!isFinite(hex)) break;
-								uffff = uffff * 16 + hex;
-							}
-							string += String.fromCharCode(uffff);
-						} else if (typeof escapee[ch] === "string") string += escapee[ch];
-						else break;
-						startAt = at;
-					}
-				}
-			}
-			error("Bad string");
-		}, white = function() {
-			while (ch && ch <= " ") next();
-		}, word = function() {
-			switch (ch) {
-				case "t":
-					next("t");
-					next("r");
-					next("u");
-					next("e");
-					return true;
-				case "f":
-					next("f");
-					next("a");
-					next("l");
-					next("s");
-					next("e");
-					return false;
-				case "n":
-					next("n");
-					next("u");
-					next("l");
-					next("l");
-					return null;
-			}
-			error("Unexpected '" + ch + "'");
-		}, value, array = function() {
-			var array = [];
-			if (ch === "[") {
-				next("[");
-				white();
-				if (ch === "]") {
-					next("]");
-					return array;
-				}
-				while (ch) {
-					array.push(value());
-					white();
-					if (ch === "]") {
-						next("]");
-						return array;
-					}
-					next(",");
-					white();
-				}
-			}
-			error("Bad array");
-		}, object = function() {
-			var key, object = Object.create(null);
-			if (ch === "{") {
-				next("{");
-				white();
-				if (ch === "}") {
-					next("}");
-					return object;
-				}
-				while (ch) {
-					key = string();
-					white();
-					next(":");
-					if (_options.strict === true && Object.hasOwnProperty.call(object, key)) error("Duplicate key \"" + key + "\"");
-					if (suspectProtoRx.test(key) === true) {
-						if (_options.protoAction === "error") error("Object contains forbidden prototype property");
-						else if (_options.protoAction === "ignore") value();
-						else object[key] = value();
-					} else if (suspectConstructorRx.test(key) === true) {
-						if (_options.constructorAction === "error") error("Object contains forbidden constructor property");
-						else if (_options.constructorAction === "ignore") value();
-						else object[key] = value();
-					} else object[key] = value();
-					white();
-					if (ch === "}") {
-						next("}");
-						return object;
-					}
-					next(",");
-					white();
-				}
-			}
-			error("Bad object");
-		};
-		value = function() {
-			white();
-			switch (ch) {
-				case "{": return object();
-				case "[": return array();
-				case "\"": return string();
-				case "-": return number();
-				default: return ch >= "0" && ch <= "9" ? number() : word();
-			}
-		};
-		return function(source, reviver) {
-			var result;
-			text = source + "";
-			at = 0;
-			ch = " ";
-			result = value();
-			white();
-			if (ch) error("Syntax error");
-			return typeof reviver === "function" ? (function walk(holder, key) {
-				var v, value = holder[key];
-				if (value && typeof value === "object") Object.keys(value).forEach(function(k) {
-					v = walk(value, k);
-					if (v !== void 0) value[k] = v;
-					else delete value[k];
-				});
-				return reviver.call(holder, key, value);
-			})({ "": result }, "") : result;
-		};
-	};
-	module.exports = json_parse;
-}));
-//#endregion
-//#region node_modules/.pnpm/json-bigint@1.0.0/node_modules/json-bigint/index.js
-var require_json_bigint = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var json_stringify = require_stringify().stringify;
-	var json_parse = require_parse$1();
-	module.exports = function(options) {
-		return {
-			parse: json_parse(options),
-			stringify: json_stringify
-		};
-	};
-	module.exports.parse = json_parse();
-	module.exports.stringify = json_stringify;
-}));
-//#endregion
+import { n as require_ms, t as require_src$6 } from "./debug+[...].mjs";
 //#region node_modules/.pnpm/gcp-metadata@8.1.2_supports-color@7.2.0/node_modules/gcp-metadata/build/src/gcp-residency.js
 var require_gcp_residency = /* @__PURE__ */ __commonJSMin(((exports) => {
 	/**
@@ -1294,437 +95,6 @@ var require_gcp_residency = /* @__PURE__ */ __commonJSMin(((exports) => {
 	}
 }));
 //#endregion
-//#region node_modules/.pnpm/google-logging-utils@1.1.3/node_modules/google-logging-utils/build/src/colours.js
-var require_colours = /* @__PURE__ */ __commonJSMin(((exports) => {
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.Colours = void 0;
-	/**
-	* Handles figuring out if we can use ANSI colours and handing out the escape codes.
-	*
-	* This is for package-internal use only, and may change at any time.
-	*
-	* @private
-	* @internal
-	*/
-	var Colours = class Colours {
-		/**
-		* @param stream The stream (e.g. process.stderr)
-		* @returns true if the stream should have colourization enabled
-		*/
-		static isEnabled(stream) {
-			return stream && stream.isTTY && (typeof stream.getColorDepth === "function" ? stream.getColorDepth() > 2 : true);
-		}
-		static refresh() {
-			Colours.enabled = Colours.isEnabled(process === null || process === void 0 ? void 0 : process.stderr);
-			if (!this.enabled) {
-				Colours.reset = "";
-				Colours.bright = "";
-				Colours.dim = "";
-				Colours.red = "";
-				Colours.green = "";
-				Colours.yellow = "";
-				Colours.blue = "";
-				Colours.magenta = "";
-				Colours.cyan = "";
-				Colours.white = "";
-				Colours.grey = "";
-			} else {
-				Colours.reset = "\x1B[0m";
-				Colours.bright = "\x1B[1m";
-				Colours.dim = "\x1B[2m";
-				Colours.red = "\x1B[31m";
-				Colours.green = "\x1B[32m";
-				Colours.yellow = "\x1B[33m";
-				Colours.blue = "\x1B[34m";
-				Colours.magenta = "\x1B[35m";
-				Colours.cyan = "\x1B[36m";
-				Colours.white = "\x1B[37m";
-				Colours.grey = "\x1B[90m";
-			}
-		}
-	};
-	exports.Colours = Colours;
-	Colours.enabled = false;
-	Colours.reset = "";
-	Colours.bright = "";
-	Colours.dim = "";
-	Colours.red = "";
-	Colours.green = "";
-	Colours.yellow = "";
-	Colours.blue = "";
-	Colours.magenta = "";
-	Colours.cyan = "";
-	Colours.white = "";
-	Colours.grey = "";
-	Colours.refresh();
-}));
-//#endregion
-//#region node_modules/.pnpm/google-logging-utils@1.1.3/node_modules/google-logging-utils/build/src/logging-utils.js
-var require_logging_utils = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
-		if (k2 === void 0) k2 = k;
-		var desc = Object.getOwnPropertyDescriptor(m, k);
-		if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) desc = {
-			enumerable: true,
-			get: function() {
-				return m[k];
-			}
-		};
-		Object.defineProperty(o, k2, desc);
-	}) : (function(o, m, k, k2) {
-		if (k2 === void 0) k2 = k;
-		o[k2] = m[k];
-	}));
-	var __setModuleDefault = exports && exports.__setModuleDefault || (Object.create ? (function(o, v) {
-		Object.defineProperty(o, "default", {
-			enumerable: true,
-			value: v
-		});
-	}) : function(o, v) {
-		o["default"] = v;
-	});
-	var __importStar = exports && exports.__importStar || (function() {
-		var ownKeys = function(o) {
-			ownKeys = Object.getOwnPropertyNames || function(o) {
-				var ar = [];
-				for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
-				return ar;
-			};
-			return ownKeys(o);
-		};
-		return function(mod) {
-			if (mod && mod.__esModule) return mod;
-			var result = {};
-			if (mod != null) {
-				for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
-			}
-			__setModuleDefault(result, mod);
-			return result;
-		};
-	})();
-	Object.defineProperty(exports, "__esModule", { value: true });
-	exports.env = exports.DebugLogBackendBase = exports.placeholder = exports.AdhocDebugLogger = exports.LogSeverity = void 0;
-	exports.getNodeBackend = getNodeBackend;
-	exports.getDebugBackend = getDebugBackend;
-	exports.getStructuredBackend = getStructuredBackend;
-	exports.setBackend = setBackend;
-	exports.log = log;
-	var events_1$4 = __require("events");
-	var process$1 = __importStar(__require("process"));
-	var util$4 = __importStar(__require("util"));
-	var colours_1 = require_colours();
-	/**
-	* This module defines an ad-hoc debug logger for Google Cloud Platform
-	* client libraries in Node. An ad-hoc debug logger is a tool which lets
-	* users use an external, unified interface (in this case, environment
-	* variables) to determine what logging they want to see at runtime. This
-	* isn't necessarily fed into the console, but is meant to be under the
-	* control of the user. The kind of logging that will be produced by this
-	* is more like "call retry happened", not "events you'd want to record
-	* in Cloud Logger".
-	*
-	* More for Googlers implementing libraries with it:
-	* go/cloud-client-logging-design
-	*/
-	/**
-	* Possible log levels. These are a subset of Cloud Observability levels.
-	* https://cloud.google.com/logging/docs/reference/v2/rest/v2/LogEntry#LogSeverity
-	*/
-	var LogSeverity;
-	(function(LogSeverity) {
-		LogSeverity["DEFAULT"] = "DEFAULT";
-		LogSeverity["DEBUG"] = "DEBUG";
-		LogSeverity["INFO"] = "INFO";
-		LogSeverity["WARNING"] = "WARNING";
-		LogSeverity["ERROR"] = "ERROR";
-	})(LogSeverity || (exports.LogSeverity = LogSeverity = {}));
-	/**
-	* Our logger instance. This actually contains the meat of dealing
-	* with log lines, including EventEmitter. This contains the function
-	* that will be passed back to users of the package.
-	*/
-	var AdhocDebugLogger = class extends events_1$4.EventEmitter {
-		/**
-		* @param upstream The backend will pass a function that will be
-		*   called whenever our logger function is invoked.
-		*/
-		constructor(namespace, upstream) {
-			super();
-			this.namespace = namespace;
-			this.upstream = upstream;
-			this.func = Object.assign(this.invoke.bind(this), {
-				instance: this,
-				on: (event, listener) => this.on(event, listener)
-			});
-			this.func.debug = (...args) => this.invokeSeverity(LogSeverity.DEBUG, ...args);
-			this.func.info = (...args) => this.invokeSeverity(LogSeverity.INFO, ...args);
-			this.func.warn = (...args) => this.invokeSeverity(LogSeverity.WARNING, ...args);
-			this.func.error = (...args) => this.invokeSeverity(LogSeverity.ERROR, ...args);
-			this.func.sublog = (namespace) => log(namespace, this.func);
-		}
-		invoke(fields, ...args) {
-			if (this.upstream) try {
-				this.upstream(fields, ...args);
-			} catch (e) {}
-			try {
-				this.emit("log", fields, args);
-			} catch (e) {}
-		}
-		invokeSeverity(severity, ...args) {
-			this.invoke({ severity }, ...args);
-		}
-	};
-	exports.AdhocDebugLogger = AdhocDebugLogger;
-	/**
-	* This can be used in place of a real logger while waiting for Promises or disabling logging.
-	*/
-	exports.placeholder = new AdhocDebugLogger("", () => {}).func;
-	/**
-	* The base class for debug logging backends. It's possible to use this, but the
-	* same non-guarantees above still apply (unstable interface, etc).
-	*
-	* @private
-	* @internal
-	*/
-	var DebugLogBackendBase = class {
-		constructor() {
-			var _a;
-			this.cached = /* @__PURE__ */ new Map();
-			this.filters = [];
-			this.filtersSet = false;
-			let nodeFlag = (_a = process$1.env[exports.env.nodeEnables]) !== null && _a !== void 0 ? _a : "*";
-			if (nodeFlag === "all") nodeFlag = "*";
-			this.filters = nodeFlag.split(",");
-		}
-		log(namespace, fields, ...args) {
-			try {
-				if (!this.filtersSet) {
-					this.setFilters();
-					this.filtersSet = true;
-				}
-				let logger = this.cached.get(namespace);
-				if (!logger) {
-					logger = this.makeLogger(namespace);
-					this.cached.set(namespace, logger);
-				}
-				logger(fields, ...args);
-			} catch (e) {
-				console.error(e);
-			}
-		}
-	};
-	exports.DebugLogBackendBase = DebugLogBackendBase;
-	var NodeBackend = class extends DebugLogBackendBase {
-		constructor() {
-			super(...arguments);
-			this.enabledRegexp = /.*/g;
-		}
-		isEnabled(namespace) {
-			return this.enabledRegexp.test(namespace);
-		}
-		makeLogger(namespace) {
-			if (!this.enabledRegexp.test(namespace)) return () => {};
-			return (fields, ...args) => {
-				var _a;
-				const nscolour = `${colours_1.Colours.green}${namespace}${colours_1.Colours.reset}`;
-				const pid = `${colours_1.Colours.yellow}${process$1.pid}${colours_1.Colours.reset}`;
-				let level;
-				switch (fields.severity) {
-					case LogSeverity.ERROR:
-						level = `${colours_1.Colours.red}${fields.severity}${colours_1.Colours.reset}`;
-						break;
-					case LogSeverity.INFO:
-						level = `${colours_1.Colours.magenta}${fields.severity}${colours_1.Colours.reset}`;
-						break;
-					case LogSeverity.WARNING:
-						level = `${colours_1.Colours.yellow}${fields.severity}${colours_1.Colours.reset}`;
-						break;
-					default: level = (_a = fields.severity) !== null && _a !== void 0 ? _a : LogSeverity.DEFAULT;
-				}
-				const msg = util$4.formatWithOptions({ colors: colours_1.Colours.enabled }, ...args);
-				const filteredFields = Object.assign({}, fields);
-				delete filteredFields.severity;
-				const fieldsJson = Object.getOwnPropertyNames(filteredFields).length ? JSON.stringify(filteredFields) : "";
-				const fieldsColour = fieldsJson ? `${colours_1.Colours.grey}${fieldsJson}${colours_1.Colours.reset}` : "";
-				console.error("%s [%s|%s] %s%s", pid, nscolour, level, msg, fieldsJson ? ` ${fieldsColour}` : "");
-			};
-		}
-		setFilters() {
-			const regexp = this.filters.join(",").replace(/[|\\{}()[\]^$+?.]/g, "\\$&").replace(/\*/g, ".*").replace(/,/g, "$|^");
-			this.enabledRegexp = new RegExp(`^${regexp}$`, "i");
-		}
-	};
-	/**
-	* @returns A backend based on Node util.debuglog; this is the default.
-	*/
-	function getNodeBackend() {
-		return new NodeBackend();
-	}
-	var DebugBackend = class extends DebugLogBackendBase {
-		constructor(pkg) {
-			super();
-			this.debugPkg = pkg;
-		}
-		makeLogger(namespace) {
-			const debugLogger = this.debugPkg(namespace);
-			return (fields, ...args) => {
-				debugLogger(args[0], ...args.slice(1));
-			};
-		}
-		setFilters() {
-			var _a;
-			const existingFilters = (_a = process$1.env["NODE_DEBUG"]) !== null && _a !== void 0 ? _a : "";
-			process$1.env["NODE_DEBUG"] = `${existingFilters}${existingFilters ? "," : ""}${this.filters.join(",")}`;
-		}
-	};
-	/**
-	* Creates a "debug" package backend. The user must call require('debug') and pass
-	* the resulting object to this function.
-	*
-	* ```
-	*  setBackend(getDebugBackend(require('debug')))
-	* ```
-	*
-	* https://www.npmjs.com/package/debug
-	*
-	* Note: Google does not explicitly endorse or recommend this package; it's just
-	* being provided as an option.
-	*
-	* @returns A backend based on the npm "debug" package.
-	*/
-	function getDebugBackend(debugPkg) {
-		return new DebugBackend(debugPkg);
-	}
-	/**
-	* This pretty much works like the Node logger, but it outputs structured
-	* logging JSON matching Google Cloud's ingestion specs. Rather than handling
-	* its own output, it wraps another backend. The passed backend must be a subclass
-	* of `DebugLogBackendBase` (any of the backends exposed by this package will work).
-	*/
-	var StructuredBackend = class extends DebugLogBackendBase {
-		constructor(upstream) {
-			var _a;
-			super();
-			this.upstream = (_a = upstream) !== null && _a !== void 0 ? _a : void 0;
-		}
-		makeLogger(namespace) {
-			var _a;
-			const debugLogger = (_a = this.upstream) === null || _a === void 0 ? void 0 : _a.makeLogger(namespace);
-			return (fields, ...args) => {
-				var _a;
-				const severity = (_a = fields.severity) !== null && _a !== void 0 ? _a : LogSeverity.INFO;
-				const json = Object.assign({
-					severity,
-					message: util$4.format(...args)
-				}, fields);
-				const jsonString = JSON.stringify(json);
-				if (debugLogger) debugLogger(fields, jsonString);
-				else console.log("%s", jsonString);
-			};
-		}
-		setFilters() {
-			var _a;
-			(_a = this.upstream) === null || _a === void 0 || _a.setFilters();
-		}
-	};
-	/**
-	* Creates a "structured logging" backend. This pretty much works like the
-	* Node logger, but it outputs structured logging JSON matching Google
-	* Cloud's ingestion specs instead of plain text.
-	*
-	* ```
-	*  setBackend(getStructuredBackend())
-	* ```
-	*
-	* @param upstream If you want to use something besides the Node backend to
-	*   write the actual log lines into, pass that here.
-	* @returns A backend based on Google Cloud structured logging.
-	*/
-	function getStructuredBackend(upstream) {
-		return new StructuredBackend(upstream);
-	}
-	/**
-	* The environment variables that we standardized on, for all ad-hoc logging.
-	*/
-	exports.env = { 
-	/**
-	* Filter wildcards specific to the Node syntax, and similar to the built-in
-	* utils.debuglog() environment variable. If missing, disables logging.
-	*/
-nodeEnables: "GOOGLE_SDK_NODE_LOGGING" };
-	var loggerCache = /* @__PURE__ */ new Map();
-	var cachedBackend = void 0;
-	/**
-	* Set the backend to use for our log output.
-	* - A backend object
-	* - null to disable logging
-	* - undefined for "nothing yet", defaults to the Node backend
-	*
-	* @param backend Results from one of the get*Backend() functions.
-	*/
-	function setBackend(backend) {
-		cachedBackend = backend;
-		loggerCache.clear();
-	}
-	/**
-	* Creates a logging function. Multiple calls to this with the same namespace
-	* will produce the same logger, with the same event emitter hooks.
-	*
-	* Namespaces can be a simple string ("system" name), or a qualified string
-	* (system:subsystem), which can be used for filtering, or for "system:*".
-	*
-	* @param namespace The namespace, a descriptive text string.
-	* @returns A function you can call that works similar to console.log().
-	*/
-	function log(namespace, parent) {
-		if (!cachedBackend) {
-			if (!process$1.env[exports.env.nodeEnables]) return exports.placeholder;
-		}
-		if (!namespace) return exports.placeholder;
-		if (parent) namespace = `${parent.instance.namespace}:${namespace}`;
-		const existing = loggerCache.get(namespace);
-		if (existing) return existing.func;
-		if (cachedBackend === null) return exports.placeholder;
-		else if (cachedBackend === void 0) cachedBackend = getNodeBackend();
-		const logger = (() => {
-			let previousBackend = void 0;
-			return new AdhocDebugLogger(namespace, (fields, ...args) => {
-				if (previousBackend !== cachedBackend) {
-					if (cachedBackend === null) return;
-					else if (cachedBackend === void 0) cachedBackend = getNodeBackend();
-					previousBackend = cachedBackend;
-				}
-				cachedBackend === null || cachedBackend === void 0 || cachedBackend.log(namespace, fields, ...args);
-			});
-		})();
-		loggerCache.set(namespace, logger);
-		return logger.func;
-	}
-}));
-//#endregion
-//#region node_modules/.pnpm/google-logging-utils@1.1.3/node_modules/google-logging-utils/build/src/index.js
-var require_src$3 = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
-		if (k2 === void 0) k2 = k;
-		var desc = Object.getOwnPropertyDescriptor(m, k);
-		if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) desc = {
-			enumerable: true,
-			get: function() {
-				return m[k];
-			}
-		};
-		Object.defineProperty(o, k2, desc);
-	}) : (function(o, m, k, k2) {
-		if (k2 === void 0) k2 = k;
-		o[k2] = m[k];
-	}));
-	var __exportStar = exports && exports.__exportStar || function(m, exports$6) {
-		for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports$6, p)) __createBinding(exports$6, m, p);
-	};
-	Object.defineProperty(exports, "__esModule", { value: true });
-	__exportStar(require_logging_utils(), exports);
-}));
-//#endregion
 //#region node_modules/.pnpm/gcp-metadata@8.1.2_supports-color@7.2.0/node_modules/gcp-metadata/build/src/index.js
 var require_src$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var __createBinding = exports && exports.__createBinding || (Object.create ? (function(o, m, k, k2) {
@@ -1768,8 +138,8 @@ var require_src$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
 			return result;
 		};
 	})();
-	var __exportStar = exports && exports.__exportStar || function(m, exports$5) {
-		for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports$5, p)) __createBinding(exports$5, m, p);
+	var __exportStar = exports && exports.__exportStar || function(m, exports$4) {
+		for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports$4, p)) __createBinding(exports$4, m, p);
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.gcpResidencyCache = exports.METADATA_SERVER_DETECTION = exports.HEADERS = exports.HEADER_VALUE = exports.HEADER_NAME = exports.SECONDARY_HOST_ADDRESS = exports.HOST_ADDRESS = exports.BASE_PATH = void 0;
@@ -1797,10 +167,10 @@ var require_src$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
 	* See the License for the specific language governing permissions and
 	* limitations under the License.
 	*/
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	var jsonBigint = require_json_bigint();
 	var gcp_residency_1 = require_gcp_residency();
-	var logger = __importStar(require_src$3());
+	var logger = __importStar(require_src$4());
 	exports.BASE_PATH = "/computeMetadata/v1";
 	exports.HOST_ADDRESS = "http://169.254.169.254";
 	exports.SECONDARY_HOST_ADDRESS = "http://metadata.google.internal.";
@@ -2154,22 +524,22 @@ var require_crypto$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_crypto$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.NodeCrypto = void 0;
-	var crypto$3 = __require("crypto");
+	var crypto$2 = __require("crypto");
 	var NodeCrypto = class {
 		async sha256DigestBase64(str) {
-			return crypto$3.createHash("sha256").update(str).digest("base64");
+			return crypto$2.createHash("sha256").update(str).digest("base64");
 		}
 		randomBytesBase64(count) {
-			return crypto$3.randomBytes(count).toString("base64");
+			return crypto$2.randomBytes(count).toString("base64");
 		}
 		async verify(pubkey, data, signature) {
-			const verifier = crypto$3.createVerify("RSA-SHA256");
+			const verifier = crypto$2.createVerify("RSA-SHA256");
 			verifier.update(data);
 			verifier.end();
 			return verifier.verify(pubkey, signature, "base64");
 		}
 		async sign(privateKey, data) {
-			const signer = crypto$3.createSign("RSA-SHA256");
+			const signer = crypto$2.createSign("RSA-SHA256");
 			signer.update(data);
 			signer.end();
 			return signer.sign(privateKey, "base64");
@@ -2187,7 +557,7 @@ var require_crypto$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 		*   string in hexadecimal encoding.
 		*/
 		async sha256DigestHex(str) {
-			return crypto$3.createHash("sha256").update(str).digest("hex");
+			return crypto$2.createHash("sha256").update(str).digest("hex");
 		}
 		/**
 		* Computes the HMAC hash of a message using the provided crypto key and the
@@ -2199,7 +569,7 @@ var require_crypto$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 		*/
 		async signWithHmacSha256(key, msg) {
 			const cryptoKey = typeof key === "string" ? key : toBuffer(key);
-			return toArrayBuffer(crypto$3.createHmac("sha256", cryptoKey).update(msg).digest());
+			return toArrayBuffer(crypto$2.createHmac("sha256", cryptoKey).update(msg).digest());
 		}
 	};
 	exports.NodeCrypto = NodeCrypto;
@@ -2241,8 +611,8 @@ var require_crypto = /* @__PURE__ */ __commonJSMin(((exports) => {
 		if (k2 === void 0) k2 = k;
 		o[k2] = m[k];
 	}));
-	var __exportStar = exports && exports.__exportStar || function(m, exports$4) {
-		for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports$4, p)) __createBinding(exports$4, m, p);
+	var __exportStar = exports && exports.__exportStar || function(m, exports$3) {
+		for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports$3, p)) __createBinding(exports$3, m, p);
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.createCrypto = createCrypto;
@@ -2551,9 +921,9 @@ var require_authclient = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.AuthClient = exports.DEFAULT_EAGER_REFRESH_THRESHOLD_MILLIS = exports.DEFAULT_UNIVERSE = void 0;
 	var events_1$3 = __require("events");
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	var util_1 = require_util();
-	var google_logging_utils_1 = require_src$3();
+	var google_logging_utils_1 = require_src$4();
 	var shared_cjs_1 = require_shared();
 	/**
 	* The default cloud universe
@@ -2815,7 +1185,7 @@ var require_loginticket = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_oauth2client = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.OAuth2Client = exports.ClientAuthentication = exports.CertificateFormat = exports.CodeChallengeMethod = void 0;
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	var querystring = __require("querystring");
 	var stream$3 = __require("stream");
 	var formatEcdsa = require_ecdsa_sig_formatter();
@@ -3389,7 +1759,7 @@ var require_oauth2client = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_computeclient = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Compute = void 0;
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	var gcpMetadata = require_src$2();
 	var oauth2client_1 = require_oauth2client();
 	var Compute = class extends oauth2client_1.OAuth2Client {
@@ -3570,440 +1940,6 @@ var require_envDetect = /* @__PURE__ */ __commonJSMin(((exports) => {
 	async function isComputeEngine() {
 		return gcpMetadata.isAvailable();
 	}
-}));
-//#endregion
-//#region node_modules/.pnpm/jws@4.0.1/node_modules/jws/lib/data-stream.js
-var require_data_stream = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var Buffer = require_safe_buffer().Buffer;
-	var Stream$2 = __require("stream");
-	var util$3 = __require("util");
-	function DataStream(data) {
-		this.buffer = null;
-		this.writable = true;
-		this.readable = true;
-		if (!data) {
-			this.buffer = Buffer.alloc(0);
-			return this;
-		}
-		if (typeof data.pipe === "function") {
-			this.buffer = Buffer.alloc(0);
-			data.pipe(this);
-			return this;
-		}
-		if (data.length || typeof data === "object") {
-			this.buffer = data;
-			this.writable = false;
-			process.nextTick(function() {
-				this.emit("end", data);
-				this.readable = false;
-				this.emit("close");
-			}.bind(this));
-			return this;
-		}
-		throw new TypeError("Unexpected data type (" + typeof data + ")");
-	}
-	util$3.inherits(DataStream, Stream$2);
-	DataStream.prototype.write = function write(data) {
-		this.buffer = Buffer.concat([this.buffer, Buffer.from(data)]);
-		this.emit("data", data);
-	};
-	DataStream.prototype.end = function end(data) {
-		if (data) this.write(data);
-		this.emit("end", data);
-		this.emit("close");
-		this.writable = false;
-		this.readable = false;
-	};
-	module.exports = DataStream;
-}));
-//#endregion
-//#region node_modules/.pnpm/jwa@2.0.1/node_modules/jwa/index.js
-var require_jwa = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var Buffer = require_safe_buffer().Buffer;
-	var crypto$2 = __require("crypto");
-	var formatEcdsa = require_ecdsa_sig_formatter();
-	var util$2 = __require("util");
-	var MSG_INVALID_ALGORITHM = "\"%s\" is not a valid algorithm.\n  Supported algorithms are:\n  \"HS256\", \"HS384\", \"HS512\", \"RS256\", \"RS384\", \"RS512\", \"PS256\", \"PS384\", \"PS512\", \"ES256\", \"ES384\", \"ES512\" and \"none\".";
-	var MSG_INVALID_SECRET = "secret must be a string or buffer";
-	var MSG_INVALID_VERIFIER_KEY = "key must be a string or a buffer";
-	var MSG_INVALID_SIGNER_KEY = "key must be a string, a buffer or an object";
-	var supportsKeyObjects = typeof crypto$2.createPublicKey === "function";
-	if (supportsKeyObjects) {
-		MSG_INVALID_VERIFIER_KEY += " or a KeyObject";
-		MSG_INVALID_SECRET += "or a KeyObject";
-	}
-	function checkIsPublicKey(key) {
-		if (Buffer.isBuffer(key)) return;
-		if (typeof key === "string") return;
-		if (!supportsKeyObjects) throw typeError(MSG_INVALID_VERIFIER_KEY);
-		if (typeof key !== "object") throw typeError(MSG_INVALID_VERIFIER_KEY);
-		if (typeof key.type !== "string") throw typeError(MSG_INVALID_VERIFIER_KEY);
-		if (typeof key.asymmetricKeyType !== "string") throw typeError(MSG_INVALID_VERIFIER_KEY);
-		if (typeof key.export !== "function") throw typeError(MSG_INVALID_VERIFIER_KEY);
-	}
-	function checkIsPrivateKey(key) {
-		if (Buffer.isBuffer(key)) return;
-		if (typeof key === "string") return;
-		if (typeof key === "object") return;
-		throw typeError(MSG_INVALID_SIGNER_KEY);
-	}
-	function checkIsSecretKey(key) {
-		if (Buffer.isBuffer(key)) return;
-		if (typeof key === "string") return key;
-		if (!supportsKeyObjects) throw typeError(MSG_INVALID_SECRET);
-		if (typeof key !== "object") throw typeError(MSG_INVALID_SECRET);
-		if (key.type !== "secret") throw typeError(MSG_INVALID_SECRET);
-		if (typeof key.export !== "function") throw typeError(MSG_INVALID_SECRET);
-	}
-	function fromBase64(base64) {
-		return base64.replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
-	}
-	function toBase64(base64url) {
-		base64url = base64url.toString();
-		var padding = 4 - base64url.length % 4;
-		if (padding !== 4) for (var i = 0; i < padding; ++i) base64url += "=";
-		return base64url.replace(/\-/g, "+").replace(/_/g, "/");
-	}
-	function typeError(template) {
-		var args = [].slice.call(arguments, 1);
-		var errMsg = util$2.format.bind(util$2, template).apply(null, args);
-		return new TypeError(errMsg);
-	}
-	function bufferOrString(obj) {
-		return Buffer.isBuffer(obj) || typeof obj === "string";
-	}
-	function normalizeInput(thing) {
-		if (!bufferOrString(thing)) thing = JSON.stringify(thing);
-		return thing;
-	}
-	function createHmacSigner(bits) {
-		return function sign(thing, secret) {
-			checkIsSecretKey(secret);
-			thing = normalizeInput(thing);
-			var hmac = crypto$2.createHmac("sha" + bits, secret);
-			return fromBase64((hmac.update(thing), hmac.digest("base64")));
-		};
-	}
-	var bufferEqual;
-	var timingSafeEqual = "timingSafeEqual" in crypto$2 ? function timingSafeEqual(a, b) {
-		if (a.byteLength !== b.byteLength) return false;
-		return crypto$2.timingSafeEqual(a, b);
-	} : function timingSafeEqual(a, b) {
-		if (!bufferEqual) bufferEqual = require_buffer_equal_constant_time();
-		return bufferEqual(a, b);
-	};
-	function createHmacVerifier(bits) {
-		return function verify(thing, signature, secret) {
-			var computedSig = createHmacSigner(bits)(thing, secret);
-			return timingSafeEqual(Buffer.from(signature), Buffer.from(computedSig));
-		};
-	}
-	function createKeySigner(bits) {
-		return function sign(thing, privateKey) {
-			checkIsPrivateKey(privateKey);
-			thing = normalizeInput(thing);
-			var signer = crypto$2.createSign("RSA-SHA" + bits);
-			return fromBase64((signer.update(thing), signer.sign(privateKey, "base64")));
-		};
-	}
-	function createKeyVerifier(bits) {
-		return function verify(thing, signature, publicKey) {
-			checkIsPublicKey(publicKey);
-			thing = normalizeInput(thing);
-			signature = toBase64(signature);
-			var verifier = crypto$2.createVerify("RSA-SHA" + bits);
-			verifier.update(thing);
-			return verifier.verify(publicKey, signature, "base64");
-		};
-	}
-	function createPSSKeySigner(bits) {
-		return function sign(thing, privateKey) {
-			checkIsPrivateKey(privateKey);
-			thing = normalizeInput(thing);
-			var signer = crypto$2.createSign("RSA-SHA" + bits);
-			return fromBase64((signer.update(thing), signer.sign({
-				key: privateKey,
-				padding: crypto$2.constants.RSA_PKCS1_PSS_PADDING,
-				saltLength: crypto$2.constants.RSA_PSS_SALTLEN_DIGEST
-			}, "base64")));
-		};
-	}
-	function createPSSKeyVerifier(bits) {
-		return function verify(thing, signature, publicKey) {
-			checkIsPublicKey(publicKey);
-			thing = normalizeInput(thing);
-			signature = toBase64(signature);
-			var verifier = crypto$2.createVerify("RSA-SHA" + bits);
-			verifier.update(thing);
-			return verifier.verify({
-				key: publicKey,
-				padding: crypto$2.constants.RSA_PKCS1_PSS_PADDING,
-				saltLength: crypto$2.constants.RSA_PSS_SALTLEN_DIGEST
-			}, signature, "base64");
-		};
-	}
-	function createECDSASigner(bits) {
-		var inner = createKeySigner(bits);
-		return function sign() {
-			var signature = inner.apply(null, arguments);
-			signature = formatEcdsa.derToJose(signature, "ES" + bits);
-			return signature;
-		};
-	}
-	function createECDSAVerifer(bits) {
-		var inner = createKeyVerifier(bits);
-		return function verify(thing, signature, publicKey) {
-			signature = formatEcdsa.joseToDer(signature, "ES" + bits).toString("base64");
-			return inner(thing, signature, publicKey);
-		};
-	}
-	function createNoneSigner() {
-		return function sign() {
-			return "";
-		};
-	}
-	function createNoneVerifier() {
-		return function verify(thing, signature) {
-			return signature === "";
-		};
-	}
-	module.exports = function jwa(algorithm) {
-		var signerFactories = {
-			hs: createHmacSigner,
-			rs: createKeySigner,
-			ps: createPSSKeySigner,
-			es: createECDSASigner,
-			none: createNoneSigner
-		};
-		var verifierFactories = {
-			hs: createHmacVerifier,
-			rs: createKeyVerifier,
-			ps: createPSSKeyVerifier,
-			es: createECDSAVerifer,
-			none: createNoneVerifier
-		};
-		var match = algorithm.match(/^(RS|PS|ES|HS)(256|384|512)$|^(none)$/);
-		if (!match) throw typeError(MSG_INVALID_ALGORITHM, algorithm);
-		var algo = (match[1] || match[3]).toLowerCase();
-		var bits = match[2];
-		return {
-			sign: signerFactories[algo](bits),
-			verify: verifierFactories[algo](bits)
-		};
-	};
-}));
-//#endregion
-//#region node_modules/.pnpm/jws@4.0.1/node_modules/jws/lib/tostring.js
-var require_tostring = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var Buffer$1 = __require("buffer").Buffer;
-	module.exports = function toString(obj) {
-		if (typeof obj === "string") return obj;
-		if (typeof obj === "number" || Buffer$1.isBuffer(obj)) return obj.toString();
-		return JSON.stringify(obj);
-	};
-}));
-//#endregion
-//#region node_modules/.pnpm/jws@4.0.1/node_modules/jws/lib/sign-stream.js
-var require_sign_stream = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var Buffer = require_safe_buffer().Buffer;
-	var DataStream = require_data_stream();
-	var jwa = require_jwa();
-	var Stream$1 = __require("stream");
-	var toString = require_tostring();
-	var util$1 = __require("util");
-	function base64url(string, encoding) {
-		return Buffer.from(string, encoding).toString("base64").replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
-	}
-	function jwsSecuredInput(header, payload, encoding) {
-		encoding = encoding || "utf8";
-		var encodedHeader = base64url(toString(header), "binary");
-		var encodedPayload = base64url(toString(payload), encoding);
-		return util$1.format("%s.%s", encodedHeader, encodedPayload);
-	}
-	function jwsSign(opts) {
-		var header = opts.header;
-		var payload = opts.payload;
-		var secretOrKey = opts.secret || opts.privateKey;
-		var encoding = opts.encoding;
-		var algo = jwa(header.alg);
-		var securedInput = jwsSecuredInput(header, payload, encoding);
-		var signature = algo.sign(securedInput, secretOrKey);
-		return util$1.format("%s.%s", securedInput, signature);
-	}
-	function SignStream(opts) {
-		var secret = opts.secret;
-		secret = secret == null ? opts.privateKey : secret;
-		secret = secret == null ? opts.key : secret;
-		if (/^hs/i.test(opts.header.alg) === true && secret == null) throw new TypeError("secret must be a string or buffer or a KeyObject");
-		var secretStream = new DataStream(secret);
-		this.readable = true;
-		this.header = opts.header;
-		this.encoding = opts.encoding;
-		this.secret = this.privateKey = this.key = secretStream;
-		this.payload = new DataStream(opts.payload);
-		this.secret.once("close", function() {
-			if (!this.payload.writable && this.readable) this.sign();
-		}.bind(this));
-		this.payload.once("close", function() {
-			if (!this.secret.writable && this.readable) this.sign();
-		}.bind(this));
-	}
-	util$1.inherits(SignStream, Stream$1);
-	SignStream.prototype.sign = function sign() {
-		try {
-			var signature = jwsSign({
-				header: this.header,
-				payload: this.payload.buffer,
-				secret: this.secret.buffer,
-				encoding: this.encoding
-			});
-			this.emit("done", signature);
-			this.emit("data", signature);
-			this.emit("end");
-			this.readable = false;
-			return signature;
-		} catch (e) {
-			this.readable = false;
-			this.emit("error", e);
-			this.emit("close");
-		}
-	};
-	SignStream.sign = jwsSign;
-	module.exports = SignStream;
-}));
-//#endregion
-//#region node_modules/.pnpm/jws@4.0.1/node_modules/jws/lib/verify-stream.js
-var require_verify_stream = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var Buffer = require_safe_buffer().Buffer;
-	var DataStream = require_data_stream();
-	var jwa = require_jwa();
-	var Stream = __require("stream");
-	var toString = require_tostring();
-	var util = __require("util");
-	var JWS_REGEX = /^[a-zA-Z0-9\-_]+?\.[a-zA-Z0-9\-_]+?\.([a-zA-Z0-9\-_]+)?$/;
-	function isObject(thing) {
-		return Object.prototype.toString.call(thing) === "[object Object]";
-	}
-	function safeJsonParse(thing) {
-		if (isObject(thing)) return thing;
-		try {
-			return JSON.parse(thing);
-		} catch (e) {
-			return;
-		}
-	}
-	function headerFromJWS(jwsSig) {
-		var encodedHeader = jwsSig.split(".", 1)[0];
-		return safeJsonParse(Buffer.from(encodedHeader, "base64").toString("binary"));
-	}
-	function securedInputFromJWS(jwsSig) {
-		return jwsSig.split(".", 2).join(".");
-	}
-	function signatureFromJWS(jwsSig) {
-		return jwsSig.split(".")[2];
-	}
-	function payloadFromJWS(jwsSig, encoding) {
-		encoding = encoding || "utf8";
-		var payload = jwsSig.split(".")[1];
-		return Buffer.from(payload, "base64").toString(encoding);
-	}
-	function isValidJws(string) {
-		return JWS_REGEX.test(string) && !!headerFromJWS(string);
-	}
-	function jwsVerify(jwsSig, algorithm, secretOrKey) {
-		if (!algorithm) {
-			var err = /* @__PURE__ */ new Error("Missing algorithm parameter for jws.verify");
-			err.code = "MISSING_ALGORITHM";
-			throw err;
-		}
-		jwsSig = toString(jwsSig);
-		var signature = signatureFromJWS(jwsSig);
-		var securedInput = securedInputFromJWS(jwsSig);
-		return jwa(algorithm).verify(securedInput, signature, secretOrKey);
-	}
-	function jwsDecode(jwsSig, opts) {
-		opts = opts || {};
-		jwsSig = toString(jwsSig);
-		if (!isValidJws(jwsSig)) return null;
-		var header = headerFromJWS(jwsSig);
-		if (!header) return null;
-		var payload = payloadFromJWS(jwsSig);
-		if (header.typ === "JWT" || opts.json) payload = JSON.parse(payload, opts.encoding);
-		return {
-			header,
-			payload,
-			signature: signatureFromJWS(jwsSig)
-		};
-	}
-	function VerifyStream(opts) {
-		opts = opts || {};
-		var secretOrKey = opts.secret;
-		secretOrKey = secretOrKey == null ? opts.publicKey : secretOrKey;
-		secretOrKey = secretOrKey == null ? opts.key : secretOrKey;
-		if (/^hs/i.test(opts.algorithm) === true && secretOrKey == null) throw new TypeError("secret must be a string or buffer or a KeyObject");
-		var secretStream = new DataStream(secretOrKey);
-		this.readable = true;
-		this.algorithm = opts.algorithm;
-		this.encoding = opts.encoding;
-		this.secret = this.publicKey = this.key = secretStream;
-		this.signature = new DataStream(opts.signature);
-		this.secret.once("close", function() {
-			if (!this.signature.writable && this.readable) this.verify();
-		}.bind(this));
-		this.signature.once("close", function() {
-			if (!this.secret.writable && this.readable) this.verify();
-		}.bind(this));
-	}
-	util.inherits(VerifyStream, Stream);
-	VerifyStream.prototype.verify = function verify() {
-		try {
-			var valid = jwsVerify(this.signature.buffer, this.algorithm, this.key.buffer);
-			var obj = jwsDecode(this.signature.buffer, this.encoding);
-			this.emit("done", valid, obj);
-			this.emit("data", valid);
-			this.emit("end");
-			this.readable = false;
-			return valid;
-		} catch (e) {
-			this.readable = false;
-			this.emit("error", e);
-			this.emit("close");
-		}
-	};
-	VerifyStream.decode = jwsDecode;
-	VerifyStream.isValid = isValidJws;
-	VerifyStream.verify = jwsVerify;
-	module.exports = VerifyStream;
-}));
-//#endregion
-//#region node_modules/.pnpm/jws@4.0.1/node_modules/jws/index.js
-var require_jws = /* @__PURE__ */ __commonJSMin(((exports) => {
-	var SignStream = require_sign_stream();
-	var VerifyStream = require_verify_stream();
-	exports.ALGORITHMS = [
-		"HS256",
-		"HS384",
-		"HS512",
-		"RS256",
-		"RS384",
-		"RS512",
-		"PS256",
-		"PS384",
-		"PS512",
-		"ES256",
-		"ES384",
-		"ES512"
-	];
-	exports.sign = SignStream.sign;
-	exports.verify = VerifyStream.verify;
-	exports.decode = VerifyStream.decode;
-	exports.isValid = VerifyStream.isValid;
-	exports.createSign = function createSign(opts) {
-		return new SignStream(opts);
-	};
-	exports.createVerify = function createVerify(opts) {
-		return new VerifyStream(opts);
-	};
 }));
 //#endregion
 //#region node_modules/.pnpm/google-auth-library@10.9.1_supports-color@7.2.0/node_modules/google-auth-library/build/src/gtoken/jwsSign.js
@@ -4322,7 +2258,7 @@ var require_revokeToken = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_googleToken = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.GoogleToken = void 0;
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	var tokenHandler_1 = require_tokenHandler();
 	var revokeToken_1 = require_revokeToken();
 	/**
@@ -4907,7 +2843,7 @@ var require_impersonated = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.Impersonated = exports.IMPERSONATED_ACCOUNT_TYPE = void 0;
 	var oauth2client_1 = require_oauth2client();
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	var util_1 = require_util();
 	exports.IMPERSONATED_ACCOUNT_TYPE = "impersonated_service_account";
 	exports.Impersonated = class Impersonated extends oauth2client_1.OAuth2Client {
@@ -5075,7 +3011,7 @@ var require_oauth2common = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.OAuthClientAuthHandler = void 0;
 	exports.getErrorFromOAuthErrorResponse = getErrorFromOAuthErrorResponse;
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	var crypto_1 = require_crypto();
 	/** List of HTTP methods that accept request bodies. */
 	var METHODS_SUPPORTING_REQUEST_BODY = [
@@ -5223,7 +3159,7 @@ var require_oauth2common = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_stscredentials = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.StsCredentials = void 0;
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	var authclient_1 = require_authclient();
 	var oauth2common_1 = require_oauth2common();
 	var util_1 = require_util();
@@ -5296,7 +3232,7 @@ var require_stscredentials = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_baseexternalclient = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.BaseExternalAccountClient = exports.CLOUD_RESOURCE_MANAGER = exports.EXTERNAL_ACCOUNT_TYPE = exports.EXPIRATION_TIME_OFFSET = void 0;
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	var stream$2 = __require("stream");
 	var authclient_1 = require_authclient();
 	var sts = require_stscredentials();
@@ -5948,7 +3884,7 @@ var require_identitypoolclient = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var urlsubjecttokensupplier_1 = require_urlsubjecttokensupplier();
 	var certificatesubjecttokensupplier_1 = require_certificatesubjecttokensupplier();
 	var stscredentials_1 = require_stscredentials();
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	exports.IdentityPoolClient = class IdentityPoolClient extends baseexternalclient_1.BaseExternalAccountClient {
 		subjectTokenSupplier;
 		/**
@@ -6039,7 +3975,7 @@ var require_identitypoolclient = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_awsrequestsigner = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.AwsRequestSigner = void 0;
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	var crypto_1 = require_crypto();
 	/** AWS Signature Version 4 signing algorithm identifier.  */
 	var AWS_ALGORITHM = "AWS4-HMAC-SHA256";
@@ -6344,7 +4280,7 @@ var require_awsclient = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var baseexternalclient_1 = require_baseexternalclient();
 	var defaultawssecuritycredentialssupplier_1 = require_defaultawssecuritycredentialssupplier();
 	var util_1 = require_util();
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	exports.AwsClient = class AwsClient extends baseexternalclient_1.BaseExternalAccountClient {
 		environmentId;
 		awsSecurityCredentialsSupplier;
@@ -6905,7 +4841,7 @@ var require_externalAccountAuthorizedUserClient = /* @__PURE__ */ __commonJSMin(
 	exports.ExternalAccountAuthorizedUserClient = exports.EXTERNAL_ACCOUNT_AUTHORIZED_USER_TYPE = void 0;
 	var authclient_1 = require_authclient();
 	var oauth2common_1 = require_oauth2common();
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	var stream$1 = __require("stream");
 	var baseexternalclient_1 = require_baseexternalclient();
 	/**
@@ -7311,7 +5247,7 @@ var require_googleauth = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.GoogleAuth = exports.GoogleAuthExceptionMessages = void 0;
 	var child_process_1 = __require("child_process");
 	var fs$2 = __require("fs");
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	var gcpMetadata = require_src$2();
 	var os = __require("os");
 	var path = __require("path");
@@ -8024,7 +5960,7 @@ var require_iam = /* @__PURE__ */ __commonJSMin(((exports) => {
 var require_downscopedclient = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.DownscopedClient = exports.EXPIRATION_TIME_OFFSET = exports.MAX_ACCESS_BOUNDARY_RULES_COUNT = void 0;
-	var gaxios_1 = require_src$4();
+	var gaxios_1 = require_src$3();
 	var stream = __require("stream");
 	var authclient_1 = require_authclient();
 	var sts = require_stscredentials();
@@ -8276,8 +6212,8 @@ var require_src$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 		if (k2 === void 0) k2 = k;
 		o[k2] = m[k];
 	}));
-	var __exportStar = exports && exports.__exportStar || function(m, exports$3) {
-		for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports$3, p)) __createBinding(exports$3, m, p);
+	var __exportStar = exports && exports.__exportStar || function(m, exports$2) {
+		for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports$2, p)) __createBinding(exports$2, m, p);
 	};
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.GoogleAuth = exports.auth = exports.GDCH_SERVICE_ACCOUNT_TYPE = exports.GdchClient = exports.PassThroughClient = exports.ExternalAccountAuthorizedUserClient = exports.EXTERNAL_ACCOUNT_AUTHORIZED_USER_TYPE = exports.ExecutableError = exports.PluggableAuthClient = exports.DownscopedClient = exports.BaseExternalAccountClient = exports.ExternalAccountClient = exports.IdentityPoolClient = exports.AwsRequestSigner = exports.AwsClient = exports.UserRefreshClient = exports.LoginTicket = exports.ClientAuthentication = exports.OAuth2Client = exports.CodeChallengeMethod = exports.Impersonated = exports.JWT = exports.JWTAccess = exports.IdTokenClient = exports.IAMAuth = exports.GCPEnv = exports.Compute = exports.DEFAULT_UNIVERSE = exports.AuthClient = exports.gaxios = exports.gcpMetadata = void 0;
@@ -8289,7 +6225,7 @@ var require_src$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 		}
 	});
 	exports.gcpMetadata = require_src$2();
-	exports.gaxios = require_src$4();
+	exports.gaxios = require_src$3();
 	var authclient_1 = require_authclient();
 	Object.defineProperty(exports, "AuthClient", {
 		enumerable: true,
@@ -8479,7 +6415,7 @@ var require_src$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 //#endregion
 //#region node_modules/.pnpm/firebase-admin@14.2.0_@fire_5dc7b51e8f8445f023693e3088849870/node_modules/firebase-admin/lib/utils/error.js
 /*! firebase-admin v14.2.0 */
-var require_error$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
+var require_error$3 = /* @__PURE__ */ __commonJSMin(((exports) => {
 	/*!
 	* @license
 	* Copyright 2017 Google LLC
@@ -8565,7 +6501,7 @@ var require_error$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
 //#endregion
 //#region node_modules/.pnpm/firebase-admin@14.2.0_@fire_5dc7b51e8f8445f023693e3088849870/node_modules/firebase-admin/lib/app/error.js
 /*! firebase-admin v14.2.0 */
-var require_error$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
+var require_error$2 = /* @__PURE__ */ __commonJSMin(((exports) => {
 	/*!
 	* Copyright 2026 Google LLC
 	*
@@ -8583,7 +6519,7 @@ var require_error$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 	*/
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.AppErrorCode = exports.FirebaseAppError = void 0;
-	var error_1 = require_error$2();
+	var error_1 = require_error$3();
 	/**
 	* Firebase App error code structure. This extends `FirebaseError`.
 	*/
@@ -8890,7 +6826,7 @@ var require_credential_internal = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var fs$1 = __require("fs");
 	var node_crypto_1 = __require("node:crypto");
 	var google_auth_library_1 = require_src$1();
-	var error_1 = require_error$1();
+	var error_1 = require_error$2();
 	var util = require_validator();
 	var SCOPES = [
 		"https://www.googleapis.com/auth/cloud-platform",
@@ -9847,7 +7783,7 @@ var require_firebase_app = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var credential_internal_1 = require_credential_internal();
 	var validator = require_validator();
 	var deep_copy_1 = require_deep_copy();
-	var error_1 = require_error$1();
+	var error_1 = require_error$2();
 	var TOKEN_EXPIRY_THRESHOLD_MILLIS = 3e5;
 	/**
 	* Internals of a FirebaseApp instance.
@@ -10054,7 +7990,7 @@ var require_lifecycle = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.deleteApp = deleteApp;
 	var fs = __require("fs");
 	var validator = require_validator();
-	var error_1 = require_error$1();
+	var error_1 = require_error$2();
 	var credential_internal_1 = require_credential_internal();
 	var firebase_app_1 = require_firebase_app();
 	var fastDeepEqual = require_fast_deep_equal();
@@ -10503,14 +8439,14 @@ var require_app = /* @__PURE__ */ __commonJSMin(((exports) => {
 			return credential_factory_1.refreshToken;
 		}
 	});
-	var error_1 = require_error$2();
+	var error_1 = require_error$3();
 	Object.defineProperty(exports, "FirebaseError", {
 		enumerable: true,
 		get: function() {
 			return error_1.FirebaseError;
 		}
 	});
-	var error_2 = require_error$1();
+	var error_2 = require_error$2();
 	Object.defineProperty(exports, "FirebaseAppError", {
 		enumerable: true,
 		get: function() {
@@ -10542,7 +8478,7 @@ import_app.refreshToken;
 //#endregion
 //#region node_modules/.pnpm/firebase-admin@14.2.0_@fire_5dc7b51e8f8445f023693e3088849870/node_modules/firebase-admin/lib/auth/error.js
 /*! firebase-admin v14.2.0 */
-var require_error = /* @__PURE__ */ __commonJSMin(((exports) => {
+var require_error$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
 	/*!
 	* Copyright 2026 Google LLC
 	*
@@ -10560,7 +8496,7 @@ var require_error = /* @__PURE__ */ __commonJSMin(((exports) => {
 	*/
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.FirebaseAuthError = exports.authClientErrorCode = exports.AuthErrorCode = void 0;
-	var error_1 = require_error$2();
+	var error_1 = require_error$3();
 	var deep_copy_1 = require_deep_copy();
 	/**
 	* The constant mapping for valid Auth client error codes.
@@ -11178,8 +9114,8 @@ var require_api_request = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.Http2SessionHandler = exports.ExponentialBackoffPoller = exports.ApiSettings = exports.AuthorizedHttp2Client = exports.AuthorizedHttpClient = exports.Http2Client = exports.HttpClient = exports.RequestClient = exports.RequestResponseError = void 0;
 	exports.defaultRetryConfig = defaultRetryConfig;
 	exports.parseHttpResponse = parseHttpResponse;
-	var error_1 = require_error$2();
-	var error_2 = require_error$1();
+	var error_1 = require_error$3();
+	var error_2 = require_error$2();
 	var validator = require_validator();
 	var http$1 = __require("http");
 	var https$1 = __require("https");
@@ -12112,7 +10048,7 @@ var require_user_import_builder = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var deep_copy_1 = require_deep_copy();
 	var utils = require_utils$1();
 	var validator = require_validator();
-	var error_1 = require_error();
+	var error_1 = require_error$1();
 	/**
 	* Converts a client format second factor object to server format.
 	* @param multiFactorInfo - The client format second factor.
@@ -12394,7 +10330,7 @@ var require_action_code_settings_builder = /* @__PURE__ */ __commonJSMin(((expor
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.ActionCodeSettingsBuilder = void 0;
 	var validator = require_validator();
-	var error_1 = require_error();
+	var error_1 = require_error$1();
 	/**
 	* Defines the ActionCodeSettings builder class used to convert the
 	* ActionCodeSettings object to its corresponding server request.
@@ -12486,7 +10422,7 @@ var require_auth_config = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.validateTestPhoneNumbers = validateTestPhoneNumbers;
 	var validator = require_validator();
 	var deep_copy_1 = require_deep_copy();
-	var error_1 = require_error();
+	var error_1 = require_error$1();
 	/** A maximum of 10 test phone number / code pairs can be configured. */
 	exports.MAXIMUM_TEST_PHONE_NUMBERS = 10;
 	/** Client Auth factor type to server auth factor type mapping. */
@@ -13187,7 +11123,7 @@ var require_tenant = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.Tenant = void 0;
 	var validator = require_validator();
 	var deep_copy_1 = require_deep_copy();
-	var error_1 = require_error();
+	var error_1 = require_error$1();
 	var auth_config_1 = require_auth_config();
 	exports.Tenant = class Tenant {
 		/**
@@ -13388,7 +11324,7 @@ var require_project_config = /* @__PURE__ */ __commonJSMin(((exports) => {
 	* limitations under the License.
 	*/
 	var validator = require_validator();
-	var error_1 = require_error();
+	var error_1 = require_error$1();
 	var auth_config_1 = require_auth_config();
 	var deep_copy_1 = require_deep_copy();
 	exports.ProjectConfig = class ProjectConfig {
@@ -13509,8 +11445,8 @@ var require_auth_api_request = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.useEmulator = useEmulator;
 	var validator = require_validator();
 	var deep_copy_1 = require_deep_copy();
-	var error_1 = require_error();
-	var error_2 = require_error$2();
+	var error_1 = require_error$1();
+	var error_2 = require_error$3();
 	var api_request_1 = require_api_request();
 	var utils = require_utils$1();
 	var user_import_builder_1 = require_user_import_builder();
@@ -15124,7 +13060,7 @@ var require_token_generator = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.FirebaseTokenGenerator = exports.EmulatedSigner = exports.BLACKLISTED_CLAIMS = void 0;
 	exports.handleCryptoSignerError = handleCryptoSignerError;
-	var error_1 = require_error();
+	var error_1 = require_error$1();
 	var crypto_signer_1 = require_crypto_signer();
 	var validator = require_validator();
 	var utils_1 = require_utils$1();
@@ -24390,7 +22326,7 @@ var require_lib = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 //#endregion
 //#region node_modules/.pnpm/jwks-rsa@4.1.0_supports-color@7.2.0/node_modules/jwks-rsa/src/wrappers/cache.js
 var require_cache = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var logger = require_src$5()("jwks");
+	var logger = require_src$6()("jwks");
 	var memoizer = require_lib();
 	var { LRUCache } = require_index_min();
 	var { promisify, callbackify: callbackify$1 } = __require("util");
@@ -24702,7 +22638,7 @@ var require_JwksRateLimitError = /* @__PURE__ */ __commonJSMin(((exports, module
 //#endregion
 //#region node_modules/.pnpm/jwks-rsa@4.1.0_supports-color@7.2.0/node_modules/jwks-rsa/src/wrappers/rateLimit.js
 var require_rateLimit = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var logger = require_src$5()("jwks");
+	var logger = require_src$6()("jwks");
 	var { RateLimiter } = require_limiter();
 	var JwksRateLimitError = require_JwksRateLimitError();
 	function rateLimitWrapper(client, { jwksRequestsPerMinute = 10 }) {
@@ -24789,7 +22725,7 @@ var require_SigningKeyNotFoundError = /* @__PURE__ */ __commonJSMin(((exports, m
 //#endregion
 //#region node_modules/.pnpm/jwks-rsa@4.1.0_supports-color@7.2.0/node_modules/jwks-rsa/src/JwksClient.js
 var require_JwksClient = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-	var logger = require_src$5()("jwks");
+	var logger = require_src$6()("jwks");
 	var { retrieveSigningKeys } = require_utils();
 	var { request, cacheSigningKey, rateLimitSigningKey, getKeysInterceptor, callbackSupport } = require_wrappers();
 	var JwksError = require_JwksError();
@@ -25330,7 +23266,7 @@ var require_token_verifier = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.createIdTokenVerifier = createIdTokenVerifier;
 	exports.createAuthBlockingTokenVerifier = createAuthBlockingTokenVerifier;
 	exports.createSessionCookieVerifier = createSessionCookieVerifier;
-	var error_1 = require_error();
+	var error_1 = require_error$1();
 	var util = require_utils$1();
 	var validator = require_validator();
 	var jwt_1 = require_jwt();
@@ -25560,7 +23496,7 @@ var require_user_record = /* @__PURE__ */ __commonJSMin(((exports) => {
 	var deep_copy_1 = require_deep_copy();
 	var validator_1 = require_validator();
 	var utils = require_utils$1();
-	var error_1 = require_error();
+	var error_1 = require_error$1();
 	/**
 	* 'REDACTED', encoded as a base64 string.
 	*/
@@ -25898,7 +23834,7 @@ var require_base_auth = /* @__PURE__ */ __commonJSMin(((exports) => {
 	Object.defineProperty(exports, "__esModule", { value: true });
 	exports.BaseAuth = void 0;
 	exports.createFirebaseTokenGenerator = createFirebaseTokenGenerator;
-	var error_1 = require_error();
+	var error_1 = require_error$1();
 	var deep_copy_1 = require_deep_copy();
 	var validator = require_validator();
 	var auth_api_request_1 = require_auth_api_request();
@@ -26727,7 +24663,7 @@ var require_tenant_manager = /* @__PURE__ */ __commonJSMin(((exports) => {
 	exports.TenantManager = exports.TenantAwareAuth = void 0;
 	var validator = require_validator();
 	var utils = require_utils$1();
-	var error_1 = require_error();
+	var error_1 = require_error$1();
 	var base_auth_1 = require_base_auth();
 	var tenant_1 = require_tenant();
 	var auth_api_request_1 = require_auth_api_request();
@@ -27167,7 +25103,7 @@ var import_auth = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((expor
 			return user_record_1.UserRecord;
 		}
 	});
-	var error_1 = require_error();
+	var error_1 = require_error$1();
 	Object.defineProperty(exports, "FirebaseAuthError", {
 		enumerable: true,
 		get: function() {
@@ -27198,4 +25134,409 @@ import_auth.UserMetadata;
 import_auth.UserRecord;
 var getAuth = import_auth.getAuth;
 //#endregion
-export { initializeApp as i, cert as n, getApps as r, getAuth as t };
+//#region node_modules/.pnpm/firebase-admin@14.2.0_@fire_5dc7b51e8f8445f023693e3088849870/node_modules/firebase-admin/lib/firestore/error.js
+/*! firebase-admin v14.2.0 */
+var require_error = /* @__PURE__ */ __commonJSMin(((exports) => {
+	/*!
+	* Copyright 2026 Google LLC
+	*
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*/
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.FirebaseFirestoreError = exports.FirestoreErrorCode = void 0;
+	var error_1 = require_error$3();
+	/**
+	* The constant mapping for valid Firestore client error codes.
+	*/
+	exports.FirestoreErrorCode = {
+		FAILED_PRECONDITION: "failed-precondition",
+		INVALID_ARGUMENT: "invalid-argument",
+		INVALID_CREDENTIAL: "invalid-credential",
+		MISSING_DEPENDENCIES: "missing-dependencies"
+	};
+	/**
+	* Firebase Firestore error code structure. This extends `FirebaseError`.
+	*/
+	var FirebaseFirestoreError = class extends error_1.FirebaseError {
+		/**
+		* @param info - The error code info.
+		* @param message - The error message. This will override the default
+		*     message if provided.
+		*/
+		constructor(info, message) {
+			super({
+				code: `firestore/${info.code}`,
+				message: message || info.message,
+				httpResponse: info.httpResponse,
+				cause: info.cause
+			});
+			/** @internal */
+			this.codePrefix = "firestore";
+		}
+	};
+	exports.FirebaseFirestoreError = FirebaseFirestoreError;
+}));
+//#endregion
+//#region node_modules/.pnpm/firebase-admin@14.2.0_@fire_5dc7b51e8f8445f023693e3088849870/node_modules/firebase-admin/lib/firestore/firestore-internal.js
+/*! firebase-admin v14.2.0 */
+var require_firestore_internal = /* @__PURE__ */ __commonJSMin(((exports) => {
+	/*!
+	* @license
+	* Copyright 2017 Google LLC
+	*
+	* Licensed under the Apache License, Version 2.0 (the "License");
+	* you may not use this file except in compliance with the License.
+	* You may obtain a copy of the License at
+	*
+	*   http://www.apache.org/licenses/LICENSE-2.0
+	*
+	* Unless required by applicable law or agreed to in writing, software
+	* distributed under the License is distributed on an "AS IS" BASIS,
+	* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+	* See the License for the specific language governing permissions and
+	* limitations under the License.
+	*/
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.FirestoreService = exports.DEFAULT_DATABASE_ID = void 0;
+	exports.getFirestoreOptions = getFirestoreOptions;
+	var error_1 = require_error();
+	var credential_internal_1 = require_credential_internal();
+	var validator = require_validator();
+	var utils = require_utils$1();
+	exports.DEFAULT_DATABASE_ID = "(default)";
+	var FirestoreService = class {
+		constructor(app) {
+			this.databases = /* @__PURE__ */ new Map();
+			this.firestoreSettings = /* @__PURE__ */ new Map();
+			this.appInternal = app;
+		}
+		initializeDatabase(databaseId, settings) {
+			const existingInstance = this.databases.get(databaseId);
+			if (existingInstance) {
+				const initialSettings = this.firestoreSettings.get(databaseId) ?? {};
+				if (this.checkIfSameSettings(settings, initialSettings)) return existingInstance;
+				throw new error_1.FirebaseFirestoreError({
+					code: "failed-precondition",
+					message: "initializeFirestore() has already been called with different options. To avoid this error, call initializeFirestore() with the same options as when it was originally called, or call getFirestore() to return the already initialized instance."
+				});
+			}
+			const newInstance = initFirestore(this.app, databaseId, settings);
+			this.databases.set(databaseId, newInstance);
+			this.firestoreSettings.set(databaseId, settings);
+			return newInstance;
+		}
+		getDatabase(databaseId) {
+			let database = this.databases.get(databaseId);
+			if (database === void 0) {
+				database = initFirestore(this.app, databaseId, {});
+				this.databases.set(databaseId, database);
+				this.firestoreSettings.set(databaseId, {});
+			}
+			return database;
+		}
+		checkIfSameSettings(settingsA, settingsB) {
+			const a = settingsA ?? {};
+			const b = settingsB ?? {};
+			return a.preferRest === b.preferRest;
+		}
+		/**
+		* Returns the app associated with this Storage instance.
+		*
+		* @returns The app associated with this Storage instance.
+		*/
+		get app() {
+			return this.appInternal;
+		}
+	};
+	exports.FirestoreService = FirestoreService;
+	function getFirestoreOptions(app, firestoreSettings) {
+		if (!validator.isNonNullObject(app) || !("options" in app)) throw new error_1.FirebaseFirestoreError({
+			code: "invalid-argument",
+			message: "First argument passed to admin.firestore() must be a valid Firebase app instance."
+		});
+		const projectId = utils.getExplicitProjectId(app);
+		const credential = app.options.credential;
+		const sdkVersion = utils.getSdkVersion();
+		const preferRest = firestoreSettings?.preferRest;
+		if (credential instanceof credential_internal_1.ServiceAccountCredential) return {
+			credentials: {
+				private_key: credential.privateKey,
+				client_email: credential.clientEmail
+			},
+			projectId,
+			firebaseVersion: sdkVersion,
+			firebaseAdminVersion: sdkVersion,
+			preferRest
+		};
+		else if ((0, credential_internal_1.isApplicationDefault)(app.options.credential)) return validator.isNonEmptyString(projectId) ? {
+			projectId,
+			firebaseVersion: sdkVersion,
+			firebaseAdminVersion: sdkVersion,
+			preferRest
+		} : {
+			firebaseVersion: sdkVersion,
+			firebaseAdminVersion: sdkVersion,
+			preferRest
+		};
+		throw new error_1.FirebaseFirestoreError({
+			code: "invalid-credential",
+			message: "Failed to initialize Google Cloud Firestore client with the available credentials. Must initialize the SDK with a certificate credential or application default credentials to use Cloud Firestore API."
+		});
+	}
+	function initFirestore(app, databaseId, firestoreSettings) {
+		const options = getFirestoreOptions(app, firestoreSettings);
+		options.databaseId = databaseId;
+		let firestoreDatabase;
+		try {
+			firestoreDatabase = require_src$5().Firestore;
+		} catch (err) {
+			throw new error_1.FirebaseFirestoreError({
+				code: "missing-dependencies",
+				message: "Failed to import the Cloud Firestore client library for Node.js. Make sure to install the \"@google-cloud/firestore\" npm package.",
+				cause: err
+			});
+		}
+		return new firestoreDatabase(options);
+	}
+}));
+/*! firebase-admin v14.2.0 */
+/*!
+* Copyright 2020 Google LLC
+*
+* Licensed under the Apache License, Version 2.0 (the "License");
+* you may not use this file except in compliance with the License.
+* You may obtain a copy of the License at
+*
+*   http://www.apache.org/licenses/LICENSE-2.0
+*
+* Unless required by applicable law or agreed to in writing, software
+* distributed under the License is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+* See the License for the specific language governing permissions and
+* limitations under the License.
+*/
+//#endregion
+//#region node_modules/.pnpm/firebase-admin@14.2.0_@fire_5dc7b51e8f8445f023693e3088849870/node_modules/firebase-admin/lib/esm/firestore/index.js
+var import_firestore = /* @__PURE__ */ __toESM((/* @__PURE__ */ __commonJSMin(((exports) => {
+	Object.defineProperty(exports, "__esModule", { value: true });
+	exports.FirebaseFirestoreError = exports.FirestoreErrorCode = exports.setLogFunction = exports.v1 = exports.WriteResult = exports.WriteBatch = exports.Transaction = exports.Timestamp = exports.QuerySnapshot = exports.QueryPartition = exports.QueryDocumentSnapshot = exports.Query = exports.GrpcStatus = exports.GeoPoint = exports.Firestore = exports.Filter = exports.FieldValue = exports.FieldPath = exports.DocumentSnapshot = exports.DocumentReference = exports.CollectionReference = exports.CollectionGroup = exports.BundleBuilder = exports.BulkWriter = exports.AggregateQuerySnapshot = exports.AggregateQuery = exports.AggregateField = void 0;
+	exports.getFirestore = getFirestore;
+	exports.initializeFirestore = initializeFirestore;
+	var app_1 = require_app();
+	var firestore_internal_1 = require_firestore_internal();
+	var firestore_1 = require_src$5();
+	Object.defineProperty(exports, "AggregateField", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.AggregateField;
+		}
+	});
+	Object.defineProperty(exports, "AggregateQuery", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.AggregateQuery;
+		}
+	});
+	Object.defineProperty(exports, "AggregateQuerySnapshot", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.AggregateQuerySnapshot;
+		}
+	});
+	Object.defineProperty(exports, "BulkWriter", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.BulkWriter;
+		}
+	});
+	Object.defineProperty(exports, "BundleBuilder", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.BundleBuilder;
+		}
+	});
+	Object.defineProperty(exports, "CollectionGroup", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.CollectionGroup;
+		}
+	});
+	Object.defineProperty(exports, "CollectionReference", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.CollectionReference;
+		}
+	});
+	Object.defineProperty(exports, "DocumentReference", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.DocumentReference;
+		}
+	});
+	Object.defineProperty(exports, "DocumentSnapshot", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.DocumentSnapshot;
+		}
+	});
+	Object.defineProperty(exports, "FieldPath", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.FieldPath;
+		}
+	});
+	Object.defineProperty(exports, "FieldValue", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.FieldValue;
+		}
+	});
+	Object.defineProperty(exports, "Filter", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.Filter;
+		}
+	});
+	Object.defineProperty(exports, "Firestore", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.Firestore;
+		}
+	});
+	Object.defineProperty(exports, "GeoPoint", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.GeoPoint;
+		}
+	});
+	Object.defineProperty(exports, "GrpcStatus", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.GrpcStatus;
+		}
+	});
+	Object.defineProperty(exports, "Query", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.Query;
+		}
+	});
+	Object.defineProperty(exports, "QueryDocumentSnapshot", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.QueryDocumentSnapshot;
+		}
+	});
+	Object.defineProperty(exports, "QueryPartition", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.QueryPartition;
+		}
+	});
+	Object.defineProperty(exports, "QuerySnapshot", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.QuerySnapshot;
+		}
+	});
+	Object.defineProperty(exports, "Timestamp", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.Timestamp;
+		}
+	});
+	Object.defineProperty(exports, "Transaction", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.Transaction;
+		}
+	});
+	Object.defineProperty(exports, "WriteBatch", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.WriteBatch;
+		}
+	});
+	Object.defineProperty(exports, "WriteResult", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.WriteResult;
+		}
+	});
+	Object.defineProperty(exports, "v1", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.v1;
+		}
+	});
+	Object.defineProperty(exports, "setLogFunction", {
+		enumerable: true,
+		get: function() {
+			return firestore_1.setLogFunction;
+		}
+	});
+	function getFirestore(appOrDatabaseId, optionalDatabaseId) {
+		const app = typeof appOrDatabaseId === "object" ? appOrDatabaseId : (0, app_1.getApp)();
+		const databaseId = (typeof appOrDatabaseId === "string" ? appOrDatabaseId : optionalDatabaseId) || firestore_internal_1.DEFAULT_DATABASE_ID;
+		return app.getOrInitService("firestore", (app) => new firestore_internal_1.FirestoreService(app)).getDatabase(databaseId);
+	}
+	function initializeFirestore(app, settings, databaseId) {
+		settings ??= {};
+		databaseId ??= firestore_internal_1.DEFAULT_DATABASE_ID;
+		return app.getOrInitService("firestore", (app) => new firestore_internal_1.FirestoreService(app)).initializeDatabase(databaseId, settings);
+	}
+	var error_1 = require_error();
+	Object.defineProperty(exports, "FirestoreErrorCode", {
+		enumerable: true,
+		get: function() {
+			return error_1.FirestoreErrorCode;
+		}
+	});
+	Object.defineProperty(exports, "FirebaseFirestoreError", {
+		enumerable: true,
+		get: function() {
+			return error_1.FirebaseFirestoreError;
+		}
+	});
+})))());
+import_firestore.AggregateField;
+import_firestore.AggregateQuery;
+import_firestore.AggregateQuerySnapshot;
+import_firestore.BulkWriter;
+import_firestore.BundleBuilder;
+import_firestore.CollectionGroup;
+import_firestore.CollectionReference;
+import_firestore.DocumentReference;
+import_firestore.DocumentSnapshot;
+import_firestore.FieldPath;
+import_firestore.FieldValue;
+import_firestore.Filter;
+import_firestore.FirebaseFirestoreError;
+import_firestore.Firestore;
+import_firestore.FirestoreErrorCode;
+import_firestore.GeoPoint;
+import_firestore.GrpcStatus;
+import_firestore.Query;
+import_firestore.QueryDocumentSnapshot;
+import_firestore.QueryPartition;
+import_firestore.QuerySnapshot;
+import_firestore.Timestamp;
+import_firestore.Transaction;
+import_firestore.WriteBatch;
+import_firestore.WriteResult;
+var getFirestore = import_firestore.getFirestore;
+import_firestore.initializeFirestore;
+import_firestore.setLogFunction;
+import_firestore.v1;
+//#endregion
+export { initializeApp as a, getApps as i, getAuth as n, cert as r, getFirestore as t };

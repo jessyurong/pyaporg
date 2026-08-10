@@ -19,7 +19,13 @@ function consumeLastCapturedError() {
 	}
 	const { error } = lastCapturedError;
 	lastCapturedError = void 0;
-	return error;
+	if (error instanceof Error) return error;
+	if (typeof error === "object" && error !== null) try {
+		return /* @__PURE__ */ new Error(`Recovered non-Error throw: ${JSON.stringify(error, null, 2)}`);
+	} catch {
+		return /* @__PURE__ */ new Error(`Recovered non-Error throw: ${String(error)}`);
+	}
+	return /* @__PURE__ */ new Error(`Recovered non-Error throw: ${String(error)}`);
 }
 function renderErrorPage() {
 	return `<!doctype html>
@@ -53,7 +59,7 @@ function renderErrorPage() {
 }
 var serverEntryPromise;
 async function getServerEntry() {
-	if (!serverEntryPromise) serverEntryPromise = import("./server-IPJjiJ69.mjs").then((n) => n.t).then((m) => m.default ?? m);
+	if (!serverEntryPromise) serverEntryPromise = import("./server-BENmE4dw.mjs").then((n) => n.t).then((m) => m.default ?? m);
 	return serverEntryPromise;
 }
 async function normalizeCatastrophicSsrResponse(response) {
@@ -61,7 +67,10 @@ async function normalizeCatastrophicSsrResponse(response) {
 	if (!(response.headers.get("content-type") ?? "").includes("application/json")) return response;
 	const body = await response.clone().text();
 	if (!isH3SwallowedErrorBody(body)) return response;
-	console.error(consumeLastCapturedError() ?? /* @__PURE__ */ new Error(`h3 swallowed SSR error: ${body}`));
+	const capturedError = consumeLastCapturedError();
+	console.error("h3 swallowed SSR error body:", body);
+	if (capturedError) console.error("Recovered underlying error:", formatErrorForLogs(capturedError));
+	else console.error("No recovered underlying error available from consumeLastCapturedError().");
 	return new Response(renderErrorPage(), {
 		status: 500,
 		headers: { "content-type": "text/html; charset=utf-8" }
@@ -75,11 +84,20 @@ function isH3SwallowedErrorBody(body) {
 		return false;
 	}
 }
+function formatErrorForLogs(error) {
+	if (error instanceof Error) return `${error.name}: ${error.message}\n${error.stack ?? "<no stack available>"}`;
+	if (typeof error === "object" && error !== null) try {
+		return `Non-Error thrown object:\n${JSON.stringify(error, null, 2)}`;
+	} catch {
+		return `Non-Error thrown object: ${String(error)}`;
+	}
+	return `Non-Error thrown value: ${String(error)}`;
+}
 var server_default = { async fetch(request, env, ctx) {
 	try {
 		return await normalizeCatastrophicSsrResponse(await (await getServerEntry()).fetch(request, env, ctx));
 	} catch (error) {
-		console.error(error);
+		console.error("SSR fetch error:", formatErrorForLogs(error));
 		return new Response(renderErrorPage(), {
 			status: 500,
 			headers: { "content-type": "text/html; charset=utf-8" }
