@@ -25,163 +25,81 @@ function usePersistentState(key, initial) {
 }
 import { LayoutDashboard, Users, CheckSquare, Calendar, Award, Wallet, Megaphone, Settings, LogOut, Plus, X, Trash2, User, MessageSquare, Menu, Eye, EyeOff, Trophy, Home } from "lucide-react";
 import Welcome, { DEFAULT_WELCOME } from "./Welcome.jsx";
-import { auth, db } from "@/lib/firebase";
-import {
-  onAuthStateChanged,
-  signInWithEmailAndPassword,
-  createUserWithEmailAndPassword,
-  signOut,
-} from "firebase/auth";
-import {
-  addDoc,
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  orderBy,
-  query,
-  setDoc,
-  where,
-} from "firebase/firestore";
+import { supabase } from "@/integrations/supabase/client";
 
-// ============ Firebase-backed hooks ============
+// ============ Supabase-backed hooks ============
 function useAuthSession() {
   const [state, setState] = useState({ loading: true, session: null, role: null, name: null, status: null });
   useEffect(() => {
     let mounted = true;
-
     async function loadProfile(userId) {
-      const roleQuery = query(collection(db, "user_roles"), where("user_id", "==", userId));
-      const profileQuery = query(collection(db, "profiles"), where("user_id", "==", userId));
-      const [roleSnap, profileSnap] = await Promise.all([getDocs(roleQuery), getDocs(profileQuery)]);
-
-      let role = roleSnap.docs[0]?.data()?.role;
-      const profileData = profileSnap.docs[0]?.data();
-      role = typeof role === "string" ? role.toLowerCase() : null;
-
-      const superadminQuery = query(collection(db, "user_roles"), where("role", "==", "superadmin"));
-      const superadminSnap = await getDocs(superadminQuery);
-      const noSuperadmin = superadminSnap.empty;
-
-      if (!role) {
-        if (noSuperadmin) {
-          role = "superadmin";
-          await setDoc(doc(db, "user_roles", userId), {
-            user_id: userId,
-            role,
-          });
-        } else {
-          role = "member";
-        }
-      } else if (role !== "superadmin" && noSuperadmin) {
-        role = "superadmin";
-        await setDoc(doc(db, "user_roles", userId), {
-          user_id: userId,
-          role,
-        });
-      }
-
+      const [{ data: rr }, { data: pp }] = await Promise.all([
+        supabase.from("user_roles").select("role").eq("user_id", userId).maybeSingle(),
+        supabase.from("profiles").select("full_name, status").eq("user_id", userId).maybeSingle(),
+      ]);
       return {
-        role: role || "member",
-        name: profileData?.full_name || null,
-        status: profileData?.status ?? "active",
+        role: rr?.role || "member",
+        name: pp?.full_name || null,
+        status: pp?.status ?? "active",
       };
     }
-
-    const unsubscribe = onAuthStateChanged(auth, async (user) => {
-      if (!mounted) return;
-      if (!user) {
-        setState({ loading: false, session: null, role: null, name: null, status: null });
-        return;
-      }
-      setState((prev) => ({ ...prev, loading: true, session: { user } }));
-      try {
-        const { role, name, status } = await loadProfile(user.uid);
-        if (mounted) {
-          setState({ loading: false, session: { user }, role, name, status });
-        }
-      } catch (error) {
-        console.error("Failed to load user profile:", error);
-        if (mounted) {
-          setState({ loading: false, session: { user }, role: "member", name: null, status: "active" });
-        }
-      }
-    });
-
-    return () => {
-      mounted = false;
-      unsubscribe();
+    const applySession = async (s) => {
+      const { role, name, status } = await loadProfile(s.user.id);
+      if (mounted) setState({ loading: false, session: s, role, name, status });
     };
+    const applyFallback = (s) => {
+      if (mounted) setState({ loading: false, session: s, role: "member", name: null, status: "active" });
+    };
+    const { data: sub } = supabase.auth.onAuthStateChange((_e, s) => {
+      if (!mounted) return;
+      if (!s) { setState({ loading: false, session: null, role: null, name: null, status: null }); return; }
+      setState((prev) => ({ ...prev, loading: true, session: s }));
+      setTimeout(async () => {
+        try { await applySession(s); } catch (err) { console.error("Failed to load user profile:", err); applyFallback(s); }
+      }, 0);
+    });
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (!mounted) return;
+      if (!data.session) { setState({ loading: false, session: null, role: null, name: null, status: null }); return; }
+      try { await applySession(data.session); } catch (err) { console.error("Failed to load user profile:", err); applyFallback(data.session); }
+    });
+    return () => { mounted = false; sub.subscription.unsubscribe(); };
   }, []);
-
   return state;
 }
 
 function useAnnouncements() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const refresh = async () => {
     setLoading(true);
-    try {
-      const q = query(
-        collection(db, "announcements"),
-        orderBy("created_at", "desc"),
-      );
-      const snap = await getDocs(q);
-      setItems(snap.docs.map((docSnap) => {
-        const data = docSnap.data();
-        const createdAt = data.created_at;
-        const date = typeof createdAt === "string"
-          ? createdAt.slice(0, 10)
-          : createdAt?.toDate?.()?.toISOString().slice(0, 10) || "";
-
-        return {
-          id: docSnap.id,
-          title: data.title,
-          content: data.body,
-          urgency: data.urgency || "normal",
-          date,
-        };
-      }));
-    } catch (error) {
-      console.error("Failed to load announcements:", error);
-      setItems([]);
+    const { data, error } = await supabase.from("announcements").select("*").order("created_at", { ascending: false });
+    if (!error) {
+      setItems((data || []).map((a) => ({
+        id: a.id,
+        title: a.title,
+        content: a.body,
+        urgency: a.urgency || "normal",
+        date: (a.created_at || "").slice(0, 10),
+      })));
     }
     setLoading(false);
   };
-
   useEffect(() => { refresh(); }, []);
-
   const add = async ({ title, content, urgency }) => {
-    try {
-      const userId = auth.currentUser?.uid ?? null;
-      await addDoc(collection(db, "announcements"), {
-        title,
-        body: content || "",
-        urgency: urgency || "normal",
-        created_by: userId,
-        created_at: new Date().toISOString(),
-      });
-      await refresh();
-      return true;
-    } catch (error) {
-      console.error("Failed to post announcement:", error);
-      alert("Failed to post announcement: " + (error?.message || "Unknown error"));
-      return false;
-    }
+    const { data: u } = await supabase.auth.getUser();
+    const { error } = await supabase.from("announcements").insert({
+      title, body: content || "", urgency: urgency || "normal", created_by: u?.user?.id ?? null,
+    });
+    if (error) { alert("Failed to post announcement: " + error.message); return false; }
+    await refresh();
+    return true;
   };
-
   const remove = async (id) => {
-    try {
-      await deleteDoc(doc(db, "announcements", id));
-      await refresh();
-    } catch (error) {
-      console.error("Failed to delete announcement:", error);
-      alert("Failed to delete: " + (error?.message || "Unknown error"));
-    }
+    const { error } = await supabase.from("announcements").delete().eq("id", id);
+    if (error) { alert("Failed to delete: " + error.message); return; }
+    await refresh();
   };
-
   return { items, loading, add, remove, refresh };
 }
 
@@ -277,7 +195,7 @@ function Badge({ children, tone = "neutral" }) {
 }
 
 export default function App() {
-  const authSession = useAuthSession();
+  const auth = useAuthSession();
   const announce = useAnnouncements();
   const [guestMode, setGuestMode] = useState(false);
   const [screen, setScreen] = useState("dashboard");
@@ -308,19 +226,19 @@ export default function App() {
   const [requestBusy, setRequestBusy] = useState(false);
   const [requestSuccess, setRequestSuccess] = useState("");
   const [accountRequests, setAccountRequests] = useState([]);
+  const [pendingUsers, setPendingUsers] = useState([]);
+  const [pendingRoleSelection, setPendingRoleSelection] = useState({});
+  const [pendingLoading, setPendingLoading] = useState(true);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [showAbout, setShowAbout] = useState(false);
   const [welcomeContent, setWelcomeContent] = usePersistentState("welcomeContent", DEFAULT_WELCOME);
   const [dashboardWidgets, setDashboardWidgets] = usePersistentState("dashboardWidgets", { totalMembers: true, activeMembers: true, totalEvents: true, attendanceRate: true, fundBalance: true, birthdays: true, birthdayList: true, recentAnnouncements: true });
   const [showLoginModal, setShowLoginModal] = useState(false);
-  const [pendingUsers, setPendingUsers] = useState([]);
-  const [pendingRoleSelection, setPendingRoleSelection] = useState({});
-  const [pendingLoading, setPendingLoading] = useState(true);
 
-  const isSignedIn = !!authSession.session;
+  const isSignedIn = !!auth.session;
   const isGuest = !isSignedIn && guestMode;
-  const role = authSession.role || "member";
-  const displayName = authSession.name || authSession.session?.user?.email?.split("@")[0] || "";
+  const role = auth.role;
+  const displayName = auth.name || auth.session?.user?.email?.split("@")[0] || "";
   const session = isSignedIn ? { name: displayName, role } : (isGuest ? { guest: true } : null);
 
   const announcements = announce.items;
@@ -347,21 +265,14 @@ export default function App() {
     const fd = new FormData(e.target);
     const email = (fd.get("email") || "").trim();
     const password = fd.get("password") || "";
-
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) { setLoginError(error.message); return; }
       setShowLoginModal(false);
       setScreen("dashboard");
-    } catch (error) {
-      setLoginError(error?.message || "Authentication failed.");
     } finally {
       setLoginBusy(false);
     }
-  }
-
-  function handleGuest() {
-    setGuestMode(true);
-    setScreen("dashboard");
   }
 
   async function handleRequestAccount(e) {
@@ -384,69 +295,39 @@ export default function App() {
     }
 
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const userId = userCredential.user.uid;
-
-      let isFirstSuperadmin = false;
-      try {
-        const rolesSnap = await getDocs(collection(db, "user_roles"));
-        isFirstSuperadmin = rolesSnap.empty;
-      } catch (error) {
-        console.error("Failed to check existing roles:", error);
-      }
-
-      await setDoc(doc(db, "profiles", userId), {
-        user_id: userId,
-        full_name: name,
+      const { data, error } = await supabase.auth.signUp({
         email,
-        age,
-        sex,
-        address,
-        status: isFirstSuperadmin ? "active" : "pending",
-        created_at: new Date().toISOString(),
+        password,
+        options: {
+          data: { full_name: name, age, sex, address },
+          emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+        },
       });
-
-      if (isFirstSuperadmin) {
-        await setDoc(doc(db, "user_roles", userId), {
-          user_id: userId,
-          role: "superadmin",
-        });
+      if (error) {
+        setRequestError("Account request failed: " + error.message);
+        return;
       }
-
-      await addDoc(collection(db, "account_requests"), {
-        user_id: userId,
-        name,
-        email,
-        age,
-        sex,
-        address,
-        status: isFirstSuperadmin ? "accepted" : "new",
-        notified_roles: ["superadmin", "president", "secretary"],
-        created_at: new Date().toISOString(),
-      });
-
-      if (isFirstSuperadmin) {
-        await signOut(auth);
-        setRequestSuccess("Your account was created as the first superadmin. Please log in again.");
-        setShowRequestModal(false);
-        setShowLoginModal(true);
+      if (!data?.session) {
+        setRequestSuccess("Request sent! Please confirm your email, then log in. Wait for leader approval.");
       } else {
-        setRequestSuccess("Your account request has been sent successfully. Wait for leader approval.");
-        setShowRequestModal(false);
+        setRequestSuccess("Your account request has been sent. Wait for leader approval.");
       }
-    } catch (error) {
-      const errorMessage = error?.code
-        ? `${error.code}: ${error.message}`
-        : error?.message || "Failed to send request.";
-      console.error("Failed to send account request:", error);
-      setRequestError(`Account request failed: ${errorMessage}`);
+      setShowRequestModal(false);
+    } catch (err) {
+      console.error("Failed to send account request:", err);
+      setRequestError("Account request failed: " + (err?.message || "Please try again."));
     } finally {
       setRequestBusy(false);
     }
   }
 
+  function handleGuest() {
+    setGuestMode(true);
+    setScreen("dashboard");
+  }
+
   async function handleLogout() {
-    await signOut(auth);
+    await supabase.auth.signOut();
     setGuestMode(false);
     setScreen("dashboard");
     setSelectedMember(null);
@@ -459,13 +340,12 @@ export default function App() {
       return;
     }
     setPendingLoading(true);
-    try {
-      const q = query(collection(db, "profiles"), where("status", "==", "pending"));
-      const snap = await getDocs(q);
-      setPendingUsers(snap.docs.map(docSnap => ({ id: docSnap.id, ...(docSnap.data() || {}) })));
-    } catch (error) {
+    const { data, error } = await supabase.from("profiles").select("*").eq("status", "pending");
+    if (error) {
       console.error("Failed to load pending users:", error);
       setPendingUsers([]);
+    } else {
+      setPendingUsers(data || []);
     }
     setPendingLoading(false);
   }
@@ -475,51 +355,46 @@ export default function App() {
       setAccountRequests([]);
       return;
     }
-
-    try {
-      const q = query(collection(db, "account_requests"), orderBy("created_at", "desc"));
-      const snap = await getDocs(q);
-      setAccountRequests(snap.docs.map(docSnap => ({ id: docSnap.id, ...(docSnap.data() || {}) })));
-    } catch (error) {
+    const { data, error } = await supabase.from("account_requests").select("*").order("created_at", { ascending: false });
+    if (error) {
       console.error("Failed to load account requests:", error);
       setAccountRequests([]);
+    } else {
+      setAccountRequests(data || []);
     }
   }
 
   useEffect(() => {
     fetchPendingUsers();
     fetchAccountRequests();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role]);
 
   async function approvePendingUser(userId, roleSelection) {
     const roleToSet = roleSelection || "member";
-    try {
-      await setDoc(doc(db, "user_roles", userId), {
-        user_id: userId,
-        role: roleToSet,
-      });
-      await setDoc(doc(db, "profiles", userId), {
-        status: "active",
-      }, { merge: true });
-      await fetchPendingUsers();
-    } catch (error) {
-      console.error("Failed to approve pending user:", error);
-    }
+    const { error: roleError } = await supabase
+      .from("user_roles")
+      .upsert({ user_id: userId, role: roleToSet }, { onConflict: "user_id" });
+    if (roleError) { alert("Failed to assign role: " + roleError.message); return; }
+    const { error: profileError } = await supabase
+      .from("profiles")
+      .update({ status: "active" })
+      .eq("user_id", userId);
+    if (profileError) { alert("Failed to approve user: " + profileError.message); return; }
+    await fetchPendingUsers();
   }
 
   async function rejectPendingUser(userId) {
-    try {
-      await setDoc(doc(db, "profiles", userId), {
-        status: "rejected",
-      }, { merge: true });
-      await fetchPendingUsers();
-    } catch (error) {
-      console.error("Failed to reject pending user:", error);
-    }
+    const { error } = await supabase
+      .from("profiles")
+      .update({ status: "rejected" })
+      .eq("user_id", userId);
+    if (error) { alert("Failed to reject user: " + error.message); return; }
+    await fetchPendingUsers();
   }
 
-  const isPending = authSession.status === "pending";
-  const isRejected = authSession.status === "rejected";
+  const isPending = auth.status === "pending";
+  const isRejected = auth.status === "rejected";
 
   // Loading state while auth boots
   if (auth.loading && !isSignedIn && !isGuest) {
@@ -615,8 +490,6 @@ export default function App() {
       </div>
     );
   }
-
-  // ---------- WELCOME PAGE (when superadmin opens it after login) ----------
   if (screen === "welcome") {
     return (
       <Welcome
@@ -791,11 +664,6 @@ export default function App() {
         )}
         {screen === "accountRequests" && isLeader && (
           <AccountRequests requests={accountRequests} />
-        )}
-        {screen === "accountRequests" && isLeader && (
-          <AccountRequests
-            requests={accountRequests}
-          />
         )}
       </div>
 
