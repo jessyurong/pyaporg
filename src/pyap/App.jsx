@@ -32,6 +32,7 @@ import { Snapshots, SnapshotUploadModal } from "./components/SnapshotsPage.jsx";
 import { BackupExport, DonateBox, AboutModal, WelcomePage } from "./components/SettingsPage.jsx";
 import { PendingUsers, AccountRequests, FeatureAccess, UserManagement } from "./components/AccountsPage.jsx";
 import { Sidebar } from "./components/Sidebar.jsx";
+import { MyProfile } from "./components/MyProfilePage.jsx";
 import { LoginModal, RequestAccountModal, LoginDetailsCard } from "./components/LoginForm.jsx";
 
 export default function App() {
@@ -126,6 +127,7 @@ export default function App() {
   const accountRequestCount = accountRequests.length;
   const isLeader = ["superadmin", "president", "secretary", "organizer"].includes(role);
   const canManageSnapshots = role === "superadmin" || role === "president";
+  const myMember = isSignedIn && auth.session?.user?.id ? members.find((m) => m.userId === auth.session.user.id) || null : null;
 
   const installButton = installEvt || iosInstallHint ? (
     <button
@@ -163,6 +165,11 @@ export default function App() {
     featureAccess.pendingUsers = true;
     featureAccess.accountRequests = true;
   }
+
+  // "My Profile" — para sa LAHAT ng naka-login (member man o leader).
+  // Dito sila pwedeng mag-upload ng sariling profile photo nang hindi
+  // kailangang i-grant ang buong Members screen.
+  if (isSignedIn) featureAccess.myprofile = true;
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -509,6 +516,22 @@ export default function App() {
                 setSelectedMember((m) => (m ? { ...m, avatarUrl: "" } : m));
                 membersApi.refresh();
               }
+            }}
+          />
+        )}
+        {screen === "myprofile" && (
+          <MyProfile
+            member={myMember}
+            accountName={displayName}
+            accountEmail={auth.session?.user?.email || ""}
+            photoBusy={avatarApi.busy}
+            onPhotoChange={async (file) => {
+              const url = await avatarApi.upload(myMember, file);
+              if (url) membersApi.refresh();
+            }}
+            onPhotoRemove={async () => {
+              const ok = await avatarApi.remove(myMember);
+              if (ok) membersApi.refresh();
             }}
           />
         )}

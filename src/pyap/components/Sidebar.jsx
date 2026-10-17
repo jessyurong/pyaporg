@@ -1,8 +1,9 @@
 import React from "react";
-import { Award, Calendar, Camera, CheckSquare, Download, Home, LayoutDashboard, LogOut, Megaphone, Menu, MessageSquare, Settings, ShieldCheck, Sprout, Trophy, Users, Wallet, X } from "lucide-react";
+import { Award, Calendar, Camera, CheckSquare, Download, Home, LayoutDashboard, LogOut, Megaphone, Menu, MessageSquare, Settings, ShieldCheck, Sprout, Trophy, Users, UserRound, Wallet, X } from "lucide-react";
 
 export const NAV = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { key: "myprofile", label: "My Profile", icon: UserRound },
   { key: "announcements", label: "Announcements", icon: Megaphone },
   { key: "snapshots", label: "Snapshots", icon: Camera },
   { key: "members", label: "Members", icon: Users },
