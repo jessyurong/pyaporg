@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 import { LayoutDashboard, Users, CheckSquare, Calendar, Award, Wallet, Megaphone, Settings, LogOut, Plus, X, Trash2, User, MessageSquare, Menu, Eye, EyeOff, Trophy, Home, Camera, Download, Smartphone, Medal, Star, Dumbbell, HandHeart, Heart, Cake, Phone, ClipboardList, Check, FileText, Sprout, Banknote, CheckCircle, KeyRound, ShieldCheck, Lock } from "lucide-react";
 import Welcome, { DEFAULT_WELCOME } from "./Welcome.jsx";
@@ -68,14 +69,16 @@ function useAnnouncements() {
     const { error } = await supabase.from("announcements").insert({
       title, body: content || "", urgency: urgency || "normal", created_by: u?.user?.id ?? null,
     });
-    if (error) { alert("Failed to post announcement: " + error.message); return false; }
+    if (error) { toast.error("Failed to post announcement: " + error.message); return false; }
     await refresh();
+    toast.success("Announcement posted.");
     return true;
   };
   const remove = async (id) => {
     const { error } = await supabase.from("announcements").delete().eq("id", id);
-    if (error) { alert("Failed to delete: " + error.message); return; }
+    if (error) { toast.error("Failed to delete: " + error.message); return; }
     await refresh();
+    toast.success("Announcement deleted.");
   };
   return { items, loading, add, remove, refresh };
 }
@@ -111,14 +114,16 @@ function useSuggestions() {
       submitter_name: user?.user_metadata?.full_name || (user?.email ? user.email.split("@")[0] : "Guest"),
       is_anonymous: !user,
     });
-    if (error) { alert("Failed to send suggestion: " + error.message); return false; }
+    if (error) { toast.error("Failed to send suggestion: " + error.message); return false; }
     if (user) await refresh();
+    toast.success("Suggestion sent.");
     return true;
   };
   const remove = async (id) => {
     const { error } = await supabase.from("suggestions").delete().eq("id", id);
-    if (error) { alert("Failed to delete suggestion: " + error.message); return; }
+    if (error) { toast.error("Failed to delete suggestion: " + error.message); return; }
     await refresh();
+    toast.success("Suggestion deleted.");
   };
   return { items, loading, add, remove, refresh };
 }
@@ -149,7 +154,7 @@ function useMembers(active = true) {
     setLoading(false);
   };
   useEffect(() => { refresh(); }, [active]);
-  const add = async (member) => {
+  const add = async (member, silent = false) => {
     const { error } = await supabase.from("members").insert({
       full_name: member.name,
       position: member.position || null,
@@ -158,14 +163,16 @@ function useMembers(active = true) {
       address: member.address || null,
       email: member.email || null,
     });
-    if (error) { alert("Failed to add member: " + error.message); return false; }
+    if (error) { toast.error("Failed to add member: " + error.message); return false; }
     await refresh();
+    if (!silent) toast.success("Member added.");
     return true;
   };
   const remove = async (id) => {
     const { error } = await supabase.from("members").delete().eq("id", id);
-    if (error) { alert("Failed to delete member: " + error.message); return; }
+    if (error) { toast.error("Failed to delete member: " + error.message); return; }
     await refresh();
+    toast.success("Member deleted.");
   };
   return { items, loading, add, remove, refresh };
 }
@@ -199,14 +206,16 @@ function useEvents(active = true) {
       location: event.location || null,
       created_by: u?.user?.id ?? null,
     });
-    if (error) { alert("Failed to add event: " + error.message); return false; }
+    if (error) { toast.error("Failed to add event: " + error.message); return false; }
     await refresh();
+    toast.success("Event added.");
     return true;
   };
   const remove = async (id) => {
     const { error } = await supabase.from("events").delete().eq("id", id);
-    if (error) { alert("Failed to delete event: " + error.message); return; }
+    if (error) { toast.error("Failed to delete event: " + error.message); return; }
     await refresh();
+    toast.success("Event deleted.");
   };
   return { items, loading, add, remove, refresh };
 }
@@ -247,8 +256,9 @@ function useAttendance(active = true) {
     });
     if (rows.length === 0) return true;
     const { error } = await supabase.from("attendance").upsert(rows, { onConflict: "event_id,member_id" });
-    if (error) { alert("Failed to save attendance: " + error.message); return false; }
+    if (error) { toast.error("Failed to save attendance: " + error.message); return false; }
     await refresh();
+    toast.success("Attendance saved.");
     return true;
   };
   return { records, notes, loading, save, refresh };
@@ -284,14 +294,16 @@ function useFinance(active = true) {
       description: entry.category || null,
       created_by: u?.user?.id ?? null,
     });
-    if (error) { alert("Failed to add finance entry: " + error.message); return false; }
+    if (error) { toast.error("Failed to add finance entry: " + error.message); return false; }
     await refresh();
+    toast.success("Finance entry added.");
     return true;
   };
   const remove = async (id) => {
     const { error } = await supabase.from("finance_transactions").delete().eq("id", id);
-    if (error) { alert("Failed to delete finance entry: " + error.message); return; }
+    if (error) { toast.error("Failed to delete finance entry: " + error.message); return; }
     await refresh();
+    toast.success("Finance entry deleted.");
   };
   return { items, loading, add, remove, refresh };
 }
@@ -312,8 +324,9 @@ function useWelcomeContent() {
       { id: 1, content: next, updated_at: new Date().toISOString(), updated_by: u?.user?.id ?? null },
       { onConflict: "id" }
     );
-    if (error) { alert("Failed to save welcome page: " + error.message); return false; }
+    if (error) { toast.error("Failed to save welcome page: " + error.message); return false; }
     setContent({ ...DEFAULT_WELCOME, ...next });
+    toast.success("Welcome page saved.");
     return true;
   };
   return { content, save, refresh };
@@ -344,7 +357,8 @@ function useDashboardSettings() {
       { user_id: u.user.id, visible_widgets: next, updated_at: new Date().toISOString() },
       { onConflict: "user_id" }
     );
-    if (error) { alert("Failed to save dashboard settings: " + error.message); return false; }
+    if (error) { toast.error("Failed to save dashboard settings: " + error.message); return false; }
+    toast.success("Dashboard layout saved.");
     return true;
   };
   return { widgets, save, refresh };
@@ -382,14 +396,16 @@ function useAchievements(active = true) {
       badge: item.badge || null,
       created_by: u?.user?.id ?? null,
     });
-    if (error) { alert("Failed to add achievement: " + error.message); return false; }
+    if (error) { toast.error("Failed to add achievement: " + error.message); return false; }
     await refresh();
+    toast.success("Achievement added.");
     return true;
   };
   const remove = async (id) => {
     const { error } = await supabase.from("achievements").delete().eq("id", id);
-    if (error) { alert("Failed to delete achievement: " + error.message); return; }
+    if (error) { toast.error("Failed to delete achievement: " + error.message); return; }
     await refresh();
+    toast.success("Achievement deleted.");
   };
   return { items, loading, add, remove, refresh };
 }
@@ -427,20 +443,23 @@ function useAccounts(active = true) {
   useEffect(() => { refresh(); }, [active]);
   const setRole = async (userId, role) => {
     const { error } = await supabase.from("user_roles").update({ role }).eq("user_id", userId);
-    if (error) { alert("Failed to change role: " + error.message); return false; }
+    if (error) { toast.error("Failed to change role: " + error.message); return false; }
     await refresh();
+    toast.success("Role updated.");
     return true;
   };
   const setStatus = async (userId, status) => {
     const { error } = await supabase.from("profiles").update({ status }).eq("user_id", userId);
-    if (error) { alert("Failed to update account status: " + error.message); return false; }
+    if (error) { toast.error("Failed to update account status: " + error.message); return false; }
     await refresh();
+    toast.success("Account status updated.");
     return true;
   };
   const setBirthday = async (userId, birthday) => {
     const { error } = await supabase.from("profiles").update({ birthday: birthday || null }).eq("user_id", userId);
-    if (error) { alert("Failed to update birthday: " + error.message); return false; }
+    if (error) { toast.error("Failed to update birthday: " + error.message); return false; }
     setAccounts((prev) => prev.map((a) => (a.userId === userId ? { ...a, birthday: birthday || "" } : a)));
+    toast.success("Birthday updated.");
     return true;
   };
   return { accounts, loading, setRole, setStatus, setBirthday, refresh };
@@ -485,12 +504,13 @@ function useRoleFeatures(active) {
     try {
       const clean = Array.from(new Set(features)).filter((f) => GRANTABLE_FEATURES.some((g) => g.key === f));
       const { error } = await supabase.from("role_features").upsert({ role: roleName, features: clean }, { onConflict: "role" });
-      if (error) { alert("Failed to save feature access: " + error.message); return false; }
+      if (error) { toast.error("Failed to save feature access: " + error.message); return false; }
       await refresh();
+      toast.success("Feature access saved.");
       return true;
     } catch (err) {
       console.error("Failed to save feature access:", err);
-      alert("Failed to save feature access: " + (err?.message || "Please try again."));
+      toast.error("Failed to save feature access: " + (err?.message || "Please try again."));
       return false;
     }
   };
@@ -539,16 +559,18 @@ function useSnapshots() {
         await supabase.storage.from("snapshots").remove([path]);
       }
     }
-    if (failed > 0) alert(`Sorry — ${failed} photo(s) failed to upload.`);
+    if (failed > 0) toast.error(`Sorry — ${failed} photo(s) failed to upload.`);
+    else toast.success("Upload complete.");
     await refresh();
     return failed === 0;
   };
   const remove = async (id) => {
     const item = items.find((s) => s.id === id);
     const { error } = await supabase.from("snapshots").delete().eq("id", id);
-    if (error) { alert("Failed to delete photo: " + error.message); return; }
+    if (error) { toast.error("Failed to delete photo: " + error.message); return; }
     if (item?.path) await supabase.storage.from("snapshots").remove([item.path]);
     await refresh();
+    toast.success("Photo deleted.");
   };
   return { items, loading, add, remove, refresh };
 }
@@ -747,7 +769,7 @@ export default function App() {
           } catch { /* ignore */ }
           setInstallEvt(null);
         } else {
-          alert("To install: tap the Share button in Safari (square with an arrow), then choose 'Add to Home Screen'.");
+          toast.info("To install: tap the Share button in Safari (square with an arrow), then choose 'Add to Home Screen'.");
         }
       }}
       className="fixed bottom-4 right-4 z-40 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold pl-3 pr-4 py-3 rounded-full shadow-lg flex items-center gap-2"
@@ -900,12 +922,12 @@ export default function App() {
     const { error: roleError } = await supabase
       .from("user_roles")
       .upsert({ user_id: userId, role: roleToSet }, { onConflict: "user_id" });
-    if (roleError) { alert("Failed to assign role: " + roleError.message); return; }
+    if (roleError) { toast.error("Failed to assign role: " + roleError.message); return; }
     const { error: profileError } = await supabase
       .from("profiles")
       .update({ status: "active" })
       .eq("user_id", userId);
-    if (profileError) { alert("Failed to approve user: " + profileError.message); return; }
+    if (profileError) { toast.error("Failed to approve user: " + profileError.message); return; }
 
     // Also add to the Members list (skip if a member with the same name or email already exists)
     const applicant = pendingUsers.find(u => u.user_id === userId) || {};
@@ -924,13 +946,14 @@ export default function App() {
           email: memberEmail,
           birthday: (applicant.birthday || "").slice(0, 10),
           address: applicant.address || "",
-        });
+        }, true);
       }
     }
 
     await fetchPendingUsers();
     membersApi.refresh();
     accountBirthdaysApi.refresh();
+    toast.success("Account approved.");
   }
 
   async function rejectPendingUser(userId) {
@@ -938,27 +961,28 @@ export default function App() {
       .from("profiles")
       .update({ status: "rejected" })
       .eq("user_id", userId);
-    if (error) { alert("Failed to reject user: " + error.message); return; }
+    if (error) { toast.error("Failed to reject user: " + error.message); return; }
     await fetchPendingUsers();
+    toast.success("Request rejected.");
   }
 
   async function handleSetRole(userId, role) {
-    if (userId === auth.session?.user?.id) { alert("Hindi mo mababago ang sarili mong role."); return; }
+    if (userId === auth.session?.user?.id) { toast.error("Hindi mo mababago ang sarili mong role."); return; }
     const target = accounts.find(a => a.userId === userId);
     const activeSuperadmins = accounts.filter(a => a.role === "superadmin" && a.status === "active").length;
     if (target?.role === "superadmin" && target?.status === "active" && role !== "superadmin" && activeSuperadmins <= 1) {
-      alert("Hindi pwede — ito na lang ang aktibong superadmin.");
+      toast.error("Hindi pwede — ito na lang ang aktibong superadmin.");
       return;
     }
     await accountsApi.setRole(userId, role);
   }
 
   async function handleSetStatus(userId, status) {
-    if (userId === auth.session?.user?.id) { alert("Hindi mo maaaring i-deactivate ang sarili mong account."); return; }
+    if (userId === auth.session?.user?.id) { toast.error("Hindi mo maaaring i-deactivate ang sarili mong account."); return; }
     const target = accounts.find(a => a.userId === userId);
     const activeSuperadmins = accounts.filter(a => a.role === "superadmin" && a.status === "active").length;
     if (target?.role === "superadmin" && target?.status === "active" && status !== "active" && activeSuperadmins <= 1) {
-      alert("Hindi pwede — ito na lang ang aktibong superadmin.");
+      toast.error("Hindi pwede — ito na lang ang aktibong superadmin.");
       return;
     }
     await accountsApi.setStatus(userId, status);
