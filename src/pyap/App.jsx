@@ -1820,22 +1820,25 @@ function PendingUsers({ pendingUsers, loading, roleSelection, onRoleChange, onAp
       <div className="flex justify-between items-center mb-5">
         <div>
           <h1 className="text-xl font-bold text-emerald-900">Pending User Approvals</h1>
-          <p className="text-sm text-stone-500">Approve new signups and assign them a role before they can access the dashboard.</p>
+          <p className="text-sm text-stone-500">Tingnan ang buong info ng nag-request (edad, kasarian, address, birthday) bago i-approve. Pumili ng role bago pindutin ang Approve.</p>
         </div>
       </div>
       <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto">
-        <table className="w-full text-sm min-w-[680px]">
-          <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Name</th><th className="p-3">Email</th><th className="p-3">Birthday</th><th className="p-3">Requested</th><th className="p-3">Role</th><th className="p-3">Actions</th></tr></thead>
+        <table className="w-full text-sm min-w-[1080px]">
+          <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Name</th><th className="p-3">Email</th><th className="p-3">Age</th><th className="p-3">Sex</th><th className="p-3">Birthday</th><th className="p-3">Address</th><th className="p-3">Requested</th><th className="p-3">Role</th><th className="p-3">Actions</th></tr></thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="6" className="p-4 text-stone-500">Loading pending users…</td></tr>
+              <tr><td colSpan="9" className="p-4 text-stone-500">Loading pending users…</td></tr>
             ) : pendingUsers.length === 0 ? (
-              <tr><td colSpan="6" className="p-4 text-stone-500">No pending users at the moment.</td></tr>
+              <tr><td colSpan="9" className="p-4 text-stone-500">No pending users at the moment.</td></tr>
             ) : pendingUsers.map(u => (
               <tr key={u.id} className="border-t border-stone-100">
                 <td className="p-3 font-medium">{u.full_name || "Unknown"}</td>
                 <td className="p-3 text-stone-500">{u.email || "-"}</td>
+                <td className="p-3 text-stone-500">{u.age || "-"}</td>
+                <td className="p-3 text-stone-500">{u.sex || "-"}</td>
                 <td className="p-3 text-stone-500">{fmtBirthday(u.birthday)}</td>
+                <td className="p-3 text-stone-500 max-w-[220px] break-words">{u.address || "-"}</td>
                 <td className="p-3 text-stone-500">{u.created_at ? new Date(u.created_at).toLocaleDateString() : "-"}</td>
                 <td className="p-3">
                   <select className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm" value={roleSelection[u.user_id] || "member"} onChange={(e) => onRoleChange(u.user_id, e.target.value)}>
