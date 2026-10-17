@@ -819,18 +819,22 @@ export default function App() {
     // Also add to the Members list (skip if a member with the same name or email already exists)
     const applicant = pendingUsers.find(u => u.user_id === userId) || {};
     const memberName = (applicant.full_name || "").trim() || (applicant.email || "").split("@")[0];
-    const memberEmail = (applicant.email || "").toLowerCase();
-    const alreadyMember = membersApi.items.some(m =>
-      (memberName && m.name.toLowerCase() === memberName.toLowerCase()) ||
-      (memberEmail && (m.email || "").toLowerCase() === memberEmail)
-    );
-    if (memberName && !alreadyMember) {
-      await membersApi.add({
-        name: memberName,
-        email: applicant.email || "",
-        birthday: (applicant.birthday || "").slice(0, 10),
-        address: applicant.address || "",
-      });
+    const memberEmail = (applicant.email || "").trim();
+    if (memberName) {
+      const { data: dupName } = await supabase.from("members").select("id").ilike("full_name", memberName).limit(1);
+      let dupEmail = [];
+      if (memberEmail) {
+        const { data } = await supabase.from("members").select("id").ilike("email", memberEmail).limit(1);
+        dupEmail = data || [];
+      }
+      if ((dupName || []).length === 0 && dupEmail.length === 0) {
+        await membersApi.add({
+          name: memberName,
+          email: memberEmail,
+          birthday: (applicant.birthday || "").slice(0, 10),
+          address: applicant.address || "",
+        });
+      }
     }
 
     await fetchPendingUsers();
