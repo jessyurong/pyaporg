@@ -580,6 +580,7 @@ export default function App() {
   const dashboardWidgets = dashApi.widgets;
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [installEvt, setInstallEvt] = useState(null);
+  const [iosInstallHint, setIosInstallHint] = useState(false);
 
   useEffect(() => {
     if ("serviceWorker" in navigator && import.meta.env.PROD) {
@@ -596,6 +597,12 @@ export default function App() {
       window.removeEventListener("beforeinstallprompt", onPrompt);
       window.removeEventListener("appinstalled", onInstalled);
     };
+  }, []);
+
+  useEffect(() => {
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const standalone = window.matchMedia?.("(display-mode: standalone)")?.matches || navigator.standalone === true;
+    if (isIOS && !standalone) setIosInstallHint(true);
   }, []);
 
   const isSignedIn = !!auth.session;
@@ -620,15 +627,19 @@ export default function App() {
   const isLeader = ["superadmin", "president", "secretary", "organizer"].includes(role);
   const canManageSnapshots = role === "superadmin" || role === "president";
 
-  const installButton = installEvt ? (
+  const installButton = installEvt || iosInstallHint ? (
     <button
       aria-label="Install app"
       onClick={async () => {
-        try {
-          installEvt.prompt();
-          await installEvt.userChoice;
-        } catch { /* ignore */ }
-        setInstallEvt(null);
+        if (installEvt) {
+          try {
+            installEvt.prompt();
+            await installEvt.userChoice;
+          } catch { /* ignore */ }
+          setInstallEvt(null);
+        } else {
+          alert("To install: tap the Share button in Safari (square with an arrow), then choose 'Add to Home Screen'.");
+        }
       }}
       className="fixed bottom-4 right-4 z-40 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold pl-3 pr-4 py-3 rounded-full shadow-lg flex items-center gap-2"
     >
