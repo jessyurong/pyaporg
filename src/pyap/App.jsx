@@ -123,10 +123,11 @@ function useSuggestions() {
   return { items, loading, add, remove, refresh };
 }
 
-function useMembers() {
+function useMembers(active = true) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const refresh = async () => {
+    if (!active) { setItems([]); setLoading(false); return; }
     setLoading(true);
     const { data, error } = await supabase.from("members").select("*").order("full_name", { ascending: true });
     if (error) {
@@ -147,7 +148,7 @@ function useMembers() {
     }
     setLoading(false);
   };
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => { refresh(); }, [active]);
   const add = async (member) => {
     const { error } = await supabase.from("members").insert({
       full_name: member.name,
@@ -169,10 +170,11 @@ function useMembers() {
   return { items, loading, add, remove, refresh };
 }
 
-function useEvents() {
+function useEvents(active = true) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const refresh = async () => {
+    if (!active) { setItems([]); setLoading(false); return; }
     setLoading(true);
     const { data, error } = await supabase.from("events").select("*").order("event_date", { ascending: false });
     if (error) {
@@ -188,7 +190,7 @@ function useEvents() {
     }
     setLoading(false);
   };
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => { refresh(); }, [active]);
   const add = async (event) => {
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("events").insert({
@@ -209,11 +211,12 @@ function useEvents() {
   return { items, loading, add, remove, refresh };
 }
 
-function useAttendance() {
+function useAttendance(active = true) {
   const [records, setRecords] = useState({});
   const [notes, setNotes] = useState({});
   const [loading, setLoading] = useState(true);
   const refresh = async () => {
+    if (!active) { setRecords({}); setNotes({}); setLoading(false); return; }
     setLoading(true);
     const { data, error } = await supabase.from("attendance").select("*");
     if (error) {
@@ -236,7 +239,7 @@ function useAttendance() {
     }
     setLoading(false);
   };
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => { refresh(); }, [active]);
   const save = async (eventId, statusMap, noteMap) => {
     const rows = Object.entries(statusMap).map(([memberId, status]) => {
       const note = (noteMap?.[memberId] || "").trim();
@@ -251,10 +254,11 @@ function useAttendance() {
   return { records, notes, loading, save, refresh };
 }
 
-function useFinance() {
+function useFinance(active = true) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const refresh = async () => {
+    if (!active) { setItems([]); setLoading(false); return; }
     setLoading(true);
     const { data, error } = await supabase.from("finance_transactions").select("*").order("created_at", { ascending: false });
     if (error) {
@@ -271,7 +275,7 @@ function useFinance() {
     }
     setLoading(false);
   };
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => { refresh(); }, [active]);
   const add = async (entry) => {
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("finance_transactions").insert({
@@ -346,10 +350,11 @@ function useDashboardSettings() {
   return { widgets, save, refresh };
 }
 
-function useAchievements() {
+function useAchievements(active = true) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const refresh = async () => {
+    if (!active) { setItems([]); setLoading(false); return; }
     setLoading(true);
     const { data, error } = await supabase.from("achievements").select("*").order("awarded_date", { ascending: false });
     if (error) {
@@ -367,7 +372,7 @@ function useAchievements() {
     }
     setLoading(false);
   };
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => { refresh(); }, [active]);
   const add = async (item) => {
     const { data: u } = await supabase.auth.getUser();
     const { error } = await supabase.from("achievements").insert({
@@ -392,10 +397,11 @@ function useAchievements() {
 const ROLE_OPTIONS = ["superadmin", "president", "secretary", "organizer", "treasurer", "member"];
 const ROLE_LABELS = { superadmin: "Super Admin", president: "President", secretary: "Secretary", organizer: "Organizer", treasurer: "Treasurer", member: "Member" };
 
-function useAccounts() {
+function useAccounts(active = true) {
   const [accounts, setAccounts] = useState([]);
   const [loading, setLoading] = useState(true);
   const refresh = async () => {
+    if (!active) { setAccounts([]); setLoading(false); return; }
     setLoading(true);
     const [pRes, rRes] = await Promise.all([
       supabase.from("profiles").select("user_id, full_name, email, status, created_at, birthday").order("created_at", { ascending: true }),
@@ -418,7 +424,7 @@ function useAccounts() {
     }
     setLoading(false);
   };
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => { refresh(); }, [active]);
   const setRole = async (userId, role) => {
     const { error } = await supabase.from("user_roles").update({ role }).eq("user_id", userId);
     if (error) { alert("Failed to change role: " + error.message); return false; }
@@ -640,12 +646,13 @@ function Badge({ children, tone = "neutral" }) {
 
 export default function App() {
   const auth = useAuthSession();
+  const userActive = !!auth.session;
   const announce = useAnnouncements();
   const suggest = useSuggestions();
-  const membersApi = useMembers();
-  const eventsApi = useEvents();
-  const attendanceApi = useAttendance();
-  const financeApi = useFinance();
+  const membersApi = useMembers(userActive);
+  const eventsApi = useEvents(userActive);
+  const attendanceApi = useAttendance(userActive);
+  const financeApi = useFinance(userActive);
   const [guestMode, setGuestMode] = useState(false);
   const [screen, setScreen] = useState("dashboard");
   const [selectedMember, setSelectedMember] = useState(null);
@@ -673,8 +680,8 @@ export default function App() {
   const [showAbout, setShowAbout] = useState(false);
   const welcomeApi = useWelcomeContent();
   const dashApi = useDashboardSettings();
-  const achievementsApi = useAchievements();
-  const accountsApi = useAccounts();
+  const achievementsApi = useAchievements(userActive);
+  const accountsApi = useAccounts(userActive);
   const snapshotsApi = useSnapshots();
   const accountBirthdaysApi = useAccountBirthdays(!!auth.session);
   const roleFeaturesApi = useRoleFeatures(!!auth.session);
@@ -1173,7 +1180,7 @@ export default function App() {
 
       {/* Main content */}
       <div className="flex-1 p-5 md:p-8 pt-20 md:pt-8 max-w-5xl overflow-y-auto w-full">
-        {screen === "dashboard" && <Dashboard members={members} events={events} attendance={attendance} announcements={announcements} finance={finance} snapshots={snapshots} accountBirthdays={accountBirthdaysApi.items} isSuperAdmin={role === "superadmin"} widgets={dashboardWidgets} onSaveWidgets={dashApi.save} onViewSnapshots={() => setScreen("snapshots")} />}
+        {screen === "dashboard" && <Dashboard members={members} events={events} attendance={attendance} announcements={announcements} finance={finance} snapshots={snapshots} accountBirthdays={accountBirthdaysApi.items} isSuperAdmin={role === "superadmin"} widgets={dashboardWidgets} onSaveWidgets={dashApi.save} onViewSnapshots={() => setScreen("snapshots")} isGuest={isGuest} onLoginClick={() => { setGuestMode(false); setShowLoginModal(true); setLoginError(""); }} />}
         {screen === "announcements" && (
           <Announcements
             announcements={announcements}
@@ -1473,7 +1480,7 @@ const WIDGET_LABELS = {
 
 const fmtBirthday = (d) => (d ? new Date(String(d).slice(0, 10) + "T00:00:00").toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "—");
 
-function Dashboard({ members, events, attendance, announcements, finance, snapshots, accountBirthdays, isSuperAdmin, widgets, onSaveWidgets, onViewSnapshots }) {
+function Dashboard({ members, events, attendance, announcements, finance, snapshots, accountBirthdays, isSuperAdmin, widgets, onSaveWidgets, onViewSnapshots, isGuest, onLoginClick }) {
   const [editing, setEditing] = useState(false);
   const w = widgets || {};
   const active = members.filter(m => m.status === "active").length;
@@ -1494,6 +1501,7 @@ function Dashboard({ members, events, attendance, announcements, finance, snapsh
     })
     .sort((a, b) => new Date(a.birthday).getDate() - new Date(b.birthday).getDate());
   const anyStat = w.totalMembers || w.activeMembers || w.totalEvents || w.attendanceRate || w.fundBalance || w.birthdays;
+  const showStats = anyStat && !isGuest;
 
   return (
     <div>
@@ -1505,7 +1513,23 @@ function Dashboard({ members, events, attendance, announcements, finance, snapsh
           </button>
         )}
       </div>
-      {anyStat && (
+      {isGuest && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 mb-5 flex items-start gap-3">
+          <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+            <Eye size={18} />
+          </div>
+          <div className="flex-1">
+            <div className="font-semibold text-amber-900 text-sm">Naka-Guest Mode ka ngayon</div>
+            <p className="text-xs text-amber-800 mt-1">
+              Para makita ang live na stats — members, events, attendance, finance, at birthdays — mag-login gamit ang account mo.
+            </p>
+            <button type="button" onClick={onLoginClick} className="mt-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">
+              Mag-login
+            </button>
+          </div>
+        </div>
+      )}
+      {showStats && (
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
           {w.totalMembers && <StatCard num={members.length} label="Total Members" />}
           {w.activeMembers && <StatCard num={active} label="Active Members" />}
@@ -1515,7 +1539,7 @@ function Dashboard({ members, events, attendance, announcements, finance, snapsh
           {w.birthdays && <StatCard num={birthdays.length} label="Birthdays This Month" />}
         </div>
       )}
-      {w.birthdayList && (
+      {!isGuest && w.birthdayList && (
         <div className="bg-white rounded-xl border border-stone-200 p-5 mb-5">
           <h3 className="font-semibold text-emerald-900 text-sm mb-2 flex items-center gap-1.5"><Cake size={14} /> Birthdays This Month</h3>
           {birthdays.length === 0 ? <p className="text-sm text-stone-400">No birthdays this month.</p> :
