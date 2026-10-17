@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import { LayoutDashboard, Users, CheckSquare, Calendar, Award, Wallet, Megaphone, Settings, LogOut, Plus, X, Trash2, User, MessageSquare, Menu, Eye, EyeOff, Trophy, Home, Camera, Download } from "lucide-react";
+import { LayoutDashboard, Users, CheckSquare, Calendar, Award, Wallet, Megaphone, Settings, LogOut, Plus, X, Trash2, User, MessageSquare, Menu, Eye, EyeOff, Trophy, Home, Camera, Download, Smartphone } from "lucide-react";
 import Welcome, { DEFAULT_WELCOME } from "./Welcome.jsx";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -579,6 +579,24 @@ export default function App() {
   const welcomeContent = welcomeApi.content;
   const dashboardWidgets = dashApi.widgets;
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [installEvt, setInstallEvt] = useState(null);
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator && import.meta.env.PROD) {
+      navigator.serviceWorker.register("/sw.js").catch((err) => console.error("Service worker registration failed:", err));
+    }
+  }, []);
+
+  useEffect(() => {
+    const onPrompt = (e) => { e.preventDefault(); setInstallEvt(e); };
+    const onInstalled = () => setInstallEvt(null);
+    window.addEventListener("beforeinstallprompt", onPrompt);
+    window.addEventListener("appinstalled", onInstalled);
+    return () => {
+      window.removeEventListener("beforeinstallprompt", onPrompt);
+      window.removeEventListener("appinstalled", onInstalled);
+    };
+  }, []);
 
   const isSignedIn = !!auth.session;
   const isGuest = !isSignedIn && guestMode;
@@ -601,6 +619,22 @@ export default function App() {
   const accountRequestCount = accountRequests.length;
   const isLeader = ["superadmin", "president", "secretary", "organizer"].includes(role);
   const canManageSnapshots = role === "superadmin" || role === "president";
+
+  const installButton = installEvt ? (
+    <button
+      aria-label="Install app"
+      onClick={async () => {
+        try {
+          installEvt.prompt();
+          await installEvt.userChoice;
+        } catch { /* ignore */ }
+        setInstallEvt(null);
+      }}
+      className="fixed bottom-4 right-4 z-40 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold pl-3 pr-4 py-3 rounded-full shadow-lg flex items-center gap-2"
+    >
+      <Smartphone size={15} /> Install App
+    </button>
+  ) : null;
 
   const featureAccess = isGuest
     ? { dashboard: true, announcements: true, snapshots: true, suggestions: true, donate: true }
@@ -864,6 +898,7 @@ export default function App() {
   if (isPending || isRejected || isInactive) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-stone-50 p-6">
+        {installButton}
         <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-8 max-w-xl text-center">
           <div className="text-emerald-900 text-3xl font-bold mb-4">{isPending ? "Account Pending Approval" : isInactive ? "Account Deactivated" : "Account Rejected"}</div>
           <p className="text-sm text-stone-600 mb-5">
@@ -881,14 +916,17 @@ export default function App() {
   }
   if (screen === "welcome") {
     return (
-      <Welcome
-        content={welcomeContent}
-        logo={LOGO_B64}
-        isSuperAdmin={session?.role === "superadmin"}
-        onLoginClick={() => setScreen("dashboard")}
-        onGuestClick={() => setScreen("dashboard")}
-        onSave={welcomeApi.save}
-      />
+      <>
+        {installButton}
+        <Welcome
+          content={welcomeContent}
+          logo={LOGO_B64}
+          isSuperAdmin={session?.role === "superadmin"}
+          onLoginClick={() => setScreen("dashboard")}
+          onGuestClick={() => setScreen("dashboard")}
+          onSave={welcomeApi.save}
+        />
+      </>
     );
   }
 
@@ -1075,6 +1113,8 @@ export default function App() {
           <AccountRequests requests={accountRequests} />
         )}
       </div>
+
+      {installButton}
 
       {/* Modals */}
       {showMemberForm && <MemberFormModal onClose={() => setShowMemberForm(false)} onSave={async (m) => { const ok = await membersApi.add(m); if (ok) setShowMemberForm(false); }} />}
