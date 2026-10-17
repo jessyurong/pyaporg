@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-export const DEFAULT_WIDGETS = { totalMembers: true, activeMembers: true, totalEvents: true, attendanceRate: true, fundBalance: true, birthdays: true, birthdayList: true, recentAnnouncements: true, snapshots: true };
+export const DEFAULT_WIDGETS = { totalMembers: true, activeMembers: true, totalEvents: true, attendanceRate: true, fundBalance: true, birthdays: true, birthdayList: true, recentAnnouncements: true, snapshots: true, upcomingEvents: true, topAttenders: true, attendanceTrend: true };
 
 export function useDashboardSettings() {
   const [widgets, setWidgets] = useState(DEFAULT_WIDGETS);
