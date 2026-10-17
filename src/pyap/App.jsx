@@ -1554,7 +1554,7 @@ function MemberProfile({ member, events, attendance, onBack, onDelete }) {
       </div>
       <div className="bg-white rounded-xl border border-stone-200 p-5 mb-5 text-sm space-y-1.5">
         <h3 className="font-semibold text-emerald-900 mb-2">Personal Info</h3>
-        <p><b>Birthday:</b> {member.birthday}</p>
+        <p><b>Birthday:</b> {fmtBirthday(member.birthday)}</p>
         <p><b>Address:</b> {member.address}</p>
         <p><b>Date Joined:</b> {member.joined}</p>
       </div>
