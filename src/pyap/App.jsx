@@ -816,6 +816,7 @@ export default function App() {
       .eq("user_id", userId);
     if (profileError) { alert("Failed to approve user: " + profileError.message); return; }
     await fetchPendingUsers();
+    accountBirthdaysApi.refresh();
   }
 
   async function rejectPendingUser(userId) {
@@ -847,6 +848,7 @@ export default function App() {
       return;
     }
     await accountsApi.setStatus(userId, status);
+    accountBirthdaysApi.refresh();
   }
 
   async function handleSetBirthday(userId, birthday) {
