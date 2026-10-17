@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import { LayoutDashboard, Users, CheckSquare, Calendar, Award, Wallet, Megaphone, Settings, LogOut, Plus, X, Trash2, User, MessageSquare, Menu, Eye, EyeOff, Trophy, Home, Camera, Download, Smartphone } from "lucide-react";
+import { LayoutDashboard, Users, CheckSquare, Calendar, Award, Wallet, Megaphone, Settings, LogOut, Plus, X, Trash2, User, MessageSquare, Menu, Eye, EyeOff, Trophy, Home, Camera, Download, Smartphone, Medal, Star, Dumbbell, HandHeart, Heart, Cake, Phone, ClipboardList, Check, FileText, Sprout, Banknote } from "lucide-react";
 import Welcome, { DEFAULT_WELCOME } from "./Welcome.jsx";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -361,7 +361,7 @@ function useAchievements() {
         memberId: a.member_id,
         title: a.title,
         description: a.description || "",
-        badge: a.badge || "🏅",
+        badge: a.badge || "medal",
         date: (a.awarded_date || "").slice(0, 10),
       })));
     }
@@ -976,7 +976,7 @@ export default function App() {
         })}
       </nav>
       <button onClick={() => setShowAbout(true)} className="flex items-center gap-2.5 px-5 py-2.5 text-sm text-white/80 hover:bg-white/10 border-t border-white/15">
-        🌱 Mission & Vision
+        <Sprout size={15} /> Mission & Vision
       </button>
       <button onClick={handleLogout} className="flex items-center gap-2.5 px-5 py-2.5 text-sm text-white/80 hover:bg-white/10 border-t border-white/15">
         <LogOut size={15} /> Logout
@@ -1340,14 +1340,14 @@ function Dashboard({ members, events, attendance, announcements, finance, snapsh
       )}
       {w.birthdayList && (
         <div className="bg-white rounded-xl border border-stone-200 p-5 mb-5">
-          <h3 className="font-semibold text-emerald-900 text-sm mb-2">🎂 Birthdays This Month</h3>
+          <h3 className="font-semibold text-emerald-900 text-sm mb-2 flex items-center gap-1.5"><Cake size={14} /> Birthdays This Month</h3>
           {birthdays.length === 0 ? <p className="text-sm text-stone-400">No birthdays this month.</p> :
             <ul className="text-sm space-y-1">{birthdays.map(b => <li key={b.id}>{b.name} — {new Date(b.birthday).toLocaleDateString("en-US", { month: "long", day: "numeric" })}</li>)}</ul>}
         </div>
       )}
       {w.recentAnnouncements && (
         <div className="bg-white rounded-xl border border-stone-200 p-5">
-          <h3 className="font-semibold text-emerald-900 text-sm mb-3">📢 Recent Announcements</h3>
+          <h3 className="font-semibold text-emerald-900 text-sm mb-3 flex items-center gap-1.5"><Megaphone size={14} /> Recent Announcements</h3>
           {announcements.slice(0, 3).map(a => {
             const u = getUrgency(a);
             return (
@@ -1366,7 +1366,7 @@ function Dashboard({ members, events, attendance, announcements, finance, snapsh
       {w.snapshots && snapshots.length > 0 && (
         <div className="bg-white rounded-xl border border-stone-200 p-5 mt-5">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-semibold text-emerald-900 text-sm">📸 Snapshots</h3>
+            <h3 className="font-semibold text-emerald-900 text-sm flex items-center gap-1.5"><Camera size={14} /> Snapshots</h3>
             <button onClick={onViewSnapshots} className="text-xs text-emerald-700 font-semibold hover:underline">View all</button>
           </div>
           <div className="grid grid-cols-3 gap-2">
@@ -1482,7 +1482,7 @@ function MemberProfile({ member, events, attendance, onBack, onDelete }) {
         <div>
           <h2 className="text-lg font-bold">{member.name}</h2>
           <p className="text-sm text-stone-500 mt-0.5">{member.position} — <Badge tone={member.status}>{member.status}</Badge></p>
-          <p className="text-xs text-stone-500 mt-1">📞 {member.contact}</p>
+          <p className="text-xs text-stone-500 mt-1 flex items-center gap-1.5"><Phone size={12} /> {member.contact}</p>
         </div>
       </div>
       <div className="bg-white rounded-xl border border-stone-200 p-5 mb-5 text-sm space-y-1.5">
@@ -1540,7 +1540,7 @@ function AttendanceSelect({ events, members, attendance, onSelect, onViewHistory
         </table>
       </div>
 
-      <h3 className="font-semibold text-emerald-900 text-sm mb-3">📜 Attendance History</h3>
+      <h3 className="font-semibold text-emerald-900 text-sm mb-3 flex items-center gap-1.5"><ClipboardList size={14} /> Attendance History</h3>
       {history.length === 0 ? (
         <p className="text-sm text-stone-400">No attendance recorded yet.</p>
       ) : (
@@ -1634,7 +1634,7 @@ function AttendanceMark({ event, members, record, noteRecord, onBack, onSave }) 
         <button onClick={() => markAll("absent")} className="text-xs bg-rose-50 text-rose-700 px-3 py-1.5 rounded-lg">Mark All Absent</button>
       </div>
 
-      {saved && <div className="bg-emerald-50 text-emerald-700 text-sm rounded-lg p-2.5 mb-3">✅ Attendance saved!</div>}
+      {saved && <div className="bg-emerald-50 text-emerald-700 text-sm rounded-lg p-2.5 mb-3 flex items-center gap-1.5"><Check size={14} /> Attendance saved!</div>}
 
       <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto">
         <table className="w-full text-sm min-w-[600px]">
@@ -1717,7 +1717,9 @@ function Achievements({ members, achievements, onAdd, onDelete }) {
         <div className="grid gap-3 sm:grid-cols-2">
           {withNames.map(a => (
             <div key={a.id} className="bg-white rounded-xl border border-stone-200 p-4 flex gap-3 items-start">
-              <div className="text-3xl flex-shrink-0">{a.badge}</div>
+              <div className="w-11 h-11 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center flex-shrink-0">
+                <BadgeIcon badge={a.badge} size={20} />
+              </div>
               <div className="flex-1">
                 <div className="font-semibold text-sm text-emerald-900">{a.title}</div>
                 <div className="text-xs text-stone-500 mb-1">{a.memberName} • {a.date}</div>
@@ -1931,7 +1933,7 @@ function Suggestions({ isGuest, suggestions, loading, onSubmit, onDelete }) {
       <div>
         <h1 className="text-xl font-bold text-emerald-900 mb-2">Suggestions / Feedback</h1>
         <p className="text-sm text-stone-500 mb-3">May gusto ka bang iparating sa mga officers? Ipadala mo lang dito — mababasa lang ito ng mga leaders ng organisasyon.</p>
-        <button onClick={() => setShowPolicy(true)} className="text-xs text-emerald-700 underline mb-4 block">📋 View Policy of Use</button>
+        <button onClick={() => setShowPolicy(true)} className="text-xs text-emerald-700 underline mb-4 flex items-center gap-1.5"><FileText size={12} /> View Policy of Use</button>
         <div className="bg-white rounded-xl border border-stone-200 p-5 max-w-lg">
           {sent && <div className="bg-emerald-50 text-emerald-700 text-sm rounded-lg p-2.5 mb-3">Salamat! Naipadala na ang suggestion mo.</div>}
           {error && <div className="bg-rose-50 text-rose-700 text-sm rounded-lg p-2.5 mb-3">{error}</div>}
@@ -1976,10 +1978,10 @@ function DonateBox() {
   return (
     <div>
       <h1 className="text-xl font-bold text-emerald-900 mb-2">Support PYAP Samac</h1>
-      <p className="text-sm text-stone-500 mb-5">Ang bawat donasyon, malaking tulong para sa mga proyekto at aktibidad ng kabataan sa Barangay Samac. Maraming salamat sa inyong suporta! 🙏</p>
+      <p className="text-sm text-stone-500 mb-5">Ang bawat donasyon, malaking tulong para sa mga proyekto at aktibidad ng kabataan sa Barangay Samac. Maraming salamat sa inyong suporta! <Heart size={13} className="inline text-rose-500 -mt-0.5" /></p>
 
       <div className="bg-white rounded-xl border border-stone-200 p-5 max-w-md mb-4">
-        <h3 className="font-semibold text-emerald-900 text-sm mb-3">💵 Paraan ng Pagdo-donate</h3>
+        <h3 className="font-semibold text-emerald-900 text-sm mb-3 flex items-center gap-1.5"><Banknote size={14} /> Paraan ng Pagdo-donate</h3>
         <div className="space-y-3 text-sm">
           <div className="flex justify-between border-b border-stone-100 pb-2">
             <span className="text-stone-500">GCash</span>
@@ -2005,7 +2007,7 @@ function DonateBox() {
 
 function PolicyModal({ onClose }) {
   return (
-    <ModalShell title="📋 Policy of Use" onClose={onClose}>
+    <ModalShell title={<span className="flex items-center gap-2"><FileText size={16} /> Policy of Use</span>} onClose={onClose}>
       <div className="space-y-3 text-sm text-stone-600">
         <p>Sa paggamit ng Suggestions Box na ito, sumasang-ayon ang bawat gumagamit sa mga sumusunod:</p>
         <ul className="list-disc pl-5 space-y-1.5">
@@ -2023,7 +2025,7 @@ function PolicyModal({ onClose }) {
 
 function AboutModal({ onClose }) {
   return (
-    <ModalShell title="🌱 Mission & Vision" onClose={onClose}>
+    <ModalShell title={<span className="flex items-center gap-2"><Sprout size={16} /> Mission & Vision</span>} onClose={onClose}>
       <div className="space-y-3 text-sm text-stone-600">
         <div>
           <span className="font-semibold text-emerald-800">Mission: </span>
@@ -2161,10 +2163,16 @@ function FinanceFormModal({ onClose, onSave }) {
   );
 }
 
-const BADGE_OPTIONS = ["🏅", "🌟", "🏆", "🎖️", "💪", "📣", "🙌", "❤️"];
+const BADGE_ICONS = { medal: Medal, star: Star, trophy: Trophy, award: Award, dumbbell: Dumbbell, megaphone: Megaphone, handheart: HandHeart, heart: Heart };
+const BADGE_OPTIONS = Object.keys(BADGE_ICONS);
+
+function BadgeIcon({ badge, size = 18 }) {
+  const Icon = BADGE_ICONS[badge] || Medal;
+  return <Icon size={size} />;
+}
 
 function AchievementFormModal({ members, onClose, onSave }) {
-  const [f, setF] = useState({ memberId: members[0]?.id, title: "", description: "", badge: "🏅" });
+  const [f, setF] = useState({ memberId: members[0]?.id, title: "", description: "", badge: "medal" });
   return (
     <ModalShell title="Add Achievement" onClose={onClose}>
       <div className="space-y-3">
@@ -2180,10 +2188,11 @@ function AchievementFormModal({ members, onClose, onSave }) {
               <button
                 key={b}
                 type="button"
+                aria-label={`Badge ${b}`}
                 onClick={() => setF({ ...f, badge: b })}
-                className={`text-xl w-9 h-9 rounded-lg border ${f.badge === b ? "border-emerald-600 bg-emerald-50" : "border-stone-200"}`}
+                className={`w-10 h-10 rounded-lg border flex items-center justify-center transition ${f.badge === b ? "border-emerald-600 bg-emerald-50 text-emerald-700" : "border-stone-200 text-stone-400 hover:text-stone-600"}`}
               >
-                {b}
+                <BadgeIcon badge={b} size={18} />
               </button>
             ))}
           </div>
