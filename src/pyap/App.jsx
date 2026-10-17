@@ -33,6 +33,10 @@ import { BackupExport, DonateBox, AboutModal, WelcomePage } from "./components/S
 import { PendingUsers, AccountRequests, FeatureAccess, UserManagement } from "./components/AccountsPage.jsx";
 import { Sidebar } from "./components/Sidebar.jsx";
 import { MyProfile } from "./components/MyProfilePage.jsx";
+import { EventCalendar } from "./components/EventCalendarPage.jsx";
+import { Leaderboard } from "./components/LeaderboardPage.jsx";
+import { AttendanceReport } from "./components/AttendanceReportPage.jsx";
+import { BirthdayGreetings } from "./components/BirthdayPage.jsx";
 import { LoginModal, RequestAccountModal, LoginDetailsCard } from "./components/LoginForm.jsx";
 
 export default function App() {
@@ -152,8 +156,16 @@ export default function App() {
   const featureAccess = isGuest
     ? { dashboard: true, announcements: true, snapshots: true, suggestions: true, donate: true }
     : role === "superadmin"
-    ? { dashboard: true, members: true, attendance: true, events: true, announcements: true, snapshots: true, finance: true, certificates: true, achievements: true, users: true, access: true, backup: true, suggestions: true, welcome: true, donate: true }
+    ? { dashboard: true, members: true, attendance: true, events: true, announcements: true, snapshots: true, finance: true, certificates: true, achievements: true, users: true, access: true, backup: true, suggestions: true, welcome: true, donate: true, calendar: true, leaderboard: true, report: true }
     : { ...(PRESETS[role] || {}) };
+
+  // Ang mga role na may attendance access (tulad ng leaders) ay may
+  // calendar / leaderboard / report views din.
+  if (featureAccess.attendance) {
+    featureAccess.calendar = true;
+    featureAccess.leaderboard = true;
+    featureAccess.report = true;
+  }
 
   if (!isGuest && role !== "superadmin") {
     for (const f of roleFeaturesApi.extras[role] || []) {
@@ -170,6 +182,9 @@ export default function App() {
   // Dito sila pwedeng mag-upload ng sariling profile photo nang hindi
   // kailangang i-grant ang buong Members screen.
   if (isSignedIn) featureAccess.myprofile = true;
+
+  // "Birthdays" — makikita rin ng lahat ng naka-login.
+  if (isSignedIn) featureAccess.birthday = true;
 
   async function handleLogin(e) {
     e.preventDefault();
@@ -558,6 +573,10 @@ export default function App() {
           />
         )}
         {screen === "events" && <EventsList events={events} onAdd={isLeader ? () => setShowEventForm(true) : undefined} onDelete={isLeader ? (id) => eventsApi.remove(id) : undefined} />}
+        {screen === "calendar" && <EventCalendar events={events} />}
+        {screen === "leaderboard" && <Leaderboard members={members} events={events} attendance={attendance} />}
+        {screen === "report" && <AttendanceReport members={members} events={events} attendance={attendance} attendanceNotes={attendanceNotes} />}
+        {screen === "birthday" && <BirthdayGreetings members={members} accountBirthdays={accountBirthdaysApi.items} />}
         {screen === "certificates" && (
           <Certificates members={members} onGenerate={isLeader ? () => setShowCertForm(true) : undefined} onPreview={setCertPreview} />
         )}

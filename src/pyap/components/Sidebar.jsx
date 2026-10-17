@@ -1,14 +1,18 @@
 import React from "react";
-import { Award, Calendar, Camera, CheckSquare, Download, Home, LayoutDashboard, LogOut, Megaphone, Menu, MessageSquare, Settings, ShieldCheck, Sprout, Trophy, Users, UserRound, Wallet, X } from "lucide-react";
+import { Award, Cake, Calendar, CalendarDays, Camera, CheckSquare, Download, FileText, Home, LayoutDashboard, LogOut, Megaphone, Menu, MessageSquare, Settings, ShieldCheck, Sprout, Trophy, Users, UserRound, Wallet, X } from "lucide-react";
 
 export const NAV = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "myprofile", label: "My Profile", icon: UserRound },
+  { key: "birthday", label: "Birthdays", icon: Cake },
   { key: "announcements", label: "Announcements", icon: Megaphone },
   { key: "snapshots", label: "Snapshots", icon: Camera },
   { key: "members", label: "Members", icon: Users },
   { key: "attendance", label: "Attendance", icon: CheckSquare },
   { key: "events", label: "Events", icon: Calendar },
+  { key: "calendar", label: "Event Calendar", icon: CalendarDays },
+  { key: "leaderboard", label: "Leaderboard", icon: Trophy },
+  { key: "report", label: "Attendance Report", icon: FileText },
   { key: "certificates", label: "Certificates", icon: Award },
   { key: "achievements", label: "Achievements", icon: Trophy },
   { key: "finance", label: "Finance", icon: Wallet },
