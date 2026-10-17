@@ -398,7 +398,7 @@ function useAccounts() {
   const refresh = async () => {
     setLoading(true);
     const [pRes, rRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, full_name, email, status, created_at").order("created_at", { ascending: true }),
+      supabase.from("profiles").select("user_id, full_name, email, status, created_at, birthday").order("created_at", { ascending: true }),
       supabase.from("user_roles").select("user_id, role"),
     ]);
     if (pRes.error || rRes.error) {
@@ -413,6 +413,7 @@ function useAccounts() {
         status: p.status,
         role: roles[p.user_id] || "member",
         createdAt: (p.created_at || "").slice(0, 10),
+        birthday: (p.birthday || "").slice(0, 10),
       })));
     }
     setLoading(false);
@@ -430,7 +431,13 @@ function useAccounts() {
     await refresh();
     return true;
   };
-  return { accounts, loading, setRole, setStatus, refresh };
+  const setBirthday = async (userId, birthday) => {
+    const { error } = await supabase.from("profiles").update({ birthday: birthday || null }).eq("user_id", userId);
+    if (error) { alert("Failed to update birthday: " + error.message); return false; }
+    setAccounts((prev) => prev.map((a) => (a.userId === userId ? { ...a, birthday: birthday || "" } : a)));
+    return true;
+  };
+  return { accounts, loading, setRole, setStatus, setBirthday, refresh };
 }
 
 function useAccountBirthdays(enabled) {
@@ -842,6 +849,11 @@ export default function App() {
     await accountsApi.setStatus(userId, status);
   }
 
+  async function handleSetBirthday(userId, birthday) {
+    const ok = await accountsApi.setBirthday(userId, birthday);
+    if (ok) accountBirthdaysApi.refresh();
+  }
+
   const isPending = auth.status === "pending";
   const isRejected = auth.status === "rejected";
   const isInactive = auth.status === "inactive";
@@ -1130,6 +1142,7 @@ export default function App() {
             selfId={auth.session?.user?.id || null}
             onSetRole={handleSetRole}
             onSetStatus={handleSetStatus}
+            onSetBirthday={handleSetBirthday}
           />
         )}
         {screen === "pendingUsers" && isLeader && (
@@ -1883,7 +1896,7 @@ function AccountRequests({ requests }) {
   );
 }
 
-function UserManagement({ accounts, loading, selfId, onSetRole, onSetStatus }) {
+function UserManagement({ accounts, loading, selfId, onSetRole, onSetStatus, onSetBirthday }) {
   const activeSuperadmins = accounts.filter(a => a.role === "superadmin" && a.status === "active").length;
   const statusLabels = { active: "Active", pending: "Pending", rejected: "Rejected", inactive: "Inactive" };
   return (
@@ -1891,13 +1904,13 @@ function UserManagement({ accounts, loading, selfId, onSetRole, onSetStatus }) {
       <div className="flex justify-between items-center mb-5">
         <h1 className="text-xl font-bold text-emerald-900">User Management</h1>
       </div>
-      <p className="text-sm text-stone-500 mb-5">Lahat ng accounts ng organisasyon. Baguhin ang role, o i-activate / i-deactivate ang isang account.</p>
+      <p className="text-sm text-stone-500 mb-5">Lahat ng accounts ng organisasyon. Baguhin ang role, i-activate / i-deactivate ang account, o ayusin ang birthday (kung nagkamali ang member ng nailagay).</p>
       {loading ? (
         <p className="text-sm text-stone-400">Loading…</p>
       ) : (
         <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto">
-          <table className="w-full text-sm min-w-[680px]">
-            <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Name</th><th className="p-3">Email</th><th className="p-3">Role</th><th className="p-3">Status</th><th className="p-3"></th></tr></thead>
+          <table className="w-full text-sm min-w-[820px]">
+            <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Name</th><th className="p-3">Email</th><th className="p-3">Birthday</th><th className="p-3">Role</th><th className="p-3">Status</th><th className="p-3"></th></tr></thead>
             <tbody>{accounts.map(a => {
               const isSelf = a.userId === selfId;
               const isLastSuperadmin = a.role === "superadmin" && a.status === "active" && activeSuperadmins <= 1;
@@ -1906,6 +1919,15 @@ function UserManagement({ accounts, loading, selfId, onSetRole, onSetStatus }) {
                 <tr key={a.userId} className="border-t border-stone-100">
                   <td className="p-3">{a.name}{isSelf && <span className="text-[10px] text-emerald-700 font-semibold ml-1.5">(You)</span>}</td>
                   <td className="p-3 text-stone-500">{a.email || "—"}</td>
+                  <td className="p-3">
+                    <input
+                      type="date"
+                      value={a.birthday || ""}
+                      max={new Date().toISOString().slice(0, 10)}
+                      onChange={e => onSetBirthday(a.userId, e.target.value)}
+                      className="px-2 py-1 border border-stone-200 rounded-lg text-sm text-stone-600"
+                    />
+                  </td>
                   <td className="p-3">
                     {locked ? (
                       <span>{ROLE_LABELS[a.role] || a.role}</span>
