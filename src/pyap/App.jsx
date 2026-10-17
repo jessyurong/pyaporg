@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import { LayoutDashboard, Users, CheckSquare, Calendar, Award, Wallet, Megaphone, Settings, LogOut, Plus, X, Trash2, User, MessageSquare, Menu, Eye, EyeOff, Trophy, Home, Camera, Download, Smartphone, Medal, Star, Dumbbell, HandHeart, Heart, Cake, Phone, ClipboardList, Check, FileText, Sprout, Banknote } from "lucide-react";
+import { LayoutDashboard, Users, CheckSquare, Calendar, Award, Wallet, Megaphone, Settings, LogOut, Plus, X, Trash2, User, MessageSquare, Menu, Eye, EyeOff, Trophy, Home, Camera, Download, Smartphone, Medal, Star, Dumbbell, HandHeart, Heart, Cake, Phone, ClipboardList, Check, FileText, Sprout, Banknote, CheckCircle, KeyRound } from "lucide-react";
 import Welcome, { DEFAULT_WELCOME } from "./Welcome.jsx";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -549,6 +549,32 @@ const NAV = [
   { key: "welcome", label: "Welcome Page", icon: Home },
 ];
 
+function LoginDetailsCard({ email, password }) {
+  return (
+    <div className="text-left">
+      <div className="bg-stone-50 border border-stone-200 rounded-xl p-4">
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-stone-500 uppercase tracking-wide mb-2.5">
+          <KeyRound size={13} /> Your Login Details
+        </div>
+        <div className="space-y-2.5 text-sm">
+          <div>
+            <div className="text-[11px] text-stone-500">Email</div>
+            <div className="font-semibold text-emerald-900 break-all">{email}</div>
+          </div>
+          <div>
+            <div className="text-[11px] text-stone-500">Password</div>
+            <div className="font-mono font-semibold text-emerald-900 break-all">{password}</div>
+          </div>
+        </div>
+      </div>
+      <div className="bg-amber-50 border border-amber-200 text-amber-800 text-xs rounded-xl p-3.5 mt-3 flex items-start gap-2.5">
+        <Camera size={15} className="mt-0.5 shrink-0" />
+        <span><b>Screenshot this now</b> so you won't forget your email and password — you will use these to log in after the leaders approve your account. Keep them private and don't share them with others.</span>
+      </div>
+    </div>
+  );
+}
+
 function Badge({ children, tone = "neutral" }) {
   const tones = {
     active: "bg-emerald-50 text-emerald-700",
@@ -587,7 +613,7 @@ export default function App() {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [requestError, setRequestError] = useState("");
   const [requestBusy, setRequestBusy] = useState(false);
-  const [requestSuccess, setRequestSuccess] = useState("");
+  const [requestDone, setRequestDone] = useState(null);
   const [accountRequests, setAccountRequests] = useState([]);
   const [pendingUsers, setPendingUsers] = useState([]);
   const [pendingRoleSelection, setPendingRoleSelection] = useState({});
@@ -702,7 +728,7 @@ export default function App() {
   async function handleRequestAccount(e) {
     e.preventDefault();
     setRequestError("");
-    setRequestSuccess("");
+    setRequestDone(null);
     setRequestBusy(true);
     const fd = new FormData(e.target);
     const name = (fd.get("requestName") || "").trim();
@@ -732,12 +758,11 @@ export default function App() {
         setRequestError("Account request failed: " + error.message);
         return;
       }
-      if (!data?.session) {
-        setRequestSuccess("Request sent! Please confirm your email, then log in. Wait for leader approval.");
-      } else {
-        setRequestSuccess("Your account request has been sent. Wait for leader approval.");
-      }
-      setShowRequestModal(false);
+      setRequestDone({ email, password });
+      // With email confirmation ON there is no session yet: keep the modal
+      // open so the credentials panel is visible. If the user is signed in
+      // right away, the Pending Approval screen shows the same panel.
+      if (data?.session) setShowRequestModal(false);
     } catch (err) {
       console.error("Failed to send account request:", err);
       setRequestError("Account request failed: " + (err?.message || "Please try again."));
@@ -756,6 +781,7 @@ export default function App() {
     setGuestMode(false);
     setScreen("dashboard");
     setSelectedMember(null);
+    setRequestDone(null);
   }
 
   async function fetchPendingUsers() {
@@ -899,7 +925,7 @@ export default function App() {
           logo={LOGO_B64}
           isSuperAdmin={false}
           onLoginClick={() => { setLoginError(""); setShowLoginModal(true); }}
-          onRequestClick={() => { setShowLoginModal(false); setShowRequestModal(true); }}
+          onRequestClick={() => { setShowLoginModal(false); setShowRequestModal(true); setRequestDone(null); }}
           onGuestClick={handleGuest}
           onSave={welcomeApi.save}
         />
@@ -921,7 +947,7 @@ export default function App() {
                 </button>
               </form>
 
-              <button type="button" onClick={() => { setShowLoginModal(false); setShowRequestModal(true); }} className="w-full mt-3 text-xs text-emerald-700 hover:underline">
+              <button type="button" onClick={() => { setShowLoginModal(false); setShowRequestModal(true); setRequestDone(null); }} className="w-full mt-3 text-xs text-emerald-700 hover:underline">
                 New member? Request account access
               </button>
 
@@ -935,13 +961,24 @@ export default function App() {
           <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={() => setShowRequestModal(false)}>
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center relative" onClick={(e) => e.stopPropagation()}>
               <button type="button" onClick={() => setShowRequestModal(false)} className="absolute top-3 right-3 text-stone-400 hover:text-stone-700"><X size={18} /></button>
-              <h1 className="text-lg font-bold text-emerald-900">Request Account Access</h1>
-              <p className="text-xs text-stone-500 mt-1 mb-5">Send a request to the leaders. Superadmin, President, and Secretary will be notified.</p>
+              {requestDone ? (
+                <>
+                  <div className="mx-auto mb-3 w-14 h-14 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center">
+                    <CheckCircle size={30} />
+                  </div>
+                  <h1 className="text-lg font-bold text-emerald-900">Request Sent!</h1>
+                  <p className="text-xs text-stone-500 mt-1 mb-5">Please confirm your email, then log in. Wait for a leader to approve your account.</p>
+                  <LoginDetailsCard email={requestDone.email} password={requestDone.password} />
+                  <button type="button" onClick={() => setShowRequestModal(false)} className="w-full mt-4 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm py-2.5 rounded-lg transition">Got it</button>
+                </>
+              ) : (
+                <>
+                  <h1 className="text-lg font-bold text-emerald-900">Request Account Access</h1>
+                  <p className="text-xs text-stone-500 mt-1 mb-5">Send a request to the leaders. Superadmin, President, and Secretary will be notified.</p>
 
-              {requestError && <div className="bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4 text-left">{requestError}</div>}
-              {requestSuccess && <div className="bg-emerald-50 text-emerald-700 text-xs rounded-lg p-2.5 mb-4 text-left">{requestSuccess}</div>}
+                  {requestError && <div className="bg-rose-50 text-rose-700 text-xs rounded-lg p-2.5 mb-4 text-left">{requestError}</div>}
 
-              <form onSubmit={handleRequestAccount} className="space-y-3 text-left" autoComplete="off">
+                  <form onSubmit={handleRequestAccount} className="space-y-3 text-left" autoComplete="off">
                 <input name="requestName" type="text" placeholder="Full name" required className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
                 <input name="requestEmail" type="email" placeholder="Email" required autoComplete="email" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
                 <input name="requestPassword" type="password" placeholder="Password" required minLength={6} autoComplete="new-password" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
@@ -955,7 +992,9 @@ export default function App() {
                 <button type="submit" disabled={requestBusy} className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white font-semibold text-sm py-2.5 rounded-lg transition">
                   {requestBusy ? "Sending request…" : "Send Request"}
                 </button>
-              </form>
+                  </form>
+                </>
+              )}
             </div>
           </div>
         )}
@@ -979,6 +1018,11 @@ export default function App() {
               : "Your account has been rejected. Please contact a leader if you believe this is a mistake."
             }
           </p>
+          {isPending && requestDone && (
+            <div className="mb-6">
+              <LoginDetailsCard email={requestDone.email} password={requestDone.password} />
+            </div>
+          )}
           <button onClick={handleLogout} className="bg-emerald-700 text-white rounded-full px-6 py-3 text-sm font-semibold">Logout</button>
         </div>
       </div>
