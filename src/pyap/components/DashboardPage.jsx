@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { Camera, Cake, Eye, Megaphone, Settings, X } from "lucide-react";
+import { CalendarDays, Camera, Cake, Eye, Medal, Megaphone, Settings, TrendingUp, X } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { getUrgency } from "../constants.js";
 import { StatCard } from "./ui.jsx";
 
@@ -13,6 +14,9 @@ export const WIDGET_LABELS = {
   birthdayList: "Birthday List",
   recentAnnouncements: "Recent Announcements",
   snapshots: "Snapshots (Photos)",
+  upcomingEvents: "Upcoming Events",
+  topAttenders: "Top Attenders",
+  attendanceTrend: "Attendance Trend",
 };
 
 export function Dashboard({ members, events, attendance, announcements, finance, snapshots, accountBirthdays, isSuperAdmin, widgets, onSaveWidgets, onViewSnapshots, isGuest, onLoginClick }) {
@@ -37,6 +41,37 @@ export function Dashboard({ members, events, attendance, announcements, finance,
     .sort((a, b) => new Date(a.birthday).getDate() - new Date(b.birthday).getDate());
   const anyStat = w.totalMembers || w.activeMembers || w.totalEvents || w.attendanceRate || w.fundBalance || w.birthdays;
   const showStats = anyStat && !isGuest;
+
+  // Upcoming Events: next events sorted by date, only future or today
+  const today = new Date().toISOString().slice(0, 10);
+  const upcomingEvents = events
+    .filter(e => e.date >= today)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, 5);
+
+  // Top Attenders: members sorted by attendance rate (present / total recorded)
+  const topAttenders = members
+    .map(m => {
+      const recorded = events.filter(e => attendance[e.id]?.[m.id]);
+      const presentCount = recorded.filter(e => attendance[e.id]?.[m.id] === "present").length;
+      const rate = recorded.length ? Math.round((presentCount / recorded.length) * 100) : 0;
+      return { id: m.id, name: m.name, presentCount, total: recorded.length, rate };
+    })
+    .filter(m => m.total > 0)
+    .sort((a, b) => b.rate - a.rate)
+    .slice(0, 5);
+
+  // Attendance Trend: last 6 events with their attendance rate
+  const trendData = events
+    .filter(e => attendance[e.id])
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(-6)
+    .map(e => {
+      const rec = attendance[e.id] || {};
+      const vals = Object.values(rec);
+      const rate = vals.length ? Math.round((vals.filter(s => s === "present").length / vals.length) * 100) : 0;
+      return { name: e.title.length > 12 ? e.title.slice(0, 12) + "…" : e.title, rate };
+    });
 
   return (
     <div>
@@ -110,6 +145,70 @@ export function Dashboard({ members, events, attendance, announcements, finance,
               <img key={s.id} src={s.url} alt={s.title || "Snapshot"} className="w-full h-24 object-cover rounded-lg" loading="lazy" />
             ))}
           </div>
+        </div>
+      )}
+      {!isGuest && w.upcomingEvents && (
+        <div className="bg-white rounded-xl border border-stone-200 p-5 mt-5">
+          <h3 className="font-semibold text-emerald-900 text-sm mb-3 flex items-center gap-1.5">
+            <CalendarDays size={14} /> Upcoming Events
+          </h3>
+          {upcomingEvents.length === 0 ? (
+            <p className="text-sm text-stone-400">No upcoming events scheduled.</p>
+          ) : (
+            <div className="space-y-2">
+              {upcomingEvents.map(e => (
+                <div key={e.id} className="flex items-center gap-3 p-2.5 rounded-lg bg-emerald-50 border border-emerald-100">
+                  <div className="bg-emerald-700 text-white text-[10px] font-bold px-2 py-1 rounded-lg text-center min-w-[44px]">
+                    {new Date(e.date + "T00:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-sm font-semibold text-stone-800 truncate">{e.title}</p>
+                    {e.location && <p className="text-xs text-stone-500 truncate">{e.location}</p>}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+      {!isGuest && w.topAttenders && topAttenders.length > 0 && (
+        <div className="bg-white rounded-xl border border-stone-200 p-5 mt-5">
+          <h3 className="font-semibold text-emerald-900 text-sm mb-3 flex items-center gap-1.5">
+            <Medal size={14} /> Top Attenders
+          </h3>
+          <div className="space-y-2">
+            {topAttenders.map((m, i) => {
+              const medals = ["🥇", "🥈", "🥉"];
+              const rateColor = m.rate >= 80 ? "bg-emerald-500" : m.rate >= 50 ? "bg-amber-400" : "bg-rose-400";
+              return (
+                <div key={m.id} className="flex items-center gap-3">
+                  <span className="text-base w-6 text-center">{medals[i] || `${i + 1}.`}</span>
+                  <span className="text-sm font-medium text-stone-800 flex-1 truncate">{m.name}</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-24 h-2 rounded-full bg-stone-100 overflow-hidden">
+                      <div className={`h-2 rounded-full ${rateColor} transition-all`} style={{ width: `${m.rate}%` }} />
+                    </div>
+                    <span className="text-xs font-bold text-stone-600 w-10 text-right">{m.rate}%</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+      {!isGuest && w.attendanceTrend && trendData.length > 0 && (
+        <div className="bg-white rounded-xl border border-stone-200 p-5 mt-5">
+          <h3 className="font-semibold text-emerald-900 text-sm mb-3 flex items-center gap-1.5">
+            <TrendingUp size={14} /> Attendance Trend (Last 6 Events)
+          </h3>
+          <ResponsiveContainer width="100%" height={160}>
+            <BarChart data={trendData} margin={{ top: 4, right: 4, left: -20, bottom: 4 }}>
+              <XAxis dataKey="name" tick={{ fontSize: 10 }} />
+              <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} unit="%" />
+              <Tooltip formatter={(v) => [`${v}%`, "Attendance Rate"]} />
+              <Bar dataKey="rate" fill="#059669" radius={[4, 4, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       )}
       {editing && (
