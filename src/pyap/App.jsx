@@ -815,6 +815,24 @@ export default function App() {
       .update({ status: "active" })
       .eq("user_id", userId);
     if (profileError) { alert("Failed to approve user: " + profileError.message); return; }
+
+    // Also add to the Members list (skip if a member with the same name or email already exists)
+    const applicant = pendingUsers.find(u => u.user_id === userId) || {};
+    const memberName = (applicant.full_name || "").trim() || (applicant.email || "").split("@")[0];
+    const memberEmail = (applicant.email || "").toLowerCase();
+    const alreadyMember = membersApi.items.some(m =>
+      (memberName && m.name.toLowerCase() === memberName.toLowerCase()) ||
+      (memberEmail && (m.email || "").toLowerCase() === memberEmail)
+    );
+    if (memberName && !alreadyMember) {
+      await membersApi.add({
+        name: memberName,
+        email: applicant.email || "",
+        birthday: (applicant.birthday || "").slice(0, 10),
+        address: applicant.address || "",
+      });
+    }
+
     await fetchPendingUsers();
     accountBirthdaysApi.refresh();
   }
