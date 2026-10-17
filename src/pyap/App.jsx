@@ -476,11 +476,17 @@ function useRoleFeatures(active) {
   };
   useEffect(() => { refresh(); }, [active]);
   const save = async (roleName, features) => {
-    const clean = Array.from(new Set(features)).filter((f) => GRANTABLE_FEATURES.some((g) => g.key === f));
-    const { error } = await supabase.from("role_features").upsert({ role: roleName, features: clean }, { onConflict: "role" });
-    if (error) { alert("Failed to save feature access: " + error.message); return false; }
-    await refresh();
-    return true;
+    try {
+      const clean = Array.from(new Set(features)).filter((f) => GRANTABLE_FEATURES.some((g) => g.key === f));
+      const { error } = await supabase.from("role_features").upsert({ role: roleName, features: clean }, { onConflict: "role" });
+      if (error) { alert("Failed to save feature access: " + error.message); return false; }
+      await refresh();
+      return true;
+    } catch (err) {
+      console.error("Failed to save feature access:", err);
+      alert("Failed to save feature access: " + (err?.message || "Please try again."));
+      return false;
+    }
   };
   return { extras, loading, save, refresh };
 }
@@ -2035,8 +2041,11 @@ function FeatureAccess({ extras, onSave }) {
     if (baseline[key] || busy) return;
     const next = isOn(key) ? extra.filter((k) => k !== key) : [...extra, key];
     setBusy(key);
-    await onSave(selectedRole, next);
-    setBusy("");
+    try {
+      await onSave(selectedRole, next);
+    } finally {
+      setBusy("");
+    }
   }
 
   return (
