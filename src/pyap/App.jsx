@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { Smartphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-import { LOGO_B64, PRESETS, GRANTABLE_FEATURES } from "./constants.js";
+import { LOGO_B64, PRESETS, GRANTABLE_FEATURES, SNAPSHOT_LIMIT } from "./constants.js";
 import { useAuthSession } from "./hooks/useAuthSession.jsx";
 import { useAnnouncements } from "./hooks/useAnnouncements.jsx";
 import { useSuggestions } from "./hooks/useSuggestions.jsx";
@@ -18,6 +18,7 @@ import { useAccounts } from "./hooks/useAccounts.jsx";
 import { useAccountBirthdays } from "./hooks/useAccountBirthdays.jsx";
 import { useRoleFeatures } from "./hooks/useRoleFeatures.jsx";
 import { useSnapshots } from "./hooks/useSnapshots.jsx";
+import { useAvatar } from "./hooks/useAvatar.jsx";
 import { Dashboard } from "./components/DashboardPage.jsx";
 import { MembersList, MemberProfile, MemberFormModal } from "./components/MembersPage.jsx";
 import { EventsList, EventFormModal } from "./components/EventsPage.jsx";
@@ -72,6 +73,7 @@ export default function App() {
   const achievementsApi = useAchievements(userActive);
   const accountsApi = useAccounts(userActive);
   const snapshotsApi = useSnapshots();
+  const avatarApi = useAvatar();
   const accountBirthdaysApi = useAccountBirthdays(!!auth.session);
   const roleFeaturesApi = useRoleFeatures(!!auth.session);
   const welcomeContent = welcomeApi.content;
@@ -492,6 +494,22 @@ export default function App() {
             attendance={attendance}
             onBack={() => setSelectedMember(null)}
             onDelete={isLeader ? (id) => { membersApi.remove(id); setSelectedMember(null); } : undefined}
+            canEditPhoto={!!auth.session && (isLeader || selectedMember.userId === auth.session?.user?.id)}
+            photoBusy={avatarApi.busy}
+            onPhotoChange={async (file) => {
+              const url = await avatarApi.upload(selectedMember, file);
+              if (url) {
+                setSelectedMember((m) => (m ? { ...m, avatarUrl: url } : m));
+                membersApi.refresh();
+              }
+            }}
+            onPhotoRemove={async () => {
+              const ok = await avatarApi.remove(selectedMember);
+              if (ok) {
+                setSelectedMember((m) => (m ? { ...m, avatarUrl: "" } : m));
+                membersApi.refresh();
+              }
+            }}
           />
         )}
         {screen === "attendance" && !selectedEventForAttendance && !viewHistoryEvent && (
@@ -606,7 +624,7 @@ export default function App() {
       )}
       {certPreview && <CertPreviewModal cert={certPreview} onClose={() => setCertPreview(null)} />}
       {showSnapshotForm && (
-        <SnapshotUploadModal onClose={() => setShowSnapshotForm(false)} onSave={async (files, meta) => { const ok = await snapshotsApi.add(files, meta); if (ok) setShowSnapshotForm(false); }} />
+        <SnapshotUploadModal onClose={() => setShowSnapshotForm(false)} remaining={Math.max(0, SNAPSHOT_LIMIT - snapshots.length)} onSave={async (files, meta) => { const ok = await snapshotsApi.add(files, meta); if (ok) setShowSnapshotForm(false); }} />
       )}
       {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
     </div>

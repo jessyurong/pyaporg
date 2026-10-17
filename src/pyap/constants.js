@@ -30,5 +30,12 @@ export const GRANTABLE_FEATURES = [
   { key: "donate", label: "Donate" },
 ];
 
+// Max na bilang ng snapshots (photos sa album) para hindi mapuno ang
+// 1 GB free-tier storage ng Supabase. Kapag na-hit ito, kailangan munang
+// mag-delete ng lumang snapshots bago maka-upload ulit.
+// Importante: panatilihing pareho sa public.snapshot_count_limit() sa
+// supabase/migrations/20261018010000_snapshot_limit.sql
+export const SNAPSHOT_LIMIT = 300;
+
 export const ROLE_OPTIONS = ["superadmin", "president", "secretary", "organizer", "treasurer", "member"];
 export const ROLE_LABELS = { superadmin: "Super Admin", president: "President", secretary: "Secretary", organizer: "Organizer", treasurer: "Treasurer", member: "Member" };

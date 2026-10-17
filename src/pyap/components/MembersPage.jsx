@@ -1,7 +1,27 @@
-import React, { useState } from "react";
-import { Phone, Plus, Trash2, User } from "lucide-react";
+import React, { useRef, useState } from "react";
+import { Camera, Phone, Plus, Trash2, User } from "lucide-react";
 import { fmtBirthday } from "../lib/utils.js";
 import { Badge, ModalShell, inputCls } from "./ui.jsx";
+
+export function MemberAvatar({ member, size = 32, className = "" }) {
+  const [failed, setFailed] = useState(false);
+  if (member?.avatarUrl && !failed) {
+    return (
+      <img
+        src={member.avatarUrl}
+        alt={member.name || "Member"}
+        onError={() => setFailed(true)}
+        className={`rounded-full object-cover bg-stone-200 shrink-0 ${className}`}
+        style={{ width: size, height: size }}
+      />
+    );
+  }
+  return (
+    <div className={`rounded-full bg-stone-200 flex items-center justify-center shrink-0 ${className}`} style={{ width: size, height: size }}>
+      <User size={Math.round(size * 0.45)} className="text-stone-500" />
+    </div>
+  );
+}
 
 export function MembersList({ members, onSelect, onAdd }) {
   return (
@@ -16,7 +36,7 @@ export function MembersList({ members, onSelect, onAdd }) {
           <tbody>
             {members.map(m => (
               <tr key={m.id} onClick={() => onSelect(m)} className="border-t border-stone-100 hover:bg-stone-50 cursor-pointer">
-                <td className="p-3"><div className="w-8 h-8 rounded-full bg-stone-200 flex items-center justify-center"><User size={14} className="text-stone-500" /></div></td>
+                <td className="p-3"><MemberAvatar member={m} size={32} /></td>
                 <td className="p-3 font-medium">{m.name}</td>
                 <td className="p-3 text-stone-500">{m.position}</td>
                 <td className="p-3"><Badge tone={m.status}>{m.status}</Badge></td>
@@ -30,7 +50,8 @@ export function MembersList({ members, onSelect, onAdd }) {
   );
 }
 
-export function MemberProfile({ member, events, attendance, onBack, onDelete }) {
+export function MemberProfile({ member, events, attendance, onBack, onDelete, canEditPhoto = false, photoBusy = false, onPhotoChange, onPhotoRemove }) {
+  const fileRef = useRef(null);
   const history = events.map(e => ({ event: e.title, date: e.date, status: attendance[e.id]?.[member.id] })).filter(h => h.status);
   const rate = history.length ? Math.round((history.filter(h => h.status === "present").length / history.length) * 100) : 0;
   return (
@@ -40,11 +61,48 @@ export function MemberProfile({ member, events, attendance, onBack, onDelete }) 
         {onDelete && <button onClick={() => onDelete(member.id)} className="text-rose-600 text-sm flex items-center gap-1"><Trash2 size={14} /> Delete</button>}
       </div>
       <div className="bg-white rounded-xl border border-stone-200 p-5 flex items-center gap-5 mb-5">
-        <div className="w-20 h-20 rounded-full bg-stone-200 flex items-center justify-center"><User size={30} className="text-stone-500" /></div>
-        <div>
+        <div className="relative shrink-0">
+          <MemberAvatar member={member} size={80} />
+          {canEditPhoto && (
+            <>
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={photoBusy}
+                aria-label="Change profile photo"
+                title="Change profile photo"
+                className="absolute -bottom-1 -right-1 w-7 h-7 rounded-full bg-emerald-700 hover:bg-emerald-800 text-white flex items-center justify-center shadow disabled:opacity-60"
+              >
+                <Camera size={13} />
+              </button>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const f = e.target.files?.[0];
+                  e.target.value = "";
+                  if (f) onPhotoChange?.(f);
+                }}
+              />
+            </>
+          )}
+        </div>
+        <div className="min-w-0">
           <h2 className="text-lg font-bold">{member.name}</h2>
           <p className="text-sm text-stone-500 mt-0.5">{member.position} — <Badge tone={member.status}>{member.status}</Badge></p>
           <p className="text-xs text-stone-500 mt-1 flex items-center gap-1.5"><Phone size={12} /> {member.contact}</p>
+          {canEditPhoto && (
+            <p className="text-[11px] text-stone-400 mt-1.5">
+              {photoBusy ? "Uploading photo…" : "Tap the camera icon to change this profile photo."}
+            </p>
+          )}
+          {canEditPhoto && !photoBusy && member.avatarUrl && (
+            <button type="button" onClick={onPhotoRemove} className="text-[11px] text-rose-600 hover:underline mt-0.5">
+              Remove photo
+            </button>
+          )}
         </div>
       </div>
       <div className="bg-white rounded-xl border border-stone-200 p-5 mb-5 text-sm space-y-1.5">

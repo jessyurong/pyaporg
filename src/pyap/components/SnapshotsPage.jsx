@@ -1,18 +1,35 @@
 import React, { useState } from "react";
 import { Camera, Plus, Trash2 } from "lucide-react";
+import { SNAPSHOT_LIMIT } from "../constants.js";
 import { ModalShell, inputCls } from "./ui.jsx";
 
 export function Snapshots({ items, loading, canManage, onAdd, onDelete }) {
+  const atLimit = items.length >= SNAPSHOT_LIMIT;
   return (
     <div>
-      <div className="flex justify-between items-center mb-5">
-        <h1 className="text-xl font-bold text-emerald-900">Snapshots</h1>
+      <div className="flex justify-between items-center gap-3 mb-5">
+        <div>
+          <h1 className="text-xl font-bold text-emerald-900">Snapshots</h1>
+          <p className={`text-[11px] mt-0.5 ${atLimit ? "text-rose-600 font-semibold" : "text-stone-400"}`}>
+            {items.length} / {SNAPSHOT_LIMIT} photos
+          </p>
+        </div>
         {canManage && (
-          <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5">
+          <button
+            onClick={onAdd}
+            disabled={atLimit}
+            title={atLimit ? "Limit reached — delete old photos to upload more." : undefined}
+            className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             <Plus size={14} /> Add Photos
           </button>
         )}
       </div>
+      {atLimit && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 mb-4 text-xs text-amber-800">
+          Na-hit na ang limit na <b>{SNAPSHOT_LIMIT} photos</b>. Mag-delete muna ng lumang snapshots para maka-upload ulit ng bago.
+        </div>
+      )}
       {loading ? (
         <p className="text-sm text-stone-400">Loading…</p>
       ) : items.length === 0 ? (
@@ -50,11 +67,12 @@ export function Snapshots({ items, loading, canManage, onAdd, onDelete }) {
   );
 }
 
-export function SnapshotUploadModal({ onClose, onSave }) {
+export function SnapshotUploadModal({ onClose, onSave, remaining }) {
   const [files, setFiles] = useState([]);
   const [title, setTitle] = useState("");
   const [album, setAlbum] = useState("");
   const [busy, setBusy] = useState(false);
+  const slots = typeof remaining === "number" ? remaining : SNAPSHOT_LIMIT;
   return (
     <ModalShell title="Add Photos" onClose={onClose}>
       <div className="space-y-3">
@@ -64,11 +82,17 @@ export function SnapshotUploadModal({ onClose, onSave }) {
             type="file"
             accept="image/*"
             multiple
-            onChange={(e) => setFiles([...e.target.files])}
+            onChange={(e) => {
+              const picked = [...e.target.files];
+              setFiles(picked.length > slots ? picked.slice(0, slots) : picked);
+            }}
             className="w-full text-sm text-stone-500 file:mr-3 file:px-3 file:py-1.5 file:rounded-lg file:border-0 file:bg-emerald-700 file:text-white file:text-xs file:cursor-pointer border border-stone-200 rounded-lg p-2"
           />
+          <div className="text-[11px] text-stone-400 mt-1.5">
+            {Math.max(0, slots - files.length)} slot{slots - files.length === 1 ? "" : "s"} left (limit: {SNAPSHOT_LIMIT}). Photos are auto-compressed before upload to keep the file size small.
+          </div>
           {files.length > 0 && (
-            <div className="text-[11px] text-stone-400 mt-1.5">{files.length} photo{files.length > 1 ? "s" : ""} selected: {files.map((f) => f.name).join(", ")}</div>
+            <div className="text-[11px] text-stone-400 mt-1">{files.length} photo{files.length > 1 ? "s" : ""} selected: {files.map((f) => f.name).join(", ")}</div>
           )}
         </div>
         <input className={inputCls} placeholder="Title / caption (optional)" value={title} onChange={(e) => setTitle(e.target.value)} />

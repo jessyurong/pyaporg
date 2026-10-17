@@ -15,6 +15,8 @@ export function useMembers(active = true) {
     } else {
       setItems((data || []).map((m) => ({
         id: m.id,
+        userId: m.user_id || null,
+        avatarUrl: m.avatar_url || "",
         name: m.full_name,
         position: m.position || "",
         status: m.status || "active",
