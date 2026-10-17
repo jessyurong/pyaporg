@@ -90,15 +90,16 @@ export function BirthdayGreetings({ members = [], accountBirthdays = [] }) {
     .map((p) => ({ ...p, b: parseBday(p.birthday) }))
     .filter((p) => p.b);
 
-  const todays = all.filter((p) => p.b.mo === tM && p.b.d === tD);
-  const monthList = all.filter((p) => p.b.mo === tM).sort((a, b) => a.b.d - b.b.d);
-  const upcoming = all
-    .filter((p) => !(p.b.mo === tM && p.b.d === tD))
+  // Pinaka-malapit na birthday (today o susunod) ang mabibigyan ng greetings.
+  const withDays = all
     .map((p) => ({ ...p, in: daysUntil(p.b.mo, p.b.d, today) }))
-    .sort((a, b) => a.in - b.in);
-  const nextUp = upcoming.filter((p) => p.b.mo !== tM).slice(0, 5);
-  const featured = todays.length ? todays : upcoming.slice(0, 1);
-  const isTodaySection = todays.length > 0;
+    .sort((a, b) => a.in - b.in || (a.name || "").localeCompare(b.name || ""));
+  const minDays = withDays.length ? withDays[0].in : 0;
+  const featured = withDays.filter((p) => p.in === minDays); // parehong araw na birthday = pareho silang bibigyan
+  const isTodaySection = minDays === 0;
+
+  const monthList = all.filter((p) => p.b.mo === tM).sort((a, b) => a.b.d - b.b.d);
+  const nextUp = withDays.filter((p) => !featured.includes(p) && p.b.mo !== tM).slice(0, 5);
 
   async function copyCaption(key, text) {
     try {
@@ -143,13 +144,13 @@ export function BirthdayGreetings({ members = [], accountBirthdays = [] }) {
     <div>
       <h1 className="text-xl font-bold text-emerald-900 mb-1">Birthday Greetings</h1>
       <p className="text-sm text-stone-500 mb-5">
-        Automatic na greeting captions para sa mga celebrants — pili lang ng gusto mo at i-tap ang Copy.
+        Automatic na greeting captions para sa PINAKA-MALAPIT na magbi-birthday — pili lang ng caption at i-tap ang Copy.
       </p>
 
       {/* ---------- Featured celebrant(s) ---------- */}
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <h2 className="text-sm font-bold text-emerald-900">
-          {isTodaySection ? `🎉 Ngayong Araw (${todays.length})` : "⏳ Susunod na Celebrant"}
+          {isTodaySection ? `🎉 Ngayong Araw (${featured.length})` : `⏳ Susunod na Celebrant${featured.length > 1 ? "s" : ""}`}
         </h2>
         {!isTodaySection && <span className="text-[11px] text-stone-400">advance greeting — ready na sa araw niya</span>}
       </div>
@@ -171,7 +172,7 @@ export function BirthdayGreetings({ members = [], accountBirthdays = [] }) {
                     </span>
                   ) : (
                     <span className="text-[11px] font-semibold bg-sky-50 text-sky-700 rounded-full px-2.5 py-1">
-                      🎈 sa {p.in} araw pa
+                      {p.in === 1 ? "🎈 Bukas na!" : `🎈 sa ${p.in} araw pa`}
                     </span>
                   )}
                   <span className="text-[11px] text-stone-400">{format(new Date(2000, p.b.mo, p.b.d), "MMMM d")}</span>
