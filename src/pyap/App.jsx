@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-import { LayoutDashboard, Users, CheckSquare, Calendar, Award, Wallet, Megaphone, Settings, LogOut, Plus, X, Trash2, User, MessageSquare, Menu, Eye, EyeOff, Trophy, Home, Camera, Download, Smartphone, Medal, Star, Dumbbell, HandHeart, Heart, Cake, Phone, ClipboardList, Check, FileText, Sprout, Banknote, CheckCircle, KeyRound } from "lucide-react";
+import { LayoutDashboard, Users, CheckSquare, Calendar, Award, Wallet, Megaphone, Settings, LogOut, Plus, X, Trash2, User, MessageSquare, Menu, Eye, EyeOff, Trophy, Home, Camera, Download, Smartphone, Medal, Star, Dumbbell, HandHeart, Heart, Cake, Phone, ClipboardList, Check, FileText, Sprout, Banknote, CheckCircle, KeyRound, ShieldCheck, Lock } from "lucide-react";
 import Welcome, { DEFAULT_WELCOME } from "./Welcome.jsx";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -456,6 +456,35 @@ function useAccountBirthdays(enabled) {
   return { items, refresh };
 }
 
+function useRoleFeatures(active) {
+  const [extras, setExtras] = useState({});
+  const [loading, setLoading] = useState(true);
+  const refresh = async () => {
+    if (!active) { setExtras({}); setLoading(false); return; }
+    const { data, error } = await supabase.from("role_features").select("role, features");
+    if (error) {
+      console.error("Failed to load role features:", error);
+      setExtras({});
+    } else {
+      const map = {};
+      (data || []).forEach((r) => {
+        map[r.role] = Array.isArray(r.features) ? r.features.filter((f) => typeof f === "string") : [];
+      });
+      setExtras(map);
+    }
+    setLoading(false);
+  };
+  useEffect(() => { refresh(); }, [active]);
+  const save = async (roleName, features) => {
+    const clean = Array.from(new Set(features)).filter((f) => GRANTABLE_FEATURES.some((g) => g.key === f));
+    const { error } = await supabase.from("role_features").upsert({ role: roleName, features: clean }, { onConflict: "role" });
+    if (error) { alert("Failed to save feature access: " + error.message); return false; }
+    await refresh();
+    return true;
+  };
+  return { extras, loading, save, refresh };
+}
+
 function useSnapshots() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -530,6 +559,21 @@ const PRESETS = {
   member: { dashboard: true, members: false, attendance: false, events: false, announcements: true, snapshots: true, finance: false, certificates: false, achievements: false, suggestions: false },
 };
 
+// Features the superadmin can grant (add) per role via the Feature Access screen.
+const MANAGED_ROLES = ["member", "organizer", "treasurer", "secretary", "president"];
+const GRANTABLE_FEATURES = [
+  { key: "announcements", label: "Announcements" },
+  { key: "snapshots", label: "Snapshots" },
+  { key: "members", label: "Members" },
+  { key: "attendance", label: "Attendance" },
+  { key: "events", label: "Events" },
+  { key: "certificates", label: "Certificates" },
+  { key: "achievements", label: "Achievements" },
+  { key: "finance", label: "Finance" },
+  { key: "suggestions", label: "Suggestions" },
+  { key: "donate", label: "Donate" },
+];
+
 const NAV = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { key: "announcements", label: "Announcements", icon: Megaphone },
@@ -545,6 +589,7 @@ const NAV = [
   { key: "pendingUsers", label: "Pending Users", icon: Users },
   { key: "accountRequests", label: "Account Requests", icon: MessageSquare },
   { key: "users", label: "User Management", icon: Settings },
+  { key: "access", label: "Feature Access", icon: ShieldCheck },
   { key: "backup", label: "Backup & Export", icon: Download },
   { key: "welcome", label: "Welcome Page", icon: Home },
 ];
@@ -626,6 +671,7 @@ export default function App() {
   const accountsApi = useAccounts();
   const snapshotsApi = useSnapshots();
   const accountBirthdaysApi = useAccountBirthdays(!!auth.session);
+  const roleFeaturesApi = useRoleFeatures(!!auth.session);
   const welcomeContent = welcomeApi.content;
   const dashboardWidgets = dashApi.widgets;
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -700,8 +746,14 @@ export default function App() {
   const featureAccess = isGuest
     ? { dashboard: true, announcements: true, snapshots: true, suggestions: true, donate: true }
     : role === "superadmin"
-    ? { dashboard: true, members: true, attendance: true, events: true, announcements: true, snapshots: true, finance: true, certificates: true, achievements: true, users: true, backup: true, suggestions: true, welcome: true, donate: true }
-    : PRESETS[role] || {};
+    ? { dashboard: true, members: true, attendance: true, events: true, announcements: true, snapshots: true, finance: true, certificates: true, achievements: true, users: true, access: true, backup: true, suggestions: true, welcome: true, donate: true }
+    : { ...(PRESETS[role] || {}) };
+
+  if (!isGuest && role !== "superadmin") {
+    for (const f of roleFeaturesApi.extras[role] || []) {
+      if (GRANTABLE_FEATURES.some((g) => g.key === f)) featureAccess[f] = true;
+    }
+  }
 
   if (isLeader) {
     featureAccess.pendingUsers = true;
@@ -1126,7 +1178,7 @@ export default function App() {
           />
         )}
         {screen === "members" && !selectedMember && (
-          <MembersList members={members} onSelect={setSelectedMember} onAdd={() => setShowMemberForm(true)} />
+          <MembersList members={members} onSelect={setSelectedMember} onAdd={isLeader ? () => setShowMemberForm(true) : undefined} />
         )}
         {screen === "members" && selectedMember && (
           <MemberProfile
@@ -1134,11 +1186,11 @@ export default function App() {
             events={events}
             attendance={attendance}
             onBack={() => setSelectedMember(null)}
-            onDelete={(id) => { membersApi.remove(id); setSelectedMember(null); }}
+            onDelete={isLeader ? (id) => { membersApi.remove(id); setSelectedMember(null); } : undefined}
           />
         )}
         {screen === "attendance" && !selectedEventForAttendance && !viewHistoryEvent && (
-          <AttendanceSelect events={events} members={members} attendance={attendance} onSelect={setSelectedEventForAttendance} onViewHistory={setViewHistoryEvent} />
+          <AttendanceSelect events={events} members={members} attendance={attendance} canManage={isLeader} onSelect={setSelectedEventForAttendance} onViewHistory={setViewHistoryEvent} />
         )}
         {screen === "attendance" && viewHistoryEvent && (
           <AttendanceHistoryDetail
@@ -1159,19 +1211,19 @@ export default function App() {
             onSave={(status, notes) => attendanceApi.save(selectedEventForAttendance.id, status, notes)}
           />
         )}
-        {screen === "events" && <EventsList events={events} onAdd={() => setShowEventForm(true)} onDelete={(id) => eventsApi.remove(id)} />}
+        {screen === "events" && <EventsList events={events} onAdd={isLeader ? () => setShowEventForm(true) : undefined} onDelete={isLeader ? (id) => eventsApi.remove(id) : undefined} />}
         {screen === "certificates" && (
-          <Certificates members={members} onGenerate={() => setShowCertForm(true)} onPreview={setCertPreview} />
+          <Certificates members={members} onGenerate={isLeader ? () => setShowCertForm(true) : undefined} onPreview={setCertPreview} />
         )}
         {screen === "achievements" && (
           <Achievements
             members={members}
             achievements={achievements}
-            onAdd={() => setShowAchievementForm(true)}
-            onDelete={(id) => achievementsApi.remove(id)}
+            onAdd={isLeader ? () => setShowAchievementForm(true) : undefined}
+            onDelete={isLeader ? (id) => achievementsApi.remove(id) : undefined}
           />
         )}
-        {screen === "finance" && <Finance finance={finance} onAdd={() => setShowFinanceForm(true)} onDelete={(id) => financeApi.remove(id)} />}
+        {screen === "finance" && <Finance finance={finance} onAdd={isLeader ? () => setShowFinanceForm(true) : undefined} onDelete={isLeader ? (id) => financeApi.remove(id) : undefined} />}
         {screen === "suggestions" && (
           <Suggestions
             isGuest={isGuest}
@@ -1204,6 +1256,9 @@ export default function App() {
           />
         )}
         {screen === "donate" && <DonateBox />}
+        {screen === "access" && role === "superadmin" && (
+          <FeatureAccess extras={roleFeaturesApi.extras} onSave={roleFeaturesApi.save} />
+        )}
         {screen === "users" && (
           <UserManagement
             accounts={accounts}
@@ -1562,7 +1617,7 @@ function MembersList({ members, onSelect, onAdd }) {
     <div>
       <div className="flex justify-between items-center mb-5">
         <h1 className="text-xl font-bold text-emerald-900">Members</h1>
-        <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Add Member</button>
+        {onAdd && <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Add Member</button>}
       </div>
       <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto">
         <table className="w-full text-sm min-w-[500px]">
@@ -1591,7 +1646,7 @@ function MemberProfile({ member, events, attendance, onBack, onDelete }) {
     <div>
       <div className="flex justify-between items-center mb-5">
         <button onClick={onBack} className="text-sm text-emerald-700">&larr; Back to Members</button>
-        <button onClick={() => onDelete(member.id)} className="text-rose-600 text-sm flex items-center gap-1"><Trash2 size={14} /> Delete</button>
+        {onDelete && <button onClick={() => onDelete(member.id)} className="text-rose-600 text-sm flex items-center gap-1"><Trash2 size={14} /> Delete</button>}
       </div>
       <div className="bg-white rounded-xl border border-stone-200 p-5 flex items-center gap-5 mb-5">
         <div className="w-20 h-20 rounded-full bg-stone-200 flex items-center justify-center"><User size={30} className="text-stone-500" /></div>
@@ -1622,7 +1677,7 @@ function MemberProfile({ member, events, attendance, onBack, onDelete }) {
   );
 }
 
-function AttendanceSelect({ events, members, attendance, onSelect, onViewHistory }) {
+function AttendanceSelect({ events, members, attendance, canManage, onSelect, onViewHistory }) {
   const history = events
     .filter(e => attendance[e.id])
     .map(e => {
@@ -1643,14 +1698,14 @@ function AttendanceSelect({ events, members, attendance, onSelect, onViewHistory
   return (
     <div>
       <h1 className="text-xl font-bold text-emerald-900 mb-5">Attendance</h1>
-      <p className="text-sm text-stone-500 mb-4">Select an event to mark or view attendance.</p>
+      <p className="text-sm text-stone-500 mb-4">{canManage ? "Select an event to mark or view attendance." : "Click a recorded event below to view per-member attendance."}</p>
       <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto mb-6">
         <table className="w-full text-sm min-w-[500px]">
           <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Event</th><th className="p-3">Date</th><th className="p-3"></th></tr></thead>
           <tbody>{events.map(e => (
             <tr key={e.id} className="border-t border-stone-100">
               <td className="p-3">{e.title}</td><td className="p-3 text-stone-500">{e.date}</td>
-              <td className="p-3"><button onClick={() => onSelect(e)} className="bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg">Mark Attendance</button></td>
+              <td className="p-3">{canManage && <button onClick={() => onSelect(e)} className="bg-emerald-700 text-white text-xs px-3 py-1.5 rounded-lg">Mark Attendance</button>}</td>
             </tr>
           ))}</tbody>
         </table>
@@ -1785,7 +1840,7 @@ function EventsList({ events, onAdd, onDelete }) {
     <div>
       <div className="flex justify-between items-center mb-5">
         <h1 className="text-xl font-bold text-emerald-900">Events / Activities</h1>
-        <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Add Event</button>
+        {onAdd && <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Add Event</button>}
       </div>
       <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto">
         <table className="w-full text-sm min-w-[500px]">
@@ -1793,7 +1848,7 @@ function EventsList({ events, onAdd, onDelete }) {
           <tbody>{events.map(e => (
             <tr key={e.id} className="border-t border-stone-100">
               <td className="p-3">{e.title}</td><td className="p-3 text-stone-500">{e.date}</td><td className="p-3 text-stone-500">{e.location}</td>
-              <td className="p-3"><button onClick={() => onDelete(e.id)} className="text-rose-600"><Trash2 size={14} /></button></td>
+              <td className="p-3">{onDelete && <button onClick={() => onDelete(e.id)} className="text-rose-600"><Trash2 size={14} /></button>}</td>
             </tr>
           ))}</tbody>
         </table>
@@ -1807,9 +1862,9 @@ function Certificates({ members, onGenerate, onPreview }) {
     <div>
       <div className="flex justify-between items-center mb-5">
         <h1 className="text-xl font-bold text-emerald-900">Certificate Generator</h1>
-        <button onClick={onGenerate} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Generate Certificate</button>
+        {onGenerate && <button onClick={onGenerate} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Generate Certificate</button>}
       </div>
-      <p className="text-sm text-stone-500">Click "Generate Certificate" to create a Participation, Appreciation, Leadership, or Volunteer certificate for any member.</p>
+      <p className="text-sm text-stone-500">{onGenerate ? 'Click "Generate Certificate" to create a Participation, Appreciation, Leadership, or Volunteer certificate for any member.' : "Certificates are generated by the officers/leaders."}</p>
     </div>
   );
 }
@@ -1823,7 +1878,7 @@ function Achievements({ members, achievements, onAdd, onDelete }) {
     <div>
       <div className="flex justify-between items-center mb-5">
         <h1 className="text-xl font-bold text-emerald-900">Achievements</h1>
-        <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Add Achievement</button>
+        {onAdd && <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Add Achievement</button>}
       </div>
       <p className="text-sm text-stone-500 mb-5">Ipagdiwang ang mga milestone at magagandang gawa ng mga miyembro — mula sa perfect attendance hanggang outstanding volunteer work.</p>
 
@@ -1841,7 +1896,7 @@ function Achievements({ members, achievements, onAdd, onDelete }) {
                 <div className="text-xs text-stone-500 mb-1">{a.memberName} • {a.date}</div>
                 <p className="text-xs text-stone-600">{a.description}</p>
               </div>
-              <button onClick={() => onDelete(a.id)} className="text-rose-600 flex-shrink-0"><Trash2 size={14} /></button>
+              {onDelete && <button onClick={() => onDelete(a.id)} className="text-rose-600 flex-shrink-0"><Trash2 size={14} /></button>}
             </div>
           ))}
         </div>
@@ -1857,7 +1912,7 @@ function Finance({ finance, onAdd, onDelete }) {
     <div>
       <div className="flex justify-between items-center mb-5">
         <h1 className="text-xl font-bold text-emerald-900">Finance Tracker</h1>
-        <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Add Entry</button>
+        {onAdd && <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Add Entry</button>}
       </div>
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-5">
         <StatCard num={`₱${income}`} label="Total Income" />
@@ -1871,7 +1926,7 @@ function Finance({ finance, onAdd, onDelete }) {
             <tr key={f.id} className="border-t border-stone-100">
               <td className="p-3"><Badge tone={f.type === "income" ? "active" : "inactive"}>{f.type}</Badge></td>
               <td className="p-3">{f.category}</td><td className="p-3">₱{f.amount}</td><td className="p-3 text-stone-500">{f.date}</td>
-              <td className="p-3"><button onClick={() => onDelete(f.id)} className="text-rose-600"><Trash2 size={14} /></button></td>
+              <td className="p-3">{onDelete && <button onClick={() => onDelete(f.id)} className="text-rose-600"><Trash2 size={14} /></button>}</td>
             </tr>
           ))}</tbody>
         </table>
@@ -1963,6 +2018,77 @@ function AccountRequests({ requests }) {
             ))}
           </tbody>
         </table>
+      </div>
+    </div>
+  );
+}
+
+function FeatureAccess({ extras, onSave }) {
+  const [selectedRole, setSelectedRole] = useState("member");
+  const [busy, setBusy] = useState("");
+  const baseline = PRESETS[selectedRole] || {};
+  const extra = extras[selectedRole] || [];
+  const isOn = (key) => !!baseline[key] || extra.includes(key);
+  const isLeaderRole = ["president", "secretary", "organizer"].includes(selectedRole);
+
+  async function toggle(key) {
+    if (baseline[key] || busy) return;
+    const next = isOn(key) ? extra.filter((k) => k !== key) : [...extra, key];
+    setBusy(key);
+    await onSave(selectedRole, next);
+    setBusy("");
+  }
+
+  return (
+    <div>
+      <h1 className="text-xl font-bold text-emerald-900 mb-1">Feature Access</h1>
+      <p className="text-sm text-stone-500 mb-5">Piliin kung anong mga feature (screens) ang makikita ng bawat role. Ang naka-lock na "Default" ay laging kasama — i-tick ang iba para idagdag. Awtomatikong nase-save.</p>
+
+      <div className="flex flex-wrap gap-2 mb-5">
+        {MANAGED_ROLES.map((r) => (
+          <button
+            key={r}
+            onClick={() => setSelectedRole(r)}
+            className={`px-3.5 py-1.5 rounded-full text-xs font-semibold border transition ${selectedRole === r ? "bg-emerald-700 border-emerald-700 text-white" : "bg-white border-stone-200 text-stone-600 hover:border-emerald-600"}`}
+          >
+            {ROLE_LABELS[r]}
+          </button>
+        ))}
+      </div>
+
+      <div className="bg-white rounded-xl border border-stone-200 overflow-hidden mb-4">
+        {GRANTABLE_FEATURES.map((f) => {
+          const on = isOn(f.key);
+          const locked = !!baseline[f.key];
+          return (
+            <button
+              key={f.key}
+              type="button"
+              onClick={() => toggle(f.key)}
+              disabled={locked || busy === f.key}
+              className="w-full flex items-center justify-between gap-3 px-4 py-3 border-b border-stone-100 last:border-0 text-left transition enabled:hover:bg-stone-50 disabled:opacity-70"
+            >
+              <span className="text-sm text-stone-700 flex items-center gap-2">
+                {f.label}
+                {locked && <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-stone-400 bg-stone-100 rounded-full px-2 py-0.5"><Lock size={10} /> Default</span>}
+                {busy === f.key && <span className="text-[10px] text-stone-400">saving…</span>}
+              </span>
+              <span className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition ${on ? "bg-emerald-700 border-emerald-700 text-white" : "border-stone-300 bg-white"}`}>
+                {on && <Check size={13} />}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="bg-stone-50 border border-stone-200 rounded-xl p-4 text-xs text-stone-500 leading-relaxed">
+        <div className="flex items-center gap-1.5 font-semibold text-stone-600 mb-1.5"><ShieldCheck size={13} /> Palaging kasama (hindi mailalabas)</div>
+        <p>
+          Dashboard para sa lahat.
+          {isLeaderRole ? " Pending Users at Account Requests para sa mga leader." : ""}
+          {selectedRole === "president" ? " Backup & Export para sa president." : ""}
+          {" "}Ang User Management at itong Feature Access ay para lang sa superadmin.
+        </p>
       </div>
     </div>
   );
