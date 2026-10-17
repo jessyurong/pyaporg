@@ -433,6 +433,22 @@ function useAccounts() {
   return { accounts, loading, setRole, setStatus, refresh };
 }
 
+function useAccountBirthdays(enabled) {
+  const [items, setItems] = useState([]);
+  const refresh = async () => {
+    if (!enabled) { setItems([]); return; }
+    const { data, error } = await supabase.rpc("active_birthdays");
+    if (error) {
+      console.error("Failed to load account birthdays:", error);
+      setItems([]);
+    } else {
+      setItems((data || []).map((r) => ({ id: "acct-" + (r.name || "member"), name: r.name || "Member", birthday: (r.birthday || "").slice(0, 10) })));
+    }
+  };
+  useEffect(() => { refresh(); }, [enabled]);
+  return { items, refresh };
+}
+
 function useSnapshots() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -576,6 +592,7 @@ export default function App() {
   const achievementsApi = useAchievements();
   const accountsApi = useAccounts();
   const snapshotsApi = useSnapshots();
+  const accountBirthdaysApi = useAccountBirthdays(!!auth.session);
   const welcomeContent = welcomeApi.content;
   const dashboardWidgets = dashApi.widgets;
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -687,8 +704,9 @@ export default function App() {
     const age = (fd.get("requestAge") || "").trim();
     const sex = (fd.get("requestSex") || "").trim();
     const address = (fd.get("requestAddress") || "").trim();
+    const birthday = (fd.get("requestBirthday") || "").trim();
 
-    if (!name || !email || !password || !age || !sex || !address) {
+    if (!name || !email || !password || !age || !sex || !address || !birthday) {
       setRequestError("Please fill out all fields before sending the request.");
       setRequestBusy(false);
       return;
@@ -699,7 +717,7 @@ export default function App() {
         email,
         password,
         options: {
-          data: { full_name: name, age, sex, address },
+          data: { full_name: name, age, sex, address, birthday },
           emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
         },
       });
@@ -892,6 +910,10 @@ export default function App() {
                 <input name="requestPassword" type="password" placeholder="Password" required minLength={6} autoComplete="new-password" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
                 <input name="requestAge" type="number" placeholder="Age" required min="10" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
                 <input name="requestSex" type="text" placeholder="Sex / Gender" required className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+                <label className="block">
+                  <span className="text-xs font-semibold text-stone-600">Birthday</span>
+                  <input name="requestBirthday" type="date" required max={new Date().toISOString().slice(0, 10)} className="w-full mt-1 px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm" />
+                </label>
                 <textarea name="requestAddress" placeholder="Address" required rows="3" className="w-full px-3.5 py-2.5 border border-stone-200 rounded-lg text-sm"></textarea>
                 <button type="submit" disabled={requestBusy} className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white font-semibold text-sm py-2.5 rounded-lg transition">
                   {requestBusy ? "Sending request…" : "Send Request"}
@@ -1012,7 +1034,7 @@ export default function App() {
 
       {/* Main content */}
       <div className="flex-1 p-5 md:p-8 pt-20 md:pt-8 max-w-5xl overflow-y-auto w-full">
-        {screen === "dashboard" && <Dashboard members={members} events={events} attendance={attendance} announcements={announcements} finance={finance} snapshots={snapshots} isSuperAdmin={role === "superadmin"} widgets={dashboardWidgets} onSaveWidgets={dashApi.save} onViewSnapshots={() => setScreen("snapshots")} />}
+        {screen === "dashboard" && <Dashboard members={members} events={events} attendance={attendance} announcements={announcements} finance={finance} snapshots={snapshots} accountBirthdays={accountBirthdaysApi.items} isSuperAdmin={role === "superadmin"} widgets={dashboardWidgets} onSaveWidgets={dashApi.save} onViewSnapshots={() => setScreen("snapshots")} />}
         {screen === "announcements" && (
           <Announcements
             announcements={announcements}
@@ -1306,7 +1328,9 @@ const WIDGET_LABELS = {
   snapshots: "Snapshots (Photos)",
 };
 
-function Dashboard({ members, events, attendance, announcements, finance, snapshots, isSuperAdmin, widgets, onSaveWidgets, onViewSnapshots }) {
+const fmtBirthday = (d) => (d ? new Date(String(d).slice(0, 10) + "T00:00:00").toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "—");
+
+function Dashboard({ members, events, attendance, announcements, finance, snapshots, accountBirthdays, isSuperAdmin, widgets, onSaveWidgets, onViewSnapshots }) {
   const [editing, setEditing] = useState(false);
   const w = widgets || {};
   const active = members.filter(m => m.status === "active").length;
@@ -1315,7 +1339,17 @@ function Dashboard({ members, events, attendance, announcements, finance, snapsh
   const allRecords = Object.values(attendance).flatMap(r => Object.values(r));
   const rate = allRecords.length ? Math.round((allRecords.filter(s => s === "present").length / allRecords.length) * 100) : 0;
   const thisMonth = new Date().getMonth();
-  const birthdays = members.filter(m => new Date(m.birthday).getMonth() === thisMonth);
+  const bdaySeen = new Set();
+  const birthdays = [...members, ...(accountBirthdays || [])]
+    .filter(b => {
+      const d = new Date(b.birthday);
+      if (!b.birthday || Number.isNaN(d.getTime()) || d.getMonth() !== thisMonth) return false;
+      const key = (b.name || "").trim().toLowerCase();
+      if (!key || bdaySeen.has(key)) return false;
+      bdaySeen.add(key);
+      return true;
+    })
+    .sort((a, b) => new Date(a.birthday).getDate() - new Date(b.birthday).getDate());
   const anyStat = w.totalMembers || w.activeMembers || w.totalEvents || w.attendanceRate || w.fundBalance || w.birthdays;
 
   return (
@@ -1342,7 +1376,7 @@ function Dashboard({ members, events, attendance, announcements, finance, snapsh
         <div className="bg-white rounded-xl border border-stone-200 p-5 mb-5">
           <h3 className="font-semibold text-emerald-900 text-sm mb-2 flex items-center gap-1.5"><Cake size={14} /> Birthdays This Month</h3>
           {birthdays.length === 0 ? <p className="text-sm text-stone-400">No birthdays this month.</p> :
-            <ul className="text-sm space-y-1">{birthdays.map(b => <li key={b.id}>{b.name} — {new Date(b.birthday).toLocaleDateString("en-US", { month: "long", day: "numeric" })}</li>)}</ul>}
+            <ul className="text-sm space-y-1">{birthdays.map(b => <li key={b.id || b.name}>{b.name} — {new Date(String(b.birthday).slice(0, 10) + "T00:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric" })}</li>)}</ul>}
         </div>
       )}
       {w.recentAnnouncements && (
@@ -1776,16 +1810,17 @@ function PendingUsers({ pendingUsers, loading, roleSelection, onRoleChange, onAp
       </div>
       <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto">
         <table className="w-full text-sm min-w-[680px]">
-          <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Name</th><th className="p-3">Email</th><th className="p-3">Requested</th><th className="p-3">Role</th><th className="p-3">Actions</th></tr></thead>
+          <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Name</th><th className="p-3">Email</th><th className="p-3">Birthday</th><th className="p-3">Requested</th><th className="p-3">Role</th><th className="p-3">Actions</th></tr></thead>
           <tbody>
             {loading ? (
-              <tr><td colSpan="5" className="p-4 text-stone-500">Loading pending users…</td></tr>
+              <tr><td colSpan="6" className="p-4 text-stone-500">Loading pending users…</td></tr>
             ) : pendingUsers.length === 0 ? (
-              <tr><td colSpan="5" className="p-4 text-stone-500">No pending users at the moment.</td></tr>
+              <tr><td colSpan="6" className="p-4 text-stone-500">No pending users at the moment.</td></tr>
             ) : pendingUsers.map(u => (
               <tr key={u.id} className="border-t border-stone-100">
                 <td className="p-3 font-medium">{u.full_name || "Unknown"}</td>
                 <td className="p-3 text-stone-500">{u.email || "-"}</td>
+                <td className="p-3 text-stone-500">{fmtBirthday(u.birthday)}</td>
                 <td className="p-3 text-stone-500">{u.created_at ? new Date(u.created_at).toLocaleDateString() : "-"}</td>
                 <td className="p-3">
                   <select className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm" value={roleSelection[u.user_id] || "member"} onChange={(e) => onRoleChange(u.user_id, e.target.value)}>
@@ -1820,6 +1855,7 @@ function AccountRequests({ requests }) {
             <tr className="bg-emerald-50 text-emerald-900 text-left">
               <th className="p-3">Name</th>
               <th className="p-3">Age</th>
+              <th className="p-3">Birthday</th>
               <th className="p-3">Sex</th>
               <th className="p-3">Address</th>
               <th className="p-3">Requested</th>
@@ -1828,11 +1864,12 @@ function AccountRequests({ requests }) {
           </thead>
           <tbody>
             {requests.length === 0 ? (
-              <tr><td colSpan="6" className="p-4 text-stone-500">No account requests yet.</td></tr>
+              <tr><td colSpan="7" className="p-4 text-stone-500">No account requests yet.</td></tr>
             ) : requests.map((req) => (
               <tr key={req.id} className="border-t border-stone-100">
                 <td className="p-3 font-medium">{req.name}</td>
                 <td className="p-3 text-stone-500">{req.age}</td>
+                <td className="p-3 text-stone-500">{fmtBirthday(req.birthday)}</td>
                 <td className="p-3 text-stone-500">{req.sex}</td>
                 <td className="p-3 text-stone-500">{req.address}</td>
                 <td className="p-3 text-stone-500">{req.created_at ? new Date(req.created_at).toLocaleDateString() : "-"}</td>
