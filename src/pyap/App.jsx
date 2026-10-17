@@ -1185,13 +1185,13 @@ function PendingUsers({ pendingUsers, loading, roleSelection, onRoleChange, onAp
                 <td className="p-3 text-stone-500">{u.email || "-"}</td>
                 <td className="p-3 text-stone-500">{u.created_at ? new Date(u.created_at).toLocaleDateString() : "-"}</td>
                 <td className="p-3">
-                  <select className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm" value={roleSelection[u.id] || "member"} onChange={(e) => onRoleChange(u.id, e.target.value)}>
+                  <select className="w-full px-3 py-2 border border-stone-200 rounded-lg text-sm" value={roleSelection[u.user_id] || "member"} onChange={(e) => onRoleChange(u.user_id, e.target.value)}>
                     {roleOptions.map(role => <option key={role} value={role}>{role.charAt(0).toUpperCase() + role.slice(1)}</option>)}
                   </select>
                 </td>
                 <td className="p-3 space-x-2">
-                  <button onClick={() => onApprove(u.id)} className="bg-emerald-700 text-white text-xs px-3 py-2 rounded-lg">Approve</button>
-                  <button onClick={() => onReject(u.id)} className="bg-rose-50 text-rose-700 text-xs px-3 py-2 rounded-lg">Reject</button>
+                  <button onClick={() => onApprove(u.user_id)} className="bg-emerald-700 text-white text-xs px-3 py-2 rounded-lg">Approve</button>
+                  <button onClick={() => onReject(u.user_id)} className="bg-rose-50 text-rose-700 text-xs px-3 py-2 rounded-lg">Reject</button>
                 </td>
               </tr>
             ))}
