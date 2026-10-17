@@ -50,5 +50,18 @@ export function useMembers(active = true) {
     await refresh();
     toast.success("Member deleted.");
   };
-  return { items, loading, add, remove, refresh };
+  const update = async (id, fields) => {
+    const { error } = await supabase.from("members").update({
+      full_name: (fields.name || "").trim(),
+      phone: (fields.contact || "").trim() || null,
+      birthday: fields.birthday || null,
+      address: (fields.address || "").trim() || null,
+      email: (fields.email || "").trim() || null,
+    }).eq("id", id);
+    if (error) { toast.error("Failed to update profile: " + error.message); return false; }
+    await refresh();
+    toast.success("Profile updated.");
+    return true;
+  };
+  return { items, loading, add, update, remove, refresh };
 }

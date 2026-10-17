@@ -548,6 +548,7 @@ export default function App() {
               const ok = await avatarApi.remove(myMember);
               if (ok) membersApi.refresh();
             }}
+            onSave={async (fields) => membersApi.update(myMember.id, fields)}
           />
         )}
         {screen === "attendance" && !selectedEventForAttendance && !viewHistoryEvent && (
