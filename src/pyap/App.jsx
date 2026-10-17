@@ -574,7 +574,7 @@ export default function App() {
         )}
         {screen === "events" && <EventsList events={events} onAdd={isLeader ? () => setShowEventForm(true) : undefined} onDelete={isLeader ? (id) => eventsApi.remove(id) : undefined} />}
         {screen === "calendar" && <EventCalendar events={events} />}
-        {screen === "leaderboard" && <Leaderboard members={members} events={events} attendance={attendance} />}
+        {screen === "leaderboard" && <Leaderboard members={members} events={events} attendance={attendance} currentUserId={auth.session?.user?.id} />}
         {screen === "report" && <AttendanceReport members={members} events={events} attendance={attendance} attendanceNotes={attendanceNotes} />}
         {screen === "birthday" && <BirthdayGreetings members={members} accountBirthdays={accountBirthdaysApi.items} />}
         {screen === "certificates" && (
