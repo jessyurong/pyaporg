@@ -327,8 +327,8 @@ function EditWelcomeModal({ content, onClose, onSave }) {
   const inputCls = "w-full px-3 py-2 border border-stone-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500";
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4 overflow-y-auto">
+      <div className="bg-white rounded-2xl w-full max-w-2xl my-auto max-h-[90dvh] overflow-y-auto">
         <div className="sticky top-0 bg-white border-b border-stone-200 px-6 py-4 flex items-center justify-between">
           <h3 className="font-bold text-emerald-900">Edit Welcome Page</h3>
           <button onClick={onClose} className="text-stone-400 hover:text-stone-700"><X size={18} /></button>

@@ -137,6 +137,15 @@
     border-color: var(--color-border);
   }
 
+  /*
+   * Opt-out sa "Auto dark theme" ng Android Chrome / Samsung Internet.
+   * Kung walang ito, kapag naka-Dark Mode ang phone, pini-force-darken ng
+   * browser ang light-only UI na ito -> mukhang basag ang kulay/theme.
+   */
+  html {
+    color-scheme: light;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);

@@ -33,8 +33,8 @@ export function CertFormModal({ members, events, onClose, onGenerate }) {
 
 export function CertPreviewModal({ cert, onClose }) {
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
-      <div className="bg-[#fffdf6] rounded-lg w-full max-w-lg p-2">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+      <div className="bg-[#fffdf6] rounded-lg w-full max-w-lg p-2 my-auto max-h-[90dvh] overflow-y-auto">
         <div className="flex justify-end p-2"><button onClick={onClose}><X size={18} /></button></div>
         <div className="border-8 border-emerald-700 p-10 text-center m-2">
           <h1 className="text-xl font-bold text-emerald-900 tracking-wide">CERTIFICATE OF {cert.type.toUpperCase()}</h1>

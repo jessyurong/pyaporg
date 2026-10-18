@@ -26,8 +26,10 @@ export function StatCard({ num, label, icon: Icon, color = "emerald" }) {
 
 export function ModalShell({ title, onClose, children }) {
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto animate-in fade-in duration-200">
+      {/* max-h-dvh (hindi vh): sa Android, ang 90vh ay mas mataas pa sa totoong
+          nakikitang screen kapag may address bar, kaya napuputol ang modal. */}
+      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl my-auto max-h-[90dvh] overflow-y-auto animate-in zoom-in-95 duration-200">
         <div className="flex justify-between items-center p-5 border-b border-stone-100">
           <h3 className="font-bold text-emerald-900 text-base">{title}</h3>
           <button

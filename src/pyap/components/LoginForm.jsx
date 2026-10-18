@@ -29,9 +29,11 @@ export function LoginDetailsCard({ email, password }) {
 
 export function LoginModal({ logo, error, busy, onSubmit, onClose, onRequestClick, onGuestClick }) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center relative" onClick={(e) => e.stopPropagation()}>
-        <button type="button" onClick={onClose} className="absolute top-3 right-3 text-stone-400 hover:text-stone-700"><X size={18} /></button>
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-5 sm:p-8 text-center relative my-auto max-h-[90dvh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="sticky top-0 z-10 h-0 flex justify-end pointer-events-none">
+          <button type="button" onClick={onClose} className="pointer-events-auto -mt-1 -mr-1 p-1 text-stone-400 hover:text-stone-700" aria-label="Close"><X size={18} /></button>
+        </div>
         <img src={logo} alt="PYAP Samac Logo" className="w-20 h-20 mx-auto mb-4" />
         <h1 className="text-lg font-bold text-emerald-900">Member Login</h1>
         <p className="text-xs text-stone-500 mt-1 mb-5">Existing members only. New users should request access.</p>
@@ -60,9 +62,11 @@ export function LoginModal({ logo, error, busy, onSubmit, onClose, onRequestClic
 
 export function RequestAccountModal({ error, busy, done, onSubmit, onClose }) {
   return (
-    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-8 text-center relative" onClick={(e) => e.stopPropagation()}>
-        <button type="button" onClick={onClose} className="absolute top-3 right-3 text-stone-400 hover:text-stone-700"><X size={18} /></button>
+    <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-5 sm:p-8 text-center relative my-auto max-h-[90dvh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div className="sticky top-0 z-10 h-0 flex justify-end pointer-events-none">
+          <button type="button" onClick={onClose} className="pointer-events-auto -mt-1 -mr-1 p-1 text-stone-400 hover:text-stone-700" aria-label="Close"><X size={18} /></button>
+        </div>
         {done ? (
           <>
             <div className="mx-auto mb-3 w-14 h-14 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center">

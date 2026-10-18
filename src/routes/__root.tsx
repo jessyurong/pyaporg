@@ -78,6 +78,8 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
+      // Pinipigilan ang Android auto-dark theme na sumira sa light-only UI.
+      { name: "color-scheme", content: "light" },
       { title: "PYAP Barangay Samac" },
       { name: "description", content: "Pag-asa Youth Association of the Philippines — Barangay Samac management system." },
       { name: "author", content: "Lovable" },

@@ -139,7 +139,9 @@ export function Sidebar({ featureAccess, screen, isGuest, displayName, role, sug
       )}
 
       {/* Mobile drawer sidebar (small screens only) */}
-      <div className={`md:hidden w-64 bg-emerald-900 text-white flex flex-col py-5 fixed top-0 left-0 h-screen z-50 shadow-2xl transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
+      {/* h-dvh (hindi h-screen): ang 100vh sa Android ay kasama ang area sa
+          ilalim ng address bar, kaya napuputol ang Logout/Mission & Vision. */}
+      <div className={`md:hidden w-64 bg-emerald-900 text-white flex flex-col py-5 fixed top-0 left-0 h-dvh z-50 shadow-2xl transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}`}>
         {sidebarInner(true)}
       </div>
 

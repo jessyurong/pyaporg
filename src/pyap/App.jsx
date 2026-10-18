@@ -477,7 +477,7 @@ export default function App() {
   // ---------- SHELL ----------
 
   return (
-    <div className="min-h-screen w-full flex bg-stone-50 text-stone-800 font-sans relative">
+    <div className="min-h-dvh w-full flex bg-stone-50 text-stone-800 font-sans relative">
       <Sidebar
         featureAccess={featureAccess}
         screen={screen}
