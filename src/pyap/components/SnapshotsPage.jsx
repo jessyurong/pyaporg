@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Camera, Plus, Trash2 } from "lucide-react";
 import { SNAPSHOT_LIMIT } from "../constants.js";
 import { ModalShell, inputCls } from "./ui.jsx";
+import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function Snapshots({ items, loading, canManage, onAdd, onDelete }) {
   const atLimit = items.length >= SNAPSHOT_LIMIT;
@@ -71,7 +72,8 @@ export function SnapshotUploadModal({ onClose, onSave, remaining }) {
   const [files, setFiles] = useState([]);
   const [title, setTitle] = useState("");
   const [album, setAlbum] = useState("");
-  const [busy, setBusy] = useState(false);
+  const { run, isBusy } = useSubmitLock();
+  const busy = isBusy();
   const slots = typeof remaining === "number" ? remaining : SNAPSHOT_LIMIT;
   return (
     <ModalShell title="Add Photos" onClose={onClose}>
@@ -99,8 +101,8 @@ export function SnapshotUploadModal({ onClose, onSave, remaining }) {
         <input className={inputCls} placeholder="Album name (optional, e.g. Feeding Program 2026)" value={album} onChange={(e) => setAlbum(e.target.value)} />
         <button
           disabled={busy || files.length === 0}
-          onClick={async () => { setBusy(true); try { await onSave(files, { title: title.trim(), album: album.trim() }); } finally { setBusy(false); } }}
-          className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white text-sm font-semibold py-2.5 rounded-lg transition"
+          onClick={() => run(null, () => onSave(files, { title: title.trim(), album: album.trim() }))}
+          className={`w-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold py-2.5 rounded-lg transition ${submittingCls}`}
         >
           {busy ? "Uploading…" : `Upload ${files.length || ""} Photo${files.length === 1 ? "" : "s"}`}
         </button>

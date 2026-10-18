@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Award, Dumbbell, HandHeart, Heart, Medal, Megaphone, Plus, Star, Trash2, Trophy } from "lucide-react";
 import { ModalShell, inputCls } from "./ui.jsx";
+import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function Achievements({ members, achievements, onAdd, onDelete }) {
   const withNames = achievements
@@ -48,6 +49,8 @@ export function BadgeIcon({ badge, size = 18 }) {
 
 export function AchievementFormModal({ members, onClose, onSave }) {
   const [f, setF] = useState({ memberId: members[0]?.id, title: "", description: "", badge: "medal" });
+  const { run, isBusy } = useSubmitLock();
+  const busy = isBusy();
   return (
     <ModalShell title="Add Achievement" onClose={onClose}>
       <div className="space-y-3">
@@ -72,7 +75,13 @@ export function AchievementFormModal({ members, onClose, onSave }) {
             ))}
           </div>
         </div>
-        <button onClick={() => f.title && f.memberId && onSave(f)} className="w-full bg-emerald-700 text-white text-sm py-2 rounded-lg">Save Achievement</button>
+        <button
+          disabled={busy || !f.title.trim() || !f.memberId}
+          onClick={() => run(null, () => onSave(f))}
+          className={`w-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm py-2 rounded-lg ${submittingCls}`}
+        >
+          {busy ? "Saving…" : "Save Achievement"}
+        </button>
       </div>
     </ModalShell>
   );

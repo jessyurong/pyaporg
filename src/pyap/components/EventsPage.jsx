@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { ModalShell, inputCls } from "./ui.jsx";
+import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function EventsList({ events, onAdd, onDelete }) {
   return (
@@ -26,13 +27,21 @@ export function EventsList({ events, onAdd, onDelete }) {
 
 export function EventFormModal({ onClose, onSave }) {
   const [f, setF] = useState({ title: "", date: "", location: "" });
+  const { run, isBusy } = useSubmitLock();
+  const busy = isBusy();
   return (
     <ModalShell title="Add New Event" onClose={onClose}>
       <div className="space-y-3">
         <input className={inputCls} placeholder="Event Title" value={f.title} onChange={e => setF({ ...f, title: e.target.value })} />
         <input className={inputCls} type="date" value={f.date} onChange={e => setF({ ...f, date: e.target.value })} />
         <input className={inputCls} placeholder="Location" value={f.location} onChange={e => setF({ ...f, location: e.target.value })} />
-        <button onClick={() => f.title && onSave(f)} className="w-full bg-emerald-700 text-white text-sm py-2 rounded-lg">Save Event</button>
+        <button
+          disabled={busy || !f.title.trim()}
+          onClick={() => run(null, () => onSave(f))}
+          className={`w-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm py-2 rounded-lg ${submittingCls}`}
+        >
+          {busy ? "Saving…" : "Save Event"}
+        </button>
       </div>
     </ModalShell>
   );

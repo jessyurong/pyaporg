@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Check, ClipboardList } from "lucide-react";
 import { Badge } from "./ui.jsx";
+import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function AttendanceSelect({ events, members, attendance, canManage, onSelect, onViewHistory }) {
   const history = events
@@ -97,6 +98,8 @@ export function AttendanceMark({ event, members, record, noteRecord, onBack, onS
   const [local, setLocal] = useState(record);
   const [notes, setNotes] = useState(noteRecord);
   const [saved, setSaved] = useState(false);
+  const { run, isBusy } = useSubmitLock();
+  const busy = isBusy();
 
   function setStatus(memberId, status) {
     setLocal(l => ({ ...l, [memberId]: status }));
@@ -109,10 +112,14 @@ export function AttendanceMark({ event, members, record, noteRecord, onBack, onS
   }
 
   async function handleSave() {
-    const ok = await onSave(local, notes);
-    if (!ok) return;
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    // Ang run() ay may ref lock: ang double-tap sa Save (usapang mahina ang
+    // signal) ay isang upsert lang — hindi na doble ang attendance.
+    await run(null, async () => {
+      const ok = await onSave(local, notes);
+      if (!ok) return;
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    });
   }
 
   const total = members.length;
@@ -155,7 +162,13 @@ export function AttendanceMark({ event, members, record, noteRecord, onBack, onS
           ))}</tbody>
         </table>
       </div>
-      <button onClick={handleSave} className="mt-4 bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg">Save Attendance</button>
+      <button
+        onClick={handleSave}
+        disabled={busy}
+        className={`mt-4 bg-emerald-700 hover:bg-emerald-800 text-white text-sm px-4 py-2 rounded-lg ${submittingCls}`}
+      >
+        {busy ? "Saving…" : "Save Attendance"}
+      </button>
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Users, Calendar, Award, Megaphone, Heart, Target, Sparkles, Mail, Phone, MapPin, X, Edit3, ChevronDown } from "lucide-react";
+import { useSubmitLock, submittingCls } from "./hooks/useSubmitLock.jsx";
 
 export const DEFAULT_WELCOME = {
   heroTitle: "PYAP – Barangay Samac",
@@ -311,6 +312,8 @@ function ContactItem({ icon: Icon, label, value, href }) {
 
 function EditWelcomeModal({ content, onClose, onSave }) {
   const [form, setForm] = useState(JSON.parse(JSON.stringify(content)));
+  const { run, isBusy } = useSubmitLock();
+  const busy = isBusy();
   const setField = (k, v) => setForm((f) => ({ ...f, [k]: v }));
   const setValue = (idx, k, v) =>
     setForm((f) => ({ ...f, values: f.values.map((x, i) => (i === idx ? { ...x, [k]: v } : x)) }));
@@ -397,7 +400,13 @@ function EditWelcomeModal({ content, onClose, onSave }) {
 
         <div className="sticky bottom-0 bg-white border-t border-stone-200 px-6 py-3 flex justify-end gap-2">
           <button onClick={onClose} className="text-sm px-4 py-2 rounded-lg border border-stone-200 hover:bg-stone-50">Cancel</button>
-          <button onClick={() => onSave(form)} className="text-sm px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-semibold">Save Changes</button>
+          <button
+            disabled={busy}
+            onClick={() => run(null, () => onSave(form))}
+            className={`text-sm px-4 py-2 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white font-semibold ${submittingCls}`}
+          >
+            {busy ? "Saving…" : "Save Changes"}
+          </button>
         </div>
       </div>
     </div>

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { Plus, Trash2, X } from "lucide-react";
 import { URGENCY, getUrgency } from "../constants.js";
 import { inputCls } from "./ui.jsx";
+import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function Announcements({ announcements, isGuest, canPost, onAdd, onDelete }) {
   return (
@@ -36,7 +37,8 @@ export function Announcements({ announcements, isGuest, canPost, onAdd, onDelete
 
 export function AnnounceFormModal({ onClose, onSave }) {
   const [f, setF] = useState({ title: "", content: "", urgency: "normal" });
-  const [busy, setBusy] = useState(false);
+  const { run, isBusy } = useSubmitLock();
+  const busy = isBusy();
   const u = URGENCY[f.urgency] || URGENCY.normal;
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center p-4 z-50 overflow-y-auto" onClick={onClose}>
@@ -69,8 +71,8 @@ export function AnnounceFormModal({ onClose, onSave }) {
             </div>
             <button
               disabled={busy || !f.title.trim()}
-              onClick={async () => { setBusy(true); try { await onSave(f); } finally { setBusy(false); } }}
-              className="w-full bg-emerald-700 hover:bg-emerald-800 disabled:opacity-60 text-white text-sm font-semibold py-2.5 rounded-lg transition"
+              onClick={() => run(null, () => onSave(f))}
+              className={`w-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold py-2.5 rounded-lg transition ${submittingCls}`}
             >
               {busy ? "Posting…" : "Post Announcement"}
             </button>

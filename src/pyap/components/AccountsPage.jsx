@@ -3,9 +3,13 @@ import { Check, Lock, ShieldCheck } from "lucide-react";
 import { GRANTABLE_FEATURES, MANAGED_ROLES, PRESETS, ROLE_LABELS, ROLE_OPTIONS } from "../constants.js";
 import { fmtBirthday } from "../lib/utils.js";
 import { Badge } from "./ui.jsx";
+import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function PendingUsers({ pendingUsers, loading, roleSelection, onRoleChange, onApprove, onReject }) {
   const roleOptions = ["superadmin", "president", "secretary", "treasurer", "organizer", "member"];
+  // Keyed sa user_id: habang tumatakbo ang approve/reject ng isang row,
+  // naka-lock ang row na iyon — isang approval lang kapag double-tap.
+  const { run, isBusy } = useSubmitLock();
   return (
     <div>
       <div className="flex justify-between items-center mb-5">
@@ -36,9 +40,21 @@ export function PendingUsers({ pendingUsers, loading, roleSelection, onRoleChang
                     {roleOptions.map(role => <option key={role} value={role}>{role.charAt(0).toUpperCase() + role.slice(1)}</option>)}
                   </select>
                 </td>
-                <td className="p-3 space-x-2">
-                  <button onClick={() => onApprove(u.user_id)} className="bg-emerald-700 text-white text-xs px-3 py-2 rounded-lg">Approve</button>
-                  <button onClick={() => onReject(u.user_id)} className="bg-rose-50 text-rose-700 text-xs px-3 py-2 rounded-lg">Reject</button>
+                <td className="p-3 space-x-2 whitespace-nowrap">
+                  <button
+                    disabled={isBusy(u.user_id)}
+                    onClick={() => run(u.user_id, () => onApprove(u.user_id))}
+                    className={`bg-emerald-700 hover:bg-emerald-800 text-white text-xs px-3 py-2 rounded-lg ${submittingCls}`}
+                  >
+                    {isBusy(u.user_id) ? "Working…" : "Approve"}
+                  </button>
+                  <button
+                    disabled={isBusy(u.user_id)}
+                    onClick={() => run(u.user_id, () => onReject(u.user_id))}
+                    className={`bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs px-3 py-2 rounded-lg ${submittingCls}`}
+                  >
+                    {isBusy(u.user_id) ? "Working…" : "Reject"}
+                  </button>
                 </td>
               </tr>
             ))}

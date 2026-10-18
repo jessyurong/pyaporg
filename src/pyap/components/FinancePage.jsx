@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
 import { Badge, ModalShell, StatCard, inputCls } from "./ui.jsx";
+import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function Finance({ finance, onAdd, onDelete }) {
   const income = finance.filter(f => f.type === "income").reduce((s, f) => s + f.amount, 0);
@@ -34,6 +35,8 @@ export function Finance({ finance, onAdd, onDelete }) {
 
 export function FinanceFormModal({ onClose, onSave }) {
   const [f, setF] = useState({ type: "income", category: "", amount: "", note: "" });
+  const { run, isBusy } = useSubmitLock();
+  const busy = isBusy();
   return (
     <ModalShell title="Add Finance Entry" onClose={onClose}>
       <div className="space-y-3">
@@ -42,7 +45,13 @@ export function FinanceFormModal({ onClose, onSave }) {
         </select>
         <input className={inputCls} placeholder="Category" value={f.category} onChange={e => setF({ ...f, category: e.target.value })} />
         <input className={inputCls} type="number" placeholder="Amount" value={f.amount} onChange={e => setF({ ...f, amount: e.target.value })} />
-        <button onClick={() => f.category && f.amount && onSave({ ...f, amount: Number(f.amount) })} className="w-full bg-emerald-700 text-white text-sm py-2 rounded-lg">Save Entry</button>
+        <button
+          disabled={busy || !f.category.trim() || !f.amount}
+          onClick={() => run(null, () => onSave({ ...f, amount: Number(f.amount) }))}
+          className={`w-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm py-2 rounded-lg ${submittingCls}`}
+        >
+          {busy ? "Saving…" : "Save Entry"}
+        </button>
       </div>
     </ModalShell>
   );

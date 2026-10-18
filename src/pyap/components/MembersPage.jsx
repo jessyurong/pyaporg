@@ -2,6 +2,7 @@ import React, { useRef, useState } from "react";
 import { ArrowLeft, Cake, CalendarDays, Camera, CheckSquare, Mail, MapPin, Phone, Plus, Trash2, User } from "lucide-react";
 import { fmtBirthday } from "../lib/utils.js";
 import { Badge, EmptyState, ModalShell, inputCls } from "./ui.jsx";
+import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function MemberAvatar({ member, size = 32, className = "" }) {
   const [failed, setFailed] = useState(false);
@@ -212,6 +213,8 @@ export function MemberProfile({ member, events, attendance, onBack, onDelete, ca
 
 export function MemberFormModal({ onClose, onSave }) {
   const [f, setF] = useState({ name: "", position: "", status: "active", contact: "", birthday: "", address: "", joined: new Date().toISOString().slice(0, 10) });
+  const { run, isBusy } = useSubmitLock();
+  const busy = isBusy();
   return (
     <ModalShell title="Add New Member" onClose={onClose}>
       <div className="space-y-3">
@@ -220,7 +223,13 @@ export function MemberFormModal({ onClose, onSave }) {
         <input className={inputCls} type="date" value={f.birthday} onChange={e => setF({ ...f, birthday: e.target.value })} />
         <input className={inputCls} placeholder="Contact Number" value={f.contact} onChange={e => setF({ ...f, contact: e.target.value })} />
         <input className={inputCls} placeholder="Address" value={f.address} onChange={e => setF({ ...f, address: e.target.value })} />
-        <button onClick={() => f.name && onSave(f)} className="w-full bg-emerald-700 text-white text-sm py-2 rounded-lg">Save Member</button>
+        <button
+          disabled={busy || !f.name.trim()}
+          onClick={() => run(null, () => onSave(f))}
+          className={`w-full bg-emerald-700 hover:bg-emerald-800 text-white text-sm py-2 rounded-lg ${submittingCls}`}
+        >
+          {busy ? "Saving…" : "Save Member"}
+        </button>
       </div>
     </ModalShell>
   );

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { FileText, Trash2 } from "lucide-react";
 import { ModalShell, inputCls } from "./ui.jsx";
+import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export const FLAGGED_WORDS = ["bobo", "gago", "tanga", "putangina", "ulol"]; // basic placeholder filter — expand as needed
 
@@ -9,6 +10,8 @@ export function Suggestions({ isGuest, suggestions, loading, onSubmit, onDelete 
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
   const [showPolicy, setShowPolicy] = useState(false);
+  const { run, isBusy } = useSubmitLock();
+  const busy = isBusy();
 
   async function handleSend() {
     const trimmed = msg.trim();
@@ -20,14 +23,17 @@ export function Suggestions({ isGuest, suggestions, loading, onSubmit, onDelete 
       return;
     }
     setError("");
-    const ok = await onSubmit(trimmed);
-    if (!ok) {
-      setError("Hindi naipadala ang suggestion. Pakisubukan ulit.");
-      return;
-    }
-    setMsg("");
-    setSent(true);
-    setTimeout(() => setSent(false), 2500);
+    // Isang send lang kahit ilang beses i-tap habang mahina ang signal.
+    await run(null, async () => {
+      const ok = await onSubmit(trimmed);
+      if (!ok) {
+        setError("Hindi naipadala ang suggestion. Pakisubukan ulit.");
+        return;
+      }
+      setMsg("");
+      setSent(true);
+      setTimeout(() => setSent(false), 2500);
+    });
   }
 
   if (isGuest) {
@@ -43,9 +49,10 @@ export function Suggestions({ isGuest, suggestions, loading, onSubmit, onDelete 
           <p className="text-[11px] text-stone-400 mt-2">Sa pag-send, sumasang-ayon ka sa aming Policy of Use — bawal ang bastos, mapanira, o hindi kaaya-ayang nilalaman.</p>
           <button
             onClick={handleSend}
-            className="mt-3 bg-emerald-700 text-white text-sm px-4 py-2 rounded-lg"
+            disabled={busy}
+            className={`mt-3 bg-emerald-700 hover:bg-emerald-800 text-white text-sm px-4 py-2 rounded-lg ${submittingCls}`}
           >
-            Send Suggestion
+            {busy ? "Sending…" : "Send Suggestion"}
           </button>
         </div>
         {showPolicy && <PolicyModal onClose={() => setShowPolicy(false)} />}
