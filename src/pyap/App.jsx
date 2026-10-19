@@ -53,6 +53,7 @@ export default function App() {
   const [guestMode, setGuestMode] = useState(false);
   const [screen, setScreen] = useState("dashboard");
   const [selectedMember, setSelectedMember] = useState(null);
+  const [profileFromBirthday, setProfileFromBirthday] = useState(false);
   const [selectedEventForAttendance, setSelectedEventForAttendance] = useState(null);
   const [viewHistoryEvent, setViewHistoryEvent] = useState(null);
   const [showMemberForm, setShowMemberForm] = useState(false);
@@ -198,6 +199,8 @@ export default function App() {
       if (error) { setLoginError(error.message); return; }
       setShowLoginModal(false);
       setScreen("dashboard");
+      setSelectedMember(null);
+      setProfileFromBirthday(false);
     } finally {
       setLoginBusy(false);
     }
@@ -259,6 +262,7 @@ export default function App() {
     setGuestMode(false);
     setScreen("dashboard");
     setSelectedMember(null);
+    setProfileFromBirthday(false);
     setRequestDone(null);
   }
 
@@ -489,7 +493,7 @@ export default function App() {
         accountRequestCount={accountRequestCount}
         sidebarOpen={sidebarOpen}
         setSidebarOpen={setSidebarOpen}
-        onNavigate={(key) => { setScreen(key); setSelectedMember(null); setSelectedEventForAttendance(null); setSidebarOpen(false); }}
+        onNavigate={(key) => { setScreen(key); setSelectedMember(null); setProfileFromBirthday(false); setSelectedEventForAttendance(null); setSidebarOpen(false); }}
         onLogout={handleLogout}
         onShowAbout={() => setShowAbout(true)}
       />
@@ -507,15 +511,33 @@ export default function App() {
           />
         )}
         {screen === "members" && !selectedMember && (
-          <MembersList members={members} onSelect={setSelectedMember} onAdd={isLeader ? () => setShowMemberForm(true) : undefined} />
+          <MembersList
+            members={members}
+            onSelect={(member) => { setProfileFromBirthday(false); setSelectedMember(member); }}
+            onAdd={isLeader ? () => setShowMemberForm(true) : undefined}
+          />
         )}
         {screen === "members" && selectedMember && (
           <MemberProfile
             member={selectedMember}
             events={events}
             attendance={attendance}
-            onBack={() => setSelectedMember(null)}
-            onDelete={isLeader ? (id) => { membersApi.remove(id); setSelectedMember(null); } : undefined}
+            backLabel={profileFromBirthday ? "Back to Birthdays" : "Back to Members"}
+            onBack={() => {
+              if (profileFromBirthday) {
+                setProfileFromBirthday(false);
+                setScreen("birthday");
+              }
+              setSelectedMember(null);
+            }}
+            onDelete={isLeader ? (id) => {
+              membersApi.remove(id);
+              setSelectedMember(null);
+              if (profileFromBirthday) {
+                setProfileFromBirthday(false);
+                setScreen("birthday");
+              }
+            } : undefined}
             canEditPhoto={!!auth.session && (isLeader || selectedMember.userId === auth.session?.user?.id)}
             photoBusy={avatarApi.busy}
             onPhotoChange={async (file) => {
@@ -577,7 +599,17 @@ export default function App() {
         {screen === "calendar" && <EventCalendar events={events} />}
         {screen === "leaderboard" && <Leaderboard members={members} events={events} attendance={attendance} currentUserId={auth.session?.user?.id} />}
         {screen === "report" && <AttendanceReport members={members} events={events} attendance={attendance} attendanceNotes={attendanceNotes} />}
-        {screen === "birthday" && <BirthdayGreetings members={members} accountBirthdays={accountBirthdaysApi.items} />}
+        {screen === "birthday" && (
+          <BirthdayGreetings
+            members={members}
+            accountBirthdays={accountBirthdaysApi.items}
+            onViewProfile={featureAccess.members ? (member) => {
+              setProfileFromBirthday(true);
+              setSelectedMember(member);
+              setScreen("members");
+            } : undefined}
+          />
+        )}
         {screen === "certificates" && (
           <Certificates members={members} onGenerate={isLeader ? () => setShowCertForm(true) : undefined} onPreview={setCertPreview} />
         )}

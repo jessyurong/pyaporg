@@ -57,7 +57,7 @@ function fmtEventDate(d) {
   return Number.isNaN(t.getTime()) ? d || "—" : t.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
-export function MemberProfile({ member, events, attendance, onBack, onDelete, canEditPhoto = false, photoBusy = false, onPhotoChange, onPhotoRemove }) {
+export function MemberProfile({ member, events, attendance, onBack, onDelete, canEditPhoto = false, photoBusy = false, onPhotoChange, onPhotoRemove, backLabel = "Back to Members" }) {
   const fileRef = useRef(null);
 
   // Attendance history — pinakabago muna.
@@ -84,7 +84,7 @@ export function MemberProfile({ member, events, attendance, onBack, onDelete, ca
       {/* Top bar */}
       <div className="flex justify-between items-center mb-5">
         <button onClick={onBack} className="text-sm font-medium text-stone-500 hover:text-emerald-700 flex items-center gap-1.5">
-          <ArrowLeft size={15} /> Back to Members
+          <ArrowLeft size={15} /> {backLabel}
         </button>
         {onDelete && (
           <button onClick={() => onDelete(member.id)} className="text-rose-600 border border-rose-200 hover:bg-rose-50 text-xs font-semibold rounded-lg px-3 py-1.5 flex items-center gap-1.5">
