@@ -9,25 +9,25 @@ import { MemberAvatar } from "./MembersPage.jsx";
 const CAPTIONS = [
   {
     key: "sincere",
-    label: "💚 Sincere",
+    label: "Sincere",
     build: (first) =>
       `Maligayang kaarawan, ${first}! 🎂 Nawa'y punuin ng saya, pagmamahal, at biyaya ang bagong taon ng iyong buhay. Dasal namin ang iyong kaligayahan at tagumpay — enjoy your special day! 🎉`,
   },
   {
     key: "funny",
-    label: "😂 Funny",
+    label: "Funny",
     build: (first) =>
       `HAPPY BIRTHDAY, ${first}! 🥳 Ngayong araw mo lang 'to ha — libre mo na kami! Chour! 😂 Pero seryoso, deserve mo ang isang araw na puno ng saya, pagkain, at pagmamahal. Kain nang marami at magpahinga ka — birthday mo 'yan! 🎂`,
   },
   {
     key: "org",
-    label: "🎉 PYAP Style",
+    label: "PYAP Style",
     build: (_first, full) =>
       `🎂 Maligayang kaarawan mula sa buong PYAP Barangay Samac, ${full}! Ang iyong dedikasyon at pagmamalasakit sa ating organisasyon ay tunay na inspirasyon. Nawa'y patuloy kang pagpalain sa bagong taon ng iyong buhay. 🎉`,
   },
   {
     key: "short",
-    label: "✨ Short & Sweet",
+    label: "Short & Sweet",
     build: (first, _full, age) =>
       age
         ? `🎂 HBD, ${first}! ${age} ka na today — new age, new blessings, same amazing you! ✨`
@@ -35,13 +35,13 @@ const CAPTIONS = [
   },
   {
     key: "blessing",
-    label: "🙏 Blessing",
+    label: "Blessing",
     build: (first) =>
       `"Ang bawat bagong taon ay regalo at bagong simula." 🎁 Maligayang kaarawan, ${first}! Nawa'y patuloy kang lumago, mangarap, at magtagumpay. Ipinagdarasal namin ang pinakamaganda para sa'yo. 🙏✨`,
   },
   {
     key: "english",
-    label: "🎂 English",
+    label: "English",
     build: (first) =>
       `Happy Birthday, ${first}! 🎉 Wishing you a year filled with happiness, good health, and success. Cheers to new adventures and more blessings! 🎂🥳`,
   },
@@ -115,12 +115,12 @@ export function BirthdayGreetings({ members = [], accountBirthdays = [] }) {
         document.execCommand("copy");
         document.body.removeChild(ta);
       } catch {
-        toast.error("Hindi ma-copy — piliin na lang manually ang text.");
+        toast.error("Couldn't copy — please select the text manually.");
         return;
       }
     }
     setCopiedKey(key);
-    toast.success("Caption copied! I-paste na sa Messenger o FB 📋");
+    toast.success("Caption copied! Paste it in Messenger or FB.");
     window.setTimeout(() => setCopiedKey((k) => (k === key ? "" : k)), 2000);
   }
 
@@ -131,9 +131,9 @@ export function BirthdayGreetings({ members = [], accountBirthdays = [] }) {
         <h1 className="text-xl font-bold text-emerald-900 mb-5">Birthday Greetings</h1>
         <div className="bg-white rounded-xl border border-stone-200 p-10 text-center max-w-xl">
           <Cake size={32} className="mx-auto text-stone-300 mb-3" />
-          <p className="text-sm font-semibold text-stone-700">Walang nakatalang birthday</p>
+          <p className="text-sm font-semibold text-stone-700">No birthdays on record</p>
           <p className="text-xs text-stone-500 mt-1.5">
-            Magdagdag ng birthday sa member profiles para automatic silang lumabas dito kasama ang ready-made greeting captions.
+            Add a birthday to member profiles so they automatically show up here with ready-made greeting captions.
           </p>
         </div>
       </div>
@@ -144,15 +144,15 @@ export function BirthdayGreetings({ members = [], accountBirthdays = [] }) {
     <div>
       <h1 className="text-xl font-bold text-emerald-900 mb-1">Birthday Greetings</h1>
       <p className="text-sm text-stone-500 mb-5">
-        Automatic na greeting captions para sa PINAKA-MALAPIT na magbi-birthday — pili lang ng caption at i-tap ang Copy.
+        Automatic greeting captions for the NEXT celebrant — just pick a caption and tap Copy.
       </p>
 
       {/* ---------- Featured celebrant(s) ---------- */}
       <div className="mb-3 flex flex-wrap items-center gap-2">
         <h2 className="text-sm font-bold text-emerald-900">
-          {isTodaySection ? `🎉 Ngayong Araw (${featured.length})` : `⏳ Susunod na Celebrant${featured.length > 1 ? "s" : ""}`}
+          {isTodaySection ? `Today's Celebrants (${featured.length})` : `Next Celebrant${featured.length > 1 ? "s" : ""}`}
         </h2>
-        {!isTodaySection && <span className="text-[11px] text-stone-400">advance greeting — ready na sa araw niya</span>}
+        {!isTodaySection && <span className="text-[11px] text-stone-400">advance greeting — ready for their special day</span>}
       </div>
 
       {featured.map((p) => {
@@ -168,11 +168,11 @@ export function BirthdayGreetings({ members = [], accountBirthdays = [] }) {
                 <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
                   {isTodaySection ? (
                     <span className="text-[11px] font-semibold bg-amber-50 text-amber-700 rounded-full px-2.5 py-1">
-                      🎉 {age ? `${age} na today!` : "Birthday ngayon!"}
+                      {age ? `Turning ${age} today!` : "Birthday today!"}
                     </span>
                   ) : (
                     <span className="text-[11px] font-semibold bg-sky-50 text-sky-700 rounded-full px-2.5 py-1">
-                      {p.in === 1 ? "🎈 Bukas na!" : `🎈 sa ${p.in} araw pa`}
+                      {p.in === 1 ? "Tomorrow!" : `In ${p.in} days`}
                     </span>
                   )}
                   <span className="text-[11px] text-stone-400">{format(new Date(2000, p.b.mo, p.b.d), "MMMM d")}</span>
@@ -212,7 +212,7 @@ export function BirthdayGreetings({ members = [], accountBirthdays = [] }) {
       {/* ---------- Birthdays this month ---------- */}
       {monthList.length > 0 && (
         <div className="mt-2">
-          <h2 className="text-sm font-bold text-emerald-900 mb-2">🎈 Birthdays Ngayong {format(today, "MMMM")}</h2>
+          <h2 className="text-sm font-bold text-emerald-900 mb-2">Birthdays This {format(today, "MMMM")}</h2>
           <div className="bg-white rounded-xl border border-stone-200 divide-y divide-stone-100">
             {monthList.map((p) => (
               <div key={p.id || p.name} className="flex items-center gap-3 p-3">
@@ -224,9 +224,9 @@ export function BirthdayGreetings({ members = [], accountBirthdays = [] }) {
                 <div className="text-right shrink-0">
                   <p className="text-xs font-semibold text-stone-600">{format(new Date(2000, p.b.mo, p.b.d), "MMM d")}</p>
                   {p.b.d === tD ? (
-                    <p className="text-[10px] font-semibold text-amber-600">Ngayon! 🎉</p>
+                    <p className="text-[10px] font-semibold text-amber-600">Today!</p>
                   ) : p.b.d > tD ? (
-                    <p className="text-[10px] text-stone-400">{p.b.d - tD === 1 ? "Bukas 🎈" : `sa ${p.b.d - tD} araw`}</p>
+                    <p className="text-[10px] text-stone-400">{p.b.d - tD === 1 ? "Tomorrow" : `In ${p.b.d - tD} days`}</p>
                   ) : null}
                 </div>
               </div>
@@ -238,7 +238,7 @@ export function BirthdayGreetings({ members = [], accountBirthdays = [] }) {
       {/* ---------- Next up (next months) ---------- */}
       {nextUp.length > 0 && (
         <div className="mt-5">
-          <h2 className="text-sm font-bold text-emerald-900 mb-2">📅 Susunod na mga Birthday</h2>
+          <h2 className="text-sm font-bold text-emerald-900 mb-2">Upcoming Birthdays</h2>
           <div className="bg-white rounded-xl border border-stone-200 divide-y divide-stone-100">
             {nextUp.map((p) => (
               <div key={p.id || p.name} className="flex items-center gap-3 p-3">
@@ -249,7 +249,7 @@ export function BirthdayGreetings({ members = [], accountBirthdays = [] }) {
                 </div>
                 <div className="text-right shrink-0">
                   <p className="text-xs font-semibold text-stone-600">{format(new Date(2000, p.b.mo, p.b.d), "MMM d")}</p>
-                  <p className="text-[10px] text-stone-400">{p.in === 1 ? "Bukas 🎈" : `sa ${p.in} araw`}</p>
+                  <p className="text-[10px] text-stone-400">{p.in === 1 ? "Tomorrow" : `In ${p.in} days`}</p>
                 </div>
               </div>
             ))}

@@ -5,7 +5,7 @@ import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export const FLAGGED_WORDS = ["bobo", "gago", "tanga", "putangina", "ulol"]; // basic placeholder filter — expand as needed
 
-export function Suggestions({ isGuest, suggestions, loading, onSubmit, onDelete }) {
+export function Suggestions({ canRead = false, suggestions, loading, onSubmit, onDelete }) {
   const [msg, setMsg] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
@@ -36,11 +36,13 @@ export function Suggestions({ isGuest, suggestions, loading, onSubmit, onDelete 
     });
   }
 
-  if (isGuest) {
+  // Guests, members, at ibang roles na walang read access ay makakapag-send
+  // lang — hindi nila makikita ang inbox ng suggestions.
+  if (!canRead) {
     return (
       <div>
         <h1 className="text-xl font-bold text-emerald-900 mb-2">Suggestions / Feedback</h1>
-        <p className="text-sm text-stone-500 mb-3">May gusto ka bang iparating sa mga officers? Ipadala mo lang dito — mababasa lang ito ng mga leaders ng organisasyon.</p>
+        <p className="text-sm text-stone-500 mb-3">May gusto ka bang iparating sa mga officers? Ipadala mo lang dito — mababasa lang ito ng Super Admin, President, Secretary, at Organizer.</p>
         <button onClick={() => setShowPolicy(true)} className="text-xs text-emerald-700 underline mb-4 flex items-center gap-1.5"><FileText size={12} /> View Policy of Use</button>
         <div className="bg-white rounded-xl border border-stone-200 p-5 max-w-lg">
           {sent && <div className="bg-emerald-50 text-emerald-700 text-sm rounded-lg p-2.5 mb-3">Salamat! Naipadala na ang suggestion mo.</div>}
@@ -63,7 +65,7 @@ export function Suggestions({ isGuest, suggestions, loading, onSubmit, onDelete 
   return (
     <div>
       <h1 className="text-xl font-bold text-emerald-900 mb-2">Suggestions Inbox</h1>
-      <p className="text-sm text-stone-500 mb-5">Visible lang sa mga leaders ng organisasyon (Super Admin, President, Secretary, Organizer). Mga natanggap na suggestion/feedback mula sa Guest Mode.</p>
+      <p className="text-sm text-stone-500 mb-5">Visible lang sa Super Admin, President, Secretary, at Organizer. Mga natanggap na suggestion/feedback mula sa mga member at Guest Mode.</p>
       {loading ? (
         <p className="text-sm text-stone-400">Loading suggestions…</p>
       ) : suggestions.length === 0 ? (

@@ -173,10 +173,6 @@ export function MyProfile({ member, accountName, accountEmail, photoBusy = false
           </div>
         )}
       </div>
-
-      <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 mt-4 text-xs text-amber-800 max-w-xl">
-        Ang photo ay awtomatikong pinapaliit (~20-40 KB lang) bago i-upload para hindi mapuno ang storage. JPG o PNG na litrato ang irekomenda.
-      </div>
     </div>
   );
 }

@@ -2,10 +2,18 @@ import React, { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 
-export function useSuggestions() {
+// canRead = true lang para sa Super Admin, President, Secretary, at Organizer.
+// Ang ibang naka-login ay makakapag-send lang ng suggestion (tulad ng guest)
+// pero hindi makikita ang inbox.
+export function useSuggestions(canRead = false) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const refresh = async () => {
+    if (!canRead) {
+      setItems([]);
+      setLoading(false);
+      return;
+    }
     setLoading(true);
     const { data, error } = await supabase.from("suggestions").select("*").order("created_at", { ascending: false });
     if (error) {
@@ -23,7 +31,7 @@ export function useSuggestions() {
     }
     setLoading(false);
   };
-  useEffect(() => { refresh(); }, []);
+  useEffect(() => { refresh(); }, [canRead]);
   const add = async (message) => {
     const { data: u } = await supabase.auth.getUser();
     const user = u?.user;
@@ -34,11 +42,12 @@ export function useSuggestions() {
       is_anonymous: !user,
     });
     if (error) { toast.error("Failed to send suggestion: " + error.message); return false; }
-    if (user) await refresh();
+    if (user && canRead) await refresh();
     toast.success("Suggestion sent.");
     return true;
   };
   const remove = async (id) => {
+    if (!canRead) return;
     const { error } = await supabase.from("suggestions").delete().eq("id", id);
     if (error) { toast.error("Failed to delete suggestion: " + error.message); return; }
     await refresh();

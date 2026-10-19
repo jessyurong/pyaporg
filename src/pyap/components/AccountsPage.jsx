@@ -177,6 +177,9 @@ export function FeatureAccess({ extras, onSave }) {
           {selectedRole === "president" ? " Backup & Export para sa president." : ""}
           {" "}Ang User Management at itong Feature Access ay para lang sa superadmin.
         </p>
+        <p className="mt-2">
+          Suggestions: makakapag-send ang mga member at guest, pero Super Admin, President, Secretary, at Organizer lang ang makakabasa ng inbox.
+        </p>
       </div>
     </div>
   );

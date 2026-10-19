@@ -42,8 +42,10 @@ import { LoginModal, RequestAccountModal, LoginDetailsCard } from "./components/
 export default function App() {
   const auth = useAuthSession();
   const userActive = !!auth.session;
+  const role = auth.role;
+  const isLeader = ["superadmin", "president", "secretary", "organizer"].includes(role);
   const announce = useAnnouncements();
-  const suggest = useSuggestions();
+  const suggest = useSuggestions(isLeader);
   const membersApi = useMembers(userActive);
   const eventsApi = useEvents(userActive);
   const attendanceApi = useAttendance(userActive);
@@ -112,7 +114,6 @@ export default function App() {
 
   const isSignedIn = !!auth.session;
   const isGuest = !isSignedIn && guestMode;
-  const role = auth.role;
   const displayName = auth.name || auth.session?.user?.email?.split("@")[0] || "";
   const session = isSignedIn ? { name: displayName, role } : (isGuest ? { guest: true } : null);
 
@@ -129,7 +130,6 @@ export default function App() {
   const suggestionCount = suggestions.length;
   const pendingCount = pendingUsers.length;
   const accountRequestCount = accountRequests.length;
-  const isLeader = ["superadmin", "president", "secretary", "organizer"].includes(role);
   const canManageSnapshots = role === "superadmin" || role === "president";
   const myMember = isSignedIn && auth.session?.user?.id ? members.find((m) => m.userId === auth.session.user.id) || null : null;
 
@@ -592,7 +592,7 @@ export default function App() {
         {screen === "finance" && <Finance finance={finance} onAdd={isLeader ? () => setShowFinanceForm(true) : undefined} onDelete={isLeader ? (id) => financeApi.remove(id) : undefined} />}
         {screen === "suggestions" && (
           <Suggestions
-            isGuest={isGuest}
+            canRead={isLeader}
             suggestions={suggestions}
             loading={suggest.loading}
             onSubmit={(msg) => suggest.add(msg)}
