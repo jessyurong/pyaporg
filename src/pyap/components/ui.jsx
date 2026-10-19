@@ -10,14 +10,14 @@ export function StatCard({ num, label, icon: Icon, color = "emerald" }) {
     violet: "from-violet-600 to-violet-700",
   };
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-5 flex items-center gap-4 hover:shadow-md transition-shadow duration-200">
+    <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-4 sm:p-5 flex items-center gap-3 sm:gap-4 hover:shadow-md transition-shadow duration-200 min-w-0">
       {Icon && (
         <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${colors[color]} flex items-center justify-center shrink-0 shadow-sm`}>
           <Icon size={20} className="text-white" />
         </div>
       )}
-      <div>
-        <div className="text-2xl font-bold text-stone-800 leading-none">{num}</div>
+      <div className="min-w-0">
+        <div className="text-xl sm:text-2xl font-bold text-stone-800 leading-none break-words">{num}</div>
         <div className="text-xs text-stone-500 mt-1 font-medium">{label}</div>
       </div>
     </div>
@@ -34,9 +34,10 @@ export function ModalShell({ title, onClose, children }) {
           <h3 className="font-bold text-emerald-900 text-base">{title}</h3>
           <button
             onClick={onClose}
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-stone-100 transition-colors"
+            aria-label="Close"
+            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-stone-100 transition-colors"
           >
-            <X size={16} className="text-stone-400" />
+            <X size={18} className="text-stone-400" />
           </button>
         </div>
         <div className="p-5">{children}</div>
@@ -45,13 +46,60 @@ export function ModalShell({ title, onClose, children }) {
   );
 }
 
-export const inputCls = "w-full px-3.5 py-2.5 border border-stone-200 rounded-xl text-sm bg-stone-50 focus:bg-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition-all duration-150 placeholder:text-stone-400";
+// 16px sa mobile para hindi mag-auto-zoom ang iOS kapag nag-focus sa input.
+export const inputCls = "w-full px-3.5 py-2.5 min-h-11 border border-stone-200 rounded-xl text-base sm:text-sm bg-stone-50 focus:bg-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition-all duration-150 placeholder:text-stone-400";
 
-export const btnPrimary = "inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white text-sm font-semibold rounded-xl shadow-sm transition-all duration-150";
+export const btnPrimary = "inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-11 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white text-sm font-semibold rounded-xl shadow-sm transition-all duration-150";
 
-export const btnDanger = "inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-all duration-150";
+export const btnDanger = "inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-11 bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-all duration-150";
 
-export const btnSecondary = "inline-flex items-center justify-center gap-2 px-4 py-2.5 border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-sm font-semibold rounded-xl transition-all duration-150";
+export const btnSecondary = "inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-11 border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-sm font-semibold rounded-xl transition-all duration-150";
+
+// Shared mobile card primitives. Desktop tables stay as-is; these keep every
+// mobile list consistent and make sure actions are visible without sideways scroll.
+export function MobileCard({ children, className = "", onClick, ...props }) {
+  const interactive = typeof onClick === "function";
+  return (
+    <div
+      onClick={onClick}
+      role={interactive ? "button" : undefined}
+      tabIndex={interactive ? 0 : undefined}
+      onKeyDown={
+        interactive
+          ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                onClick(e);
+              }
+            }
+          : undefined
+      }
+      className={`bg-white rounded-xl border border-stone-200 p-4 min-w-0 ${
+        interactive ? "cursor-pointer hover:border-emerald-200 active:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300" : ""
+      } ${className}`}
+      {...props}
+    >
+      {children}
+    </div>
+  );
+}
+
+export function MobileFields({ children, className = "" }) {
+  return <dl className={`mt-3 grid grid-cols-2 gap-x-4 gap-y-3 ${className}`}>{children}</dl>;
+}
+
+export function MobileField({ label, children, wide = false, className = "" }) {
+  return (
+    <div className={`${wide ? "col-span-2" : ""} ${className}`}>
+      <dt className="text-[10px] font-semibold uppercase tracking-wide text-stone-400">{label}</dt>
+      <dd className="mt-0.5 text-sm text-stone-700 break-words">{children}</dd>
+    </div>
+  );
+}
+
+export function MobileActions({ children, className = "" }) {
+  return <div className={`mt-4 grid grid-cols-2 gap-2 ${className}`}>{children}</div>;
+}
 
 export function Badge({ children, tone = "neutral" }) {
   const tones = {

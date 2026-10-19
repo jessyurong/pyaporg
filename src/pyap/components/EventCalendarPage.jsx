@@ -24,11 +24,21 @@ const PILL_COLORS = [
   "bg-violet-100 text-violet-900 border-violet-200",
 ];
 
-function pillColor(event) {
+const DOT_COLORS = ["bg-emerald-500", "bg-sky-500", "bg-amber-500", "bg-rose-500", "bg-violet-500"];
+
+function colorIndex(event) {
   const s = String(event?.id ?? event?.title ?? "");
   let h = 0;
   for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 9973;
-  return PILL_COLORS[h % PILL_COLORS.length];
+  return h % PILL_COLORS.length;
+}
+
+function pillColor(event) {
+  return PILL_COLORS[colorIndex(event)];
+}
+
+function dotColor(event) {
+  return DOT_COLORS[colorIndex(event)];
 }
 
 // Safe parse — baka may event na walang o invalid ang petsa.
@@ -47,7 +57,7 @@ function EventRow({ event }) {
   return (
     <div className="rounded-lg border border-stone-100 bg-stone-50/70 p-2.5">
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-semibold text-stone-800">{event.title}</p>
+        <p className="text-xs font-semibold text-stone-800 break-words">{event.title}</p>
         <span className="text-[10px] text-stone-400 shrink-0 pt-0.5">{event._d ? format(event._d, "MMM d") : ""}</span>
       </div>
       {event.location && (
@@ -141,7 +151,7 @@ export function EventCalendar({ events = [] }) {
             {/* Day headers */}
             <div className="grid grid-cols-7 bg-emerald-50 text-emerald-900">
               {WEEKDAYS.map((d) => (
-                <div key={d} className="py-2 text-center text-[11px] font-semibold uppercase tracking-wide">
+                <div key={d} className="py-1.5 sm:py-2 text-center text-[10px] sm:text-[11px] font-semibold uppercase tracking-wide">
                   {d}
                 </div>
               ))}
@@ -158,16 +168,19 @@ export function EventCalendar({ events = [] }) {
                     key={format(day, "yyyy-MM-dd")}
                     onClick={() => selectDay(day)}
                     aria-pressed={!!isSelected}
-                    className={`min-h-[88px] bg-white p-1.5 text-left flex flex-col gap-1 transition-colors hover:bg-stone-50 ${isSelected ? "ring-2 ring-inset ring-emerald-500" : ""}`}
+                    aria-label={`${format(day, "MMMM d, yyyy")}${dayEvents.length ? `, ${dayEvents.length} event${dayEvents.length === 1 ? "" : "s"}` : ""}`}
+                    className={`min-h-[52px] sm:min-h-[64px] xl:min-h-[88px] bg-white p-1 sm:p-1.5 text-left flex flex-col gap-0.5 sm:gap-1 transition-colors hover:bg-stone-50 ${isSelected ? "ring-2 ring-inset ring-emerald-500" : ""}`}
                   >
                     <span
-                      className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-semibold ${
+                      className={`w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full text-[11px] sm:text-xs font-semibold ${
                         isToday(day) ? "bg-emerald-600 text-white" : inMonth ? "text-stone-700" : "text-stone-300"
                       }`}
                     >
                       {format(day, "d")}
                     </span>
-                    <div className={`space-y-1 ${inMonth ? "" : "opacity-50"}`}>
+
+                    {/* Desktop: full event pills. Mobile/tablet: compact dots. */}
+                    <div className={`hidden xl:block space-y-1 ${inMonth ? "" : "opacity-50"}`}>
                       {dayEvents.slice(0, 2).map((e) => (
                         <div key={e.id} className={`truncate rounded border px-1.5 py-0.5 text-[10px] font-medium ${pillColor(e)}`}>
                           {e.title}
@@ -177,11 +190,17 @@ export function EventCalendar({ events = [] }) {
                         <div className="pl-1 text-[10px] font-semibold text-stone-500">+{dayEvents.length - 2} more</div>
                       )}
                     </div>
+                    <div className={`flex xl:hidden flex-wrap gap-0.5 pt-0.5 ${inMonth ? "" : "opacity-40"}`}>
+                      {dayEvents.slice(0, 3).map((e) => (
+                        <span key={e.id} className={`h-1.5 w-1.5 rounded-full ${dotColor(e)}`} />
+                      ))}
+                    </div>
                   </button>
                 );
               })}
             </div>
           </div>
+          <p className="xl:hidden mt-2 text-[11px] text-stone-400">Dots mark event days. Tap a day to see the details below.</p>
         </div>
 
         {/* Side panel */}

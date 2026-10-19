@@ -72,12 +72,12 @@ export function Suggestions({ canRead = false, suggestions, loading, onSubmit, o
         <p className="text-sm text-stone-400">Wala pang natatanggap na suggestion.</p>
       ) : (
         suggestions.map(s => (
-          <div key={s.id} className="bg-white rounded-xl border border-stone-200 p-4 mb-3 flex justify-between items-start">
-            <div>
+          <div key={s.id} className="bg-white rounded-xl border border-stone-200 p-4 mb-3 flex justify-between items-start gap-3">
+            <div className="min-w-0 flex-1">
               <div className="text-[11px] text-stone-400 mb-1">{s.date} • {s.isAnonymous ? "Anonymous (Guest)" : (s.submitterName || "Member")}</div>
-              <p className="text-sm text-stone-700">{s.message}</p>
+              <p className="text-sm text-stone-700 break-words">{s.message}</p>
             </div>
-            <button onClick={() => onDelete(s.id)} className="text-rose-600 flex-shrink-0 ml-3"><Trash2 size={14} /></button>
+            <button onClick={() => onDelete(s.id)} aria-label="Delete suggestion" className="min-h-11 min-w-11 flex items-center justify-center rounded-lg text-rose-600 hover:bg-rose-50 flex-shrink-0"><Trash2 size={16} /></button>
           </div>
         ))
       )}

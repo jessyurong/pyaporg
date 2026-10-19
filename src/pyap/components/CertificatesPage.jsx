@@ -35,14 +35,18 @@ export function CertPreviewModal({ cert, onClose }) {
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
       <div className="bg-[#fffdf6] rounded-lg w-full max-w-lg p-2 my-auto max-h-[90dvh] overflow-y-auto">
-        <div className="flex justify-end p-2"><button onClick={onClose}><X size={18} /></button></div>
-        <div className="border-8 border-emerald-700 p-10 text-center m-2">
-          <h1 className="text-xl font-bold text-emerald-900 tracking-wide">CERTIFICATE OF {cert.type.toUpperCase()}</h1>
+        <div className="flex justify-end p-2">
+          <button onClick={onClose} aria-label="Close certificate preview" className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-stone-100">
+            <X size={18} />
+          </button>
+        </div>
+        <div className="border-4 sm:border-8 border-emerald-700 p-4 sm:p-10 text-center m-1 sm:m-2">
+          <h1 className="text-lg sm:text-xl font-bold text-emerald-900 tracking-wide break-words">CERTIFICATE OF {cert.type.toUpperCase()}</h1>
           <p className="text-xs text-stone-500 mt-1">Pag-asa Youth Association of the Philippines — Barangay Samac</p>
           <p className="text-sm mt-6">This certificate is proudly presented to</p>
-          <div className="text-2xl font-serif text-amber-600 border-b-2 border-stone-200 inline-block px-4 py-2 my-4">{cert.member?.name}</div>
+          <div className="text-xl sm:text-2xl font-serif text-amber-600 border-b-2 border-stone-200 inline-block max-w-full px-3 sm:px-4 py-2 my-4 break-words">{cert.member?.name}</div>
           <p className="text-xs text-stone-600">in recognition of their valuable contribution to the organization.</p>
-          <div className="flex justify-around mt-10 text-xs text-stone-500">
+          <div className="flex justify-around gap-3 mt-8 sm:mt-10 text-xs text-stone-500">
             <div>_____________<br />President</div>
             <div>_____________<br />Secretary</div>
           </div>

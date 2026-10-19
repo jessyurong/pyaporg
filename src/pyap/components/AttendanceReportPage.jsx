@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { ClipboardList, Download, Printer } from "lucide-react";
-import { Badge, StatCard, inputCls } from "./ui.jsx";
+import { Badge, MobileCard, MobileField, MobileFields, StatCard, inputCls } from "./ui.jsx";
 import { downloadCSV, todayStr } from "../lib/utils.js";
 
 const ALL = "all";
@@ -92,26 +92,28 @@ export function AttendanceReport({ members = [], events = [], attendance = {}, a
       </p>
 
       {/* Filter + actions — naka-hide kapag nagpi-print */}
-      <div className="no-print flex flex-wrap items-center gap-3 mb-5">
-        <span className="text-xs font-semibold text-stone-500">Filter by Event</span>
-        <select value={filter} onChange={(e) => setFilter(e.target.value)} className={`${inputCls} max-w-xs`}>
-          <option value={ALL}>All Events</option>
-          {recordedEvents.map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.title} ({e.date})
-            </option>
-          ))}
-        </select>
-        <div className="ml-auto flex items-center gap-2">
+      <div className="no-print grid gap-3 mb-5 sm:flex sm:flex-wrap sm:items-end">
+        <div className="w-full sm:max-w-xs">
+          <label htmlFor="attendance-report-filter" className="text-xs font-semibold text-stone-500">Filter by Event</label>
+          <select id="attendance-report-filter" value={filter} onChange={(e) => setFilter(e.target.value)} className={`${inputCls} mt-1.5`}>
+            <option value={ALL}>All Events</option>
+            {recordedEvents.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.title} ({e.date})
+              </option>
+            ))}
+          </select>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:ml-auto sm:flex">
           <button
             onClick={() => window.print()}
-            className="bg-emerald-700 hover:bg-emerald-800 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"
+            className="min-h-11 bg-emerald-700 hover:bg-emerald-800 text-white text-sm px-3 py-2 rounded-lg flex items-center justify-center gap-1.5"
           >
             <Printer size={14} /> Print
           </button>
           <button
             onClick={exportCsv}
-            className="bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"
+            className="min-h-11 bg-white hover:bg-stone-50 border border-stone-200 text-stone-700 text-sm px-3 py-2 rounded-lg flex items-center justify-center gap-1.5"
           >
             <Download size={14} /> Export CSV
           </button>
@@ -122,12 +124,38 @@ export function AttendanceReport({ members = [], events = [], attendance = {}, a
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
         <StatCard num={stats.events} label="Total Events" />
         <StatCard num={stats.members} label="Total Members" />
-        <StatCard num={`${stats.rate}%`} label="Overall Present Rate" />
+        <div className="col-span-2 md:col-span-1">
+          <StatCard num={`${stats.rate}%`} label="Overall Present Rate" />
+        </div>
       </div>
 
-      {/* Records table */}
-      <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto">
-        <table className="w-full text-sm min-w-[640px]">
+      {/* Mobile cards */}
+      <div className="lg:hidden print:hidden grid gap-3">
+        {rows.map((r) => (
+          <MobileCard key={`${r.eventId}-${r.memberId}`}>
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="font-semibold text-emerald-950 break-words">{r.memberName}</p>
+                <p className="text-xs text-stone-500 mt-0.5 break-words">{r.eventTitle}</p>
+                <p className="text-[11px] text-stone-400 mt-0.5">{r.date || "No date"}</p>
+              </div>
+              <Badge tone={r.status}>{statusLabel(r.status)}</Badge>
+            </div>
+            <MobileFields>
+              <MobileField label="Note" wide>{r.note || "—"}</MobileField>
+            </MobileFields>
+          </MobileCard>
+        ))}
+        {rows.length === 0 && (
+          <MobileCard>
+            <p className="py-4 text-center text-xs text-stone-400">Walang records para sa napiling event.</p>
+          </MobileCard>
+        )}
+      </div>
+
+      {/* Desktop / print table */}
+      <div className="hidden lg:block print:block bg-white rounded-xl border border-stone-200 overflow-x-auto">
+        <table className="w-full text-sm min-w-[640px] print:min-w-0">
           <thead>
             <tr className="bg-emerald-50 text-emerald-900 text-left">
               <th className="p-3">Member Name</th>

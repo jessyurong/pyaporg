@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { ArrowLeft, Cake, CalendarDays, Camera, CheckSquare, Mail, MapPin, Phone, Plus, Trash2, User } from "lucide-react";
+import { ArrowLeft, Cake, CalendarDays, Camera, CheckSquare, ChevronRight, Mail, MapPin, Phone, Plus, Trash2, User } from "lucide-react";
 import { fmtBirthday } from "../lib/utils.js";
 import { Badge, EmptyState, ModalShell, inputCls } from "./ui.jsx";
 import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
@@ -27,11 +27,47 @@ export function MemberAvatar({ member, size = 32, className = "" }) {
 export function MembersList({ members, onSelect, onAdd }) {
   return (
     <div>
-      <div className="flex justify-between items-center mb-5">
+      <div className="flex justify-between items-center gap-3 mb-5">
         <h1 className="text-xl font-bold text-emerald-900">Members</h1>
-        {onAdd && <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Add Member</button>}
+        {onAdd && (
+          <button onClick={onAdd} className="min-h-11 bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shrink-0">
+            <Plus size={14} /> Add Member
+          </button>
+        )}
       </div>
-      <div className="bg-white rounded-xl border border-stone-200 overflow-x-auto">
+
+      <div className="lg:hidden grid gap-3">
+        {members.length === 0 ? (
+          <div className="bg-white rounded-xl border border-stone-200 p-6">
+            <EmptyState icon={User} message="No members yet." />
+          </div>
+        ) : members.map((m) => (
+          <button
+            key={m.id}
+            type="button"
+            onClick={() => onSelect(m)}
+            aria-label={`Open profile of ${m.name || "member"}`}
+            className="w-full min-w-0 bg-white rounded-xl border border-stone-200 p-4 text-left flex items-center gap-3 hover:border-emerald-200 active:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300"
+          >
+            <MemberAvatar member={m} size={42} />
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="font-semibold text-emerald-950 break-words">{m.name || "Unknown"}</p>
+                <Badge tone={m.status}>{m.status}</Badge>
+              </div>
+              {m.position && <p className="text-xs text-stone-500 mt-0.5">{m.position}</p>}
+              {m.contact && (
+                <p className="mt-1 flex items-center gap-1.5 text-xs text-stone-500">
+                  <Phone size={11} className="shrink-0" /> {m.contact}
+                </p>
+              )}
+            </div>
+            <ChevronRight size={18} className="text-stone-300 shrink-0" />
+          </button>
+        ))}
+      </div>
+
+      <div className="hidden lg:block bg-white rounded-xl border border-stone-200 overflow-x-auto">
         <table className="w-full text-sm min-w-[500px]">
           <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3"></th><th className="p-3">Name</th><th className="p-3">Position</th><th className="p-3">Status</th><th className="p-3">Contact</th></tr></thead>
           <tbody>

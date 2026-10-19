@@ -45,7 +45,7 @@ function YouChip() {
 function Podium({ row, place, isMe }) {
   const cfg = PODIUM[place];
   return (
-    <div className="w-22 sm:w-28 shrink-0 flex flex-col items-center justify-end">
+    <div className="w-[76px] sm:w-28 shrink-0 flex flex-col items-center justify-end">
       <div className="mb-1">{cfg.medal}</div>
       <div className={`rounded-full ring-2 ring-offset-2 ring-offset-white ${cfg.ring} mb-1.5`}>
         <MemberAvatar member={row.member} size={cfg.avatar} />
@@ -133,7 +133,9 @@ export function Leaderboard({ members = [], events = [], attendance = {}, curren
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">
         <StatCard num={members.length} label="Total Members" />
         <StatCard num={recordedEventIds.length} label="Total Events" />
-        <StatCard num={`${avgRate}%`} label="Avg Attendance Rate" />
+        <div className="col-span-2 md:col-span-1">
+          <StatCard num={`${avgRate}%`} label="Avg Attendance Rate" />
+        </div>
       </div>
 
       {/* Podium — top 3 */}
