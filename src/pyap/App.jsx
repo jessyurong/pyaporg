@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { Smartphone } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -38,6 +38,9 @@ import { Leaderboard } from "./components/LeaderboardPage.jsx";
 import { AttendanceReport } from "./components/AttendanceReportPage.jsx";
 import { BirthdayGreetings } from "./components/BirthdayPage.jsx";
 import { LoginModal, RequestAccountModal, LoginDetailsCard } from "./components/LoginForm.jsx";
+
+// Case/space-insensitive compare para sa pangalan at email.
+const normText = (value) => String(value || "").trim().toLowerCase().replace(/\s+/g, " ");
 
 export default function App() {
   const auth = useAuthSession();
@@ -89,6 +92,7 @@ export default function App() {
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [installEvt, setInstallEvt] = useState(null);
   const [iosInstallHint, setIosInstallHint] = useState(false);
+  const memberLinkAttempted = useRef(null);
 
   useEffect(() => {
     if ("serviceWorker" in navigator && import.meta.env.PROD) {
@@ -132,7 +136,16 @@ export default function App() {
   const pendingCount = pendingUsers.length;
   const accountRequestCount = accountRequests.length;
   const canManageSnapshots = role === "superadmin" || role === "president";
-  const myMember = isSignedIn && auth.session?.user?.id ? members.find((m) => m.userId === auth.session.user.id) || null : null;
+  const myUserId = auth.session?.user?.id || null;
+  // Una, hanapin sa user_id. Kung wala (hal. manual na naidagdag ang member
+  // bago ma-approve ang account), mag-fallback sa email/name para makita pa
+  // rin ang sariling record habang nagse-self-heal ang link.
+  const myMember = !isSignedIn || !myUserId ? null : (
+    members.find((m) => m.userId === myUserId)
+    || members.find((m) => !m.userId && !!auth.session?.user?.email && normText(m.email) === normText(auth.session.user.email))
+    || members.find((m) => !m.userId && !!auth.name && normText(m.name) === normText(auth.name))
+    || null
+  );
 
   const installButton = installEvt || iosInstallHint ? (
     <button
@@ -312,6 +325,72 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [role]);
 
+  // Self-heal: kung may active account pero wala pang linked member row,
+  // i-link ito (o gumawa ng row) para gumana agad ang My Profile.
+  useEffect(() => {
+    if (!isSignedIn || !myUserId || membersApi.loading) return;
+    if (myMember?.userId === myUserId) return;
+    if (memberLinkAttempted.current === myUserId) return;
+    memberLinkAttempted.current = myUserId;
+
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase.rpc("link_my_member");
+      if (cancelled) return;
+      if (error) {
+        // Baka hindi pa na-a-apply ang migration — huwag hadlangan ang screen.
+        console.warn("Could not auto-link member account:", error.message);
+        return;
+      }
+      if (data) await membersApi.refresh();
+    })();
+
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSignedIn, myUserId, membersApi.loading, myMember?.id, myMember?.userId]);
+
+  async function ensureMemberForUser(userId, applicant = {}) {
+    const name = (applicant.full_name || "").trim() || (applicant.email || "").split("@")[0];
+    if (!name) return;
+
+    const { data: linked } = await supabase.from("members").select("id").eq("user_id", userId).limit(1);
+    if ((linked || []).length > 0) return;
+
+    const { data: rows, error } = await supabase.from("members").select("id, user_id, full_name, email");
+    if (error) console.error("Failed to load members for linking:", error);
+    const candidates = rows || [];
+    const email = (applicant.email || "").trim();
+    const match =
+      candidates.find((m) => !m.user_id && email && normText(m.email) === normText(email))
+      || candidates.find((m) => !m.user_id && normText(m.full_name) === normText(name));
+
+    if (match) {
+      await membersApi.link(match.id, userId);
+      return;
+    }
+
+    await membersApi.add({
+      name,
+      email,
+      birthday: (applicant.birthday || "").slice(0, 10),
+      address: applicant.address || "",
+    }, true, userId);
+  }
+
+  // Bago mag-upload o mag-edit sa My Profile, siguraduhing linked na ang
+  // member row para pumasa sa RLS (members_update_own).
+  async function linkOwnMember(member) {
+    if (!member || !myUserId || member.userId === myUserId) return member;
+    const { data, error } = await supabase.rpc("link_my_member");
+    if (error) {
+      console.warn("Could not link own member account:", error.message);
+      return member;
+    }
+    if (!data) return member;
+    await membersApi.refresh();
+    return { ...member, userId: myUserId };
+  }
+
   async function approvePendingUser(userId, roleSelection) {
     const roleToSet = roleSelection || "member";
     const { error: roleError } = await supabase
@@ -324,26 +403,11 @@ export default function App() {
       .eq("user_id", userId);
     if (profileError) { toast.error("Failed to approve user: " + profileError.message); return; }
 
-    // Also add to the Members list (skip if a member with the same name or email already exists)
+    // Also keep the Members list in sync. Kung may existing member row na
+    // kapareho ng pangalan/email, i-link ito sa bagong account — hindi lang
+    // basta i-skip (iyon ang dati pang dahilan ng "no linked member record").
     const applicant = pendingUsers.find(u => u.user_id === userId) || {};
-    const memberName = (applicant.full_name || "").trim() || (applicant.email || "").split("@")[0];
-    const memberEmail = (applicant.email || "").trim();
-    if (memberName) {
-      const { data: dupName } = await supabase.from("members").select("id").ilike("full_name", memberName).limit(1);
-      let dupEmail = [];
-      if (memberEmail) {
-        const { data } = await supabase.from("members").select("id").ilike("email", memberEmail).limit(1);
-        dupEmail = data || [];
-      }
-      if ((dupName || []).length === 0 && dupEmail.length === 0) {
-        await membersApi.add({
-          name: memberName,
-          email: memberEmail,
-          birthday: (applicant.birthday || "").slice(0, 10),
-          address: applicant.address || "",
-        }, true);
-      }
-    }
+    await ensureMemberForUser(userId, applicant);
 
     await fetchPendingUsers();
     membersApi.refresh();
@@ -563,14 +627,19 @@ export default function App() {
             accountEmail={auth.session?.user?.email || ""}
             photoBusy={avatarApi.busy}
             onPhotoChange={async (file) => {
-              const url = await avatarApi.upload(myMember, file);
+              const target = await linkOwnMember(myMember);
+              const url = await avatarApi.upload(target, file);
               if (url) membersApi.refresh();
             }}
             onPhotoRemove={async () => {
-              const ok = await avatarApi.remove(myMember);
+              const target = await linkOwnMember(myMember);
+              const ok = await avatarApi.remove(target);
               if (ok) membersApi.refresh();
             }}
-            onSave={async (fields) => membersApi.update(myMember.id, fields)}
+            onSave={async (fields) => {
+              await linkOwnMember(myMember);
+              return membersApi.update(myMember.id, fields);
+            }}
           />
         )}
         {screen === "attendance" && !selectedEventForAttendance && !viewHistoryEvent && (

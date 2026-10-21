@@ -248,13 +248,14 @@ export function MemberProfile({ member, events, attendance, onBack, onDelete, ca
 }
 
 export function MemberFormModal({ onClose, onSave }) {
-  const [f, setF] = useState({ name: "", position: "", status: "active", contact: "", birthday: "", address: "", joined: new Date().toISOString().slice(0, 10) });
+  const [f, setF] = useState({ name: "", position: "", status: "active", contact: "", email: "", birthday: "", address: "", joined: new Date().toISOString().slice(0, 10) });
   const { run, isBusy } = useSubmitLock();
   const busy = isBusy();
   return (
     <ModalShell title="Add New Member" onClose={onClose}>
       <div className="space-y-3">
         <input className={inputCls} placeholder="Full Name" value={f.name} onChange={e => setF({ ...f, name: e.target.value })} />
+        <input className={inputCls} type="email" placeholder="Email (optional — para ma-link sa account)" value={f.email} onChange={e => setF({ ...f, email: e.target.value })} />
         <input className={inputCls} placeholder="Position (optional)" value={f.position} onChange={e => setF({ ...f, position: e.target.value })} />
         <input className={inputCls} type="date" value={f.birthday} onChange={e => setF({ ...f, birthday: e.target.value })} />
         <input className={inputCls} placeholder="Contact Number" value={f.contact} onChange={e => setF({ ...f, contact: e.target.value })} />
