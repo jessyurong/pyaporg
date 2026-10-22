@@ -19,7 +19,7 @@ export function Achievements({ members, achievements, onAdd, onDelete }) {
       {withNames.length === 0 ? (
         <p className="text-sm text-stone-400">Wala pang naitalang achievement.</p>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {withNames.map(a => (
             <div key={a.id} className="bg-white rounded-xl border border-stone-200 p-4 flex gap-3 items-start">
               <div className="w-11 h-11 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center flex-shrink-0">

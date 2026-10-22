@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { X } from "lucide-react";
 
 export function StatCard({ num, label, icon: Icon, color = "emerald" }) {
@@ -42,6 +42,53 @@ export function ModalShell({ title, onClose, children }) {
         </div>
         <div className="p-5">{children}</div>
       </div>
+    </div>
+  );
+}
+
+export function ImageLightbox({ src, alt, caption, onClose }) {
+  useEffect(() => {
+    const onKey = (e) => {
+      if (e.key === "Escape") onClose?.();
+    };
+    document.addEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
+  }, [onClose]);
+
+  if (!src) return null;
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={alt || "Image preview"}
+      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 sm:p-8 animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close image preview"
+        className="absolute top-4 right-4 sm:top-6 sm:right-6 z-10 w-11 h-11 rounded-full bg-white/10 hover:bg-white/20 active:bg-white/30 text-white flex items-center justify-center transition-colors"
+      >
+        <X size={22} />
+      </button>
+      <img
+        src={src}
+        alt={alt || "Image preview"}
+        onClick={(e) => e.stopPropagation()}
+        className="max-w-full max-h-[calc(100dvh-2rem)] sm:max-h-[calc(100dvh-4rem)] object-contain rounded-lg shadow-2xl"
+      />
+      {caption && (
+        <p className="absolute bottom-4 left-4 right-4 text-center text-sm text-white/80 truncate pointer-events-none">
+          {caption}
+        </p>
+      )}
     </div>
   );
 }

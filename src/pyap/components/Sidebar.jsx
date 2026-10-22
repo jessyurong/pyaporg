@@ -1,5 +1,5 @@
-import React from "react";
-import { Award, Cake, Calendar, CalendarDays, Camera, CheckSquare, Download, FileText, Home, LayoutDashboard, LogOut, Megaphone, Menu, MessageSquare, Settings, ShieldCheck, Sprout, Trophy, Users, UserRound, Wallet, X } from "lucide-react";
+import React, { useState } from "react";
+import { Award, Cake, Calendar, CalendarDays, Camera, CheckSquare, ChevronRight, Download, FileText, Home, LayoutDashboard, LogOut, Megaphone, Menu, MessageSquare, Settings, ShieldCheck, Sprout, Trophy, Users, UserRound, Wallet, X } from "lucide-react";
 
 export const NAV = [
   { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -34,7 +34,25 @@ const NAV_GROUPS = [
   { label: "Admin", keys: ["pendingUsers", "accountRequests", "users", "access", "backup", "welcome"] },
 ];
 
-export function Sidebar({ featureAccess, screen, isGuest, displayName, role, suggestionCount, pendingCount, accountRequestCount, sidebarOpen, setSidebarOpen, onNavigate, onLogout, onShowAbout }) {
+// Profile photo sa sidebar; kung wala o hindi mag-load, initials ang fallback.
+function SidebarAvatar({ src, name, initial }) {
+  const [failed, setFailed] = useState(false);
+  if (src && !failed) {
+    return (
+      <img
+        src={src}
+        alt={name ? `${name} profile photo` : "Profile photo"}
+        onError={() => setFailed(true)}
+        className="w-8 h-8 rounded-full object-cover bg-emerald-800 ring-1 ring-white/20 shrink-0"
+      />
+    );
+  }
+  return (
+    <div className="w-8 h-8 rounded-full bg-emerald-700 ring-1 ring-white/20 flex items-center justify-center text-xs font-bold shrink-0">{initial}</div>
+  );
+}
+
+export function Sidebar({ featureAccess, screen, isGuest, displayName, role, avatarUrl = "", suggestionCount, pendingCount, accountRequestCount, sidebarOpen, setSidebarOpen, onNavigate, onLogout, onShowAbout }) {
   const groupedKeys = new Set(NAV_GROUPS.flatMap(g => g.keys));
   const groups = NAV_GROUPS
     .map(g => ({ label: g.label, items: NAV.filter(n => g.keys.includes(n.key) && featureAccess[n.key]) }))
@@ -62,15 +80,39 @@ export function Sidebar({ featureAccess, screen, isGuest, displayName, role, sug
         )}
       </div>
 
-      {/* User chip */}
+      {/* User chip — clickable para diretso sa My Profile, at makikita ang
+          profile photo kung meron nang naka-upload. */}
       <div className="px-2 pt-3 pb-2">
-        <div className="flex items-center gap-2.5 rounded-xl bg-white/5 px-3 py-2.5">
-          <div className="w-8 h-8 rounded-full bg-emerald-700 ring-1 ring-white/20 flex items-center justify-center text-xs font-bold shrink-0">{initial}</div>
-          <div className="min-w-0">
-            <p className="text-xs font-semibold truncate">{isGuest ? "Guest Mode" : displayName}</p>
-            {!isGuest && <p className="text-[10px] text-emerald-200/60 capitalize truncate">{role}</p>}
-          </div>
-        </div>
+        {(() => {
+          const canOpenProfile = !isGuest && !!featureAccess.myprofile;
+          const isCurrent = screen === "myprofile";
+          const chip = (
+            <>
+              <SidebarAvatar key={avatarUrl || "initials"} src={avatarUrl} name={displayName} initial={initial} />
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold truncate">{isGuest ? "Guest Mode" : displayName}</p>
+                {!isGuest && <p className="text-[10px] text-emerald-200/60 capitalize truncate">{role}</p>}
+              </div>
+              {canOpenProfile && <ChevronRight size={14} className="text-emerald-200/50 shrink-0" />}
+            </>
+          );
+          const baseCls = `w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-left transition-colors duration-150 ${
+            isCurrent && canOpenProfile ? "bg-white/15" : "bg-white/5"
+          }`;
+          return canOpenProfile ? (
+            <button
+              type="button"
+              onClick={() => onNavigate("myprofile")}
+              aria-label="Open My Profile"
+              aria-current={isCurrent ? "page" : undefined}
+              className={`${baseCls} hover:bg-white/10 active:bg-white/20`}
+            >
+              {chip}
+            </button>
+          ) : (
+            <div className={baseCls}>{chip}</div>
+          );
+        })()}
       </div>
 
       <nav className="flex-1 overflow-y-auto px-2 pb-2">
@@ -145,8 +187,9 @@ export function Sidebar({ featureAccess, screen, isGuest, displayName, role, sug
         {sidebarInner(true)}
       </div>
 
-      {/* Permanent desktop sidebar (always visible on md and up, normal flow — not fixed/sticky) */}
-      <div className="hidden md:flex md:w-56 bg-emerald-900 text-white flex-col py-5 flex-shrink-0 min-h-screen">
+      {/* Permanent desktop sidebar (always visible on md and up, sticky so it
+          stays put habang nag-i-scroll ang content) */}
+      <div className="hidden md:flex md:w-56 bg-emerald-900 text-white flex-col py-5 flex-shrink-0 md:sticky md:top-0 md:h-dvh md:self-start overflow-y-auto">
         {sidebarInner(false)}
       </div>
     </>

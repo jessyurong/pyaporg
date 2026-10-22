@@ -552,6 +552,7 @@ export default function App() {
         isGuest={isGuest}
         displayName={session.name}
         role={session.role}
+        avatarUrl={myMember?.avatarUrl || ""}
         suggestionCount={suggestionCount}
         pendingCount={pendingCount}
         accountRequestCount={accountRequestCount}
@@ -563,7 +564,7 @@ export default function App() {
       />
 
       {/* Main content */}
-      <div className="flex-1 p-5 md:p-8 pt-20 md:pt-8 max-w-5xl overflow-y-auto w-full">
+      <div className="flex-1 min-w-0 p-5 md:p-8 pt-20 md:pt-8 w-full">
         {screen === "dashboard" && <Dashboard members={members} events={events} attendance={attendance} announcements={announcements} finance={finance} snapshots={snapshots} accountBirthdays={accountBirthdaysApi.items} isSuperAdmin={role === "superadmin"} widgets={dashboardWidgets} onSaveWidgets={dashApi.save} onViewSnapshots={() => setScreen("snapshots")} onViewAnnouncements={() => setScreen("announcements")} onViewEvents={() => setScreen("events")} isGuest={isGuest} onLoginClick={() => { setGuestMode(false); setShowLoginModal(true); setLoginError(""); }} />}
         {screen === "announcements" && (
           <Announcements

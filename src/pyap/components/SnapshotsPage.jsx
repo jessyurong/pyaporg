@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { Camera, Plus, Trash2 } from "lucide-react";
 import { SNAPSHOT_LIMIT } from "../constants.js";
-import { ModalShell, inputCls } from "./ui.jsx";
+import { ImageLightbox, ModalShell, inputCls } from "./ui.jsx";
 import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function Snapshots({ items, loading, canManage, onAdd, onDelete }) {
+  const [preview, setPreview] = useState(null);
   const atLimit = items.length >= SNAPSHOT_LIMIT;
   return (
     <div>
@@ -40,10 +41,17 @@ export function Snapshots({ items, loading, canManage, onAdd, onDelete }) {
           {canManage && <p className="text-xs text-stone-400 mt-1">Click "Add Photos" to upload pictures or a whole album.</p>}
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-3">
           {items.map((s) => (
-            <div key={s.id} className="bg-white rounded-xl border border-stone-200 overflow-hidden relative">
-              <img src={s.url} alt={s.title || s.album || "Snapshot"} className="w-full h-40 object-cover bg-stone-100" loading="lazy" />
+            <div key={s.id} className="group bg-white rounded-xl border border-stone-200 overflow-hidden relative">
+              <button
+                type="button"
+                onClick={() => setPreview(s)}
+                aria-label={`View ${s.title || s.album || "snapshot"} fullscreen`}
+                className="block w-full cursor-zoom-in overflow-hidden"
+              >
+                <img src={s.url} alt={s.title || s.album || "Snapshot"} className="w-full h-40 object-cover bg-stone-100 transition-transform duration-300 group-hover:scale-[1.03]" loading="lazy" />
+              </button>
               {s.album && (
                 <span className="absolute top-2 left-2 bg-black/50 text-white text-[10px] font-semibold px-2 py-0.5 rounded-full">{s.album}</span>
               )}
@@ -63,6 +71,14 @@ export function Snapshots({ items, loading, canManage, onAdd, onDelete }) {
             </div>
           ))}
         </div>
+      )}
+      {preview && (
+        <ImageLightbox
+          src={preview.url}
+          alt={preview.title || preview.album || "Snapshot"}
+          caption={preview.title || preview.album}
+          onClose={() => setPreview(null)}
+        />
       )}
     </div>
   );

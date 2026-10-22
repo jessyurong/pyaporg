@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { CalendarDays, Camera, Cake, Eye, Medal, Megaphone, Settings, TrendingUp, X } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { getUrgency } from "../constants.js";
-import { StatCard } from "./ui.jsx";
+import { ImageLightbox, StatCard } from "./ui.jsx";
 
 // Nakaayos ayon sa display order ng dashboard.
 export const WIDGET_LABELS = {
@@ -22,6 +22,7 @@ export const WIDGET_LABELS = {
 
 export function Dashboard({ members, events, attendance, announcements, finance, snapshots, accountBirthdays, isSuperAdmin, widgets, onSaveWidgets, onViewSnapshots, onViewAnnouncements, onViewEvents, isGuest, onLoginClick }) {
   const [editing, setEditing] = useState(false);
+  const [preview, setPreview] = useState(null);
   const w = widgets || {};
   const active = members.filter(m => m.status === "active").length;
   const income = finance.filter(f => f.type === "income").reduce((s, f) => s + f.amount, 0);
@@ -91,9 +92,9 @@ export function Dashboard({ members, events, attendance, announcements, finance,
         )}
       </div>
 
-      <div className="space-y-5">
+      <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3 items-start">
         {isGuest && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-3">
+          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-3 lg:col-span-2 2xl:col-span-3">
             <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
               <Eye size={18} />
             </div>
@@ -111,7 +112,7 @@ export function Dashboard({ members, events, attendance, announcements, finance,
 
         {/* 1. Announcements — pinaka-una: balita/urgent na dapat makita agad */}
         {w.recentAnnouncements && (
-          <div className="bg-white rounded-xl border border-stone-200 p-5">
+          <div className={`bg-white rounded-xl border border-stone-200 p-5 ${isGuest ? "lg:col-span-2 2xl:col-span-3" : ""}`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-emerald-900 text-sm flex items-center gap-1.5"><Megaphone size={14} /> Announcements</h3>
               {onViewAnnouncements && (
@@ -197,7 +198,7 @@ export function Dashboard({ members, events, attendance, announcements, finance,
 
         {/* 3. Birthdays This Month */}
         {!isGuest && w.birthdayList && (
-          <div className="bg-white rounded-xl border border-stone-200 p-5">
+          <div className="bg-white rounded-xl border border-stone-200 p-5 lg:col-span-2 2xl:col-span-1">
             <h3 className="font-semibold text-emerald-900 text-sm mb-2 flex items-center gap-1.5"><Cake size={14} /> Birthdays This Month</h3>
             {birthdays.length === 0 ? <p className="text-sm text-stone-400">No birthdays this month.</p> :
               <ul className="text-sm space-y-1">{birthdays.map(b => <li key={b.id || b.name}>{b.name} — {new Date(String(b.birthday).slice(0, 10) + "T00:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric" })}</li>)}</ul>}
@@ -206,7 +207,7 @@ export function Dashboard({ members, events, attendance, announcements, finance,
 
         {/* 4. Stats */}
         {showStats && (
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4 lg:col-span-2 2xl:col-span-3">
             {w.totalMembers && <StatCard num={members.length} label="Total Members" />}
             {w.activeMembers && <StatCard num={active} label="Active Members" />}
             {w.totalEvents && <StatCard num={events.length} label="Total Events" />}
@@ -218,7 +219,7 @@ export function Dashboard({ members, events, attendance, announcements, finance,
 
         {/* 5. Attendance Trend */}
         {!isGuest && w.attendanceTrend && trendData.length > 0 && (
-          <div className="bg-white rounded-xl border border-stone-200 p-5">
+          <div className="bg-white rounded-xl border border-stone-200 p-5 lg:col-span-2">
             <h3 className="font-semibold text-emerald-900 text-sm mb-3 flex items-center gap-1.5">
               <TrendingUp size={14} /> Attendance Trend (Last 6 Events)
             </h3>
@@ -235,7 +236,7 @@ export function Dashboard({ members, events, attendance, announcements, finance,
 
         {/* 6. Top Attenders */}
         {!isGuest && w.topAttenders && topAttenders.length > 0 && (
-          <div className="bg-white rounded-xl border border-stone-200 p-5">
+          <div className="bg-white rounded-xl border border-stone-200 p-5 lg:col-span-2 2xl:col-span-1">
             <h3 className="font-semibold text-emerald-900 text-sm mb-3 flex items-center gap-1.5">
               <Medal size={14} /> Top Attenders
             </h3>
@@ -262,14 +263,22 @@ export function Dashboard({ members, events, attendance, announcements, finance,
 
         {/* 7. Snapshots */}
         {w.snapshots && snapshots.length > 0 && (
-          <div className="bg-white rounded-xl border border-stone-200 p-5">
+          <div className="bg-white rounded-xl border border-stone-200 p-5 lg:col-span-2 2xl:col-span-3">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-emerald-900 text-sm flex items-center gap-1.5"><Camera size={14} /> Snapshots</h3>
               <button onClick={onViewSnapshots} className="text-xs text-emerald-700 font-semibold hover:underline">View all</button>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-4 xl:grid-cols-6 gap-2">
               {snapshots.slice(0, 6).map(s => (
-                <img key={s.id} src={s.url} alt={s.title || "Snapshot"} className="w-full h-24 object-cover rounded-lg" loading="lazy" />
+                <button
+                  key={s.id}
+                  type="button"
+                  onClick={() => setPreview(s)}
+                  aria-label={`View ${s.title || s.album || "snapshot"} fullscreen`}
+                  className="group block overflow-hidden rounded-lg cursor-zoom-in"
+                >
+                  <img src={s.url} alt={s.title || "Snapshot"} className="w-full h-24 object-cover transition-transform duration-300 group-hover:scale-[1.05]" loading="lazy" />
+                </button>
               ))}
             </div>
           </div>
@@ -278,6 +287,14 @@ export function Dashboard({ members, events, attendance, announcements, finance,
 
       {editing && (
         <DashboardCustomizeModal current={w} onClose={() => setEditing(false)} onSave={(v) => { onSaveWidgets(v); setEditing(false); }} />
+      )}
+      {preview && (
+        <ImageLightbox
+          src={preview.url}
+          alt={preview.title || preview.album || "Snapshot"}
+          caption={preview.title || preview.album}
+          onClose={() => setPreview(null)}
+        />
       )}
     </div>
   );
