@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Award, Dumbbell, HandHeart, Heart, Medal, Megaphone, Plus, Star, Trash2, Trophy } from "lucide-react";
-import { ModalShell, inputCls } from "./ui.jsx";
+import { ModalShell, PageHeader, btnPrimary, inputCls } from "./ui.jsx";
 import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function Achievements({ members, achievements, onAdd, onDelete }) {
@@ -10,11 +10,11 @@ export function Achievements({ members, achievements, onAdd, onDelete }) {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-5">
-        <h1 className="text-xl font-bold text-emerald-900">Achievements</h1>
-        {onAdd && <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Add Achievement</button>}
-      </div>
-      <p className="text-sm text-stone-500 mb-5">Ipagdiwang ang mga milestone at magagandang gawa ng mga miyembro — mula sa perfect attendance hanggang outstanding volunteer work.</p>
+      <PageHeader
+        title="Achievements"
+        subtitle="Ipagdiwang ang mga milestone at magagandang gawa ng mga miyembro — mula sa perfect attendance hanggang outstanding volunteer work."
+        action={onAdd ? <button onClick={onAdd} className={btnPrimary}><Plus size={14} /> Add Achievement</button> : null}
+      />
 
       {withNames.length === 0 ? (
         <p className="text-sm text-stone-400">Wala pang naitalang achievement.</p>

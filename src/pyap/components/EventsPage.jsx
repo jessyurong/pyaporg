@@ -1,19 +1,20 @@
 import React, { useState } from "react";
 import { CalendarDays, MapPin, Plus, Trash2 } from "lucide-react";
-import { EmptyState, MobileCard, ModalShell, inputCls } from "./ui.jsx";
+import { EmptyState, MobileCard, ModalShell, PageHeader, btnPrimary, inputCls } from "./ui.jsx";
 import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function EventsList({ events, onAdd, onDelete }) {
   return (
     <div>
-      <div className="flex justify-between items-center gap-3 mb-5">
-        <h1 className="text-xl font-bold text-emerald-900">Events / Activities</h1>
-        {onAdd && (
-          <button onClick={onAdd} className="min-h-11 bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shrink-0">
+      <PageHeader
+        title="Events / Activities"
+        subtitle="Programs, gatherings, and community work."
+        action={onAdd ? (
+          <button onClick={onAdd} className={btnPrimary}>
             <Plus size={14} /> Add Event
           </button>
-        )}
-      </div>
+        ) : null}
+      />
 
       <div className="lg:hidden grid gap-3">
         {events.length === 0 ? (
@@ -48,7 +49,7 @@ export function EventsList({ events, onAdd, onDelete }) {
         ))}
       </div>
 
-      <div className="hidden lg:block bg-white rounded-xl border border-stone-200 overflow-x-auto">
+      <div className="hidden lg:block surface rounded-2xl overflow-x-auto">
         <table className="w-full text-sm min-w-[500px]">
           <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Title</th><th className="p-3">Date</th><th className="p-3">Location</th><th className="p-3"></th></tr></thead>
           <tbody>{events.map(e => (

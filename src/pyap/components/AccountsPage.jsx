@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Check, Lock, ShieldCheck, UserCheck } from "lucide-react";
 import { GRANTABLE_FEATURES, MANAGED_ROLES, PRESETS, ROLE_LABELS, ROLE_OPTIONS } from "../constants.js";
 import { fmtBirthday } from "../lib/utils.js";
-import { Badge, EmptyState, MobileActions, MobileCard, MobileField, MobileFields, inputCls } from "./ui.jsx";
+import { Badge, EmptyState, MobileActions, MobileCard, MobileField, MobileFields, PageHeader, inputCls } from "./ui.jsx";
 import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 function initialsOf(name, email) {
@@ -45,15 +45,11 @@ export function PendingUsers({ pendingUsers, loading, roleSelection, onRoleChang
 
   return (
     <div>
-      <div className="flex items-start justify-between gap-3 mb-5">
-        <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl font-bold text-emerald-900">Pending User Approvals</h1>
-            {total > 0 && <Badge tone="pending">{total} pending</Badge>}
-          </div>
-          <p className="text-sm text-stone-500 mt-1">Review the details, choose a role, then approve or reject.</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Pending User Approvals"
+        subtitle="Review the details, choose a role, then approve or reject."
+        badge={total > 0 ? <Badge tone="pending">{total} pending</Badge> : null}
+      />
 
       {/* Mobile / tablet cards */}
       <div className="xl:hidden grid gap-3 lg:grid-cols-2">
@@ -131,7 +127,7 @@ export function PendingUsers({ pendingUsers, loading, roleSelection, onRoleChang
       </div>
 
       {/* Desktop table */}
-      <div className="hidden xl:block bg-white rounded-xl border border-stone-200 overflow-x-auto">
+      <div className="hidden xl:block surface rounded-2xl overflow-x-auto">
         <table className="w-full text-sm min-w-[900px]">
           <thead>
             <tr className="bg-emerald-50 text-emerald-900 text-left">
@@ -208,15 +204,11 @@ export function PendingUsers({ pendingUsers, loading, roleSelection, onRoleChang
 export function AccountRequests({ requests }) {
   return (
     <div>
-      <div className="flex items-start justify-between gap-3 mb-5">
-        <div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <h1 className="text-xl font-bold text-emerald-900">Account Requests</h1>
-            {requests.length > 0 && <Badge tone="neutral">{requests.length} request{requests.length === 1 ? "" : "s"}</Badge>}
-          </div>
-          <p className="text-sm text-stone-500 mt-1">Requests sent by new members. Notify leaders to approve them manually.</p>
-        </div>
-      </div>
+      <PageHeader
+        title="Account Requests"
+        subtitle="Requests sent by new members. Notify leaders to approve them manually."
+        badge={requests.length > 0 ? <Badge tone="neutral">{requests.length} request{requests.length === 1 ? "" : "s"}</Badge> : null}
+      />
 
       <div className="lg:hidden grid gap-3">
         {requests.length === 0 ? (
@@ -242,7 +234,7 @@ export function AccountRequests({ requests }) {
         ))}
       </div>
 
-      <div className="hidden lg:block bg-white rounded-xl border border-stone-200 overflow-x-auto">
+      <div className="hidden lg:block surface rounded-2xl overflow-x-auto">
         <table className="w-full text-sm min-w-[700px]">
           <thead>
             <tr className="bg-emerald-50 text-emerald-900 text-left">
@@ -297,8 +289,10 @@ export function FeatureAccess({ extras, onSave }) {
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-emerald-900 mb-1">Feature Access</h1>
-      <p className="text-sm text-stone-500 mb-5">Piliin kung anong mga feature (screens) ang makikita ng bawat role. Ang naka-lock na "Default" ay laging kasama — i-tick ang iba para idagdag. Awtomatikong nase-save.</p>
+      <PageHeader
+        title="Feature Access"
+        subtitle='Piliin kung anong mga feature (screens) ang makikita ng bawat role. Ang naka-lock na "Default" ay laging kasama — i-tick ang iba para idagdag. Awtomatikong nase-save.'
+      />
 
       <div className="flex flex-wrap gap-2 mb-5">
         {MANAGED_ROLES.map((r) => (
@@ -384,12 +378,10 @@ export function UserManagement({ accounts, loading, selfId, onSetRole, onSetStat
 
   return (
     <div>
-      <div className="flex items-start justify-between gap-3 mb-5">
-        <div>
-          <h1 className="text-xl font-bold text-emerald-900">User Management</h1>
-          <p className="text-sm text-stone-500 mt-1">Manage roles, account status, and birthdays.</p>
-        </div>
-      </div>
+      <PageHeader
+        title="User Management"
+        subtitle="Manage roles, account status, and birthdays."
+      />
 
       {loading ? (
         <>
@@ -453,7 +445,7 @@ export function UserManagement({ accounts, loading, selfId, onSetRole, onSetStat
             })}
           </div>
 
-          <div className="hidden xl:block bg-white rounded-xl border border-stone-200 overflow-x-auto">
+          <div className="hidden xl:block surface rounded-2xl overflow-x-auto">
             <table className="w-full text-sm min-w-[820px]">
               <thead>
                 <tr className="bg-emerald-50 text-emerald-900 text-left">

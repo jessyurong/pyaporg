@@ -1,24 +1,39 @@
 import React, { useEffect } from "react";
 import { X } from "lucide-react";
 
+export function PageHeader({ title, subtitle, action, badge }) {
+  return (
+    <div className="page-header">
+      <div className="min-w-0 flex-1">
+        <div className="flex items-center gap-2.5 flex-wrap">
+          <h1 className="page-title">{title}</h1>
+          {badge}
+        </div>
+        {subtitle ? <p className="page-subtitle">{subtitle}</p> : null}
+      </div>
+      {action ? <div className="shrink-0">{action}</div> : null}
+    </div>
+  );
+}
+
 export function StatCard({ num, label, icon: Icon, color = "emerald" }) {
   const colors = {
-    emerald: "from-emerald-600 to-emerald-700",
-    blue: "from-blue-600 to-blue-700",
-    amber: "from-amber-500 to-amber-600",
-    rose: "from-rose-500 to-rose-600",
-    violet: "from-violet-600 to-violet-700",
+    emerald: "bg-emerald-50 text-emerald-800",
+    blue: "bg-sky-50 text-sky-800",
+    amber: "bg-amber-50 text-amber-800",
+    rose: "bg-rose-50 text-rose-800",
+    violet: "bg-violet-50 text-violet-800",
   };
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 shadow-sm p-4 sm:p-5 flex items-center gap-3 sm:gap-4 hover:shadow-md transition-shadow duration-200 min-w-0">
+    <div className="surface rounded-2xl p-4 sm:p-5 flex items-center gap-3 sm:gap-4 min-w-0 transition-shadow duration-200">
       {Icon && (
-        <div className={`w-11 h-11 rounded-xl bg-gradient-to-br ${colors[color]} flex items-center justify-center shrink-0 shadow-sm`}>
-          <Icon size={20} className="text-white" />
+        <div className={`w-11 h-11 rounded-2xl ${colors[color]} flex items-center justify-center shrink-0`}>
+          <Icon size={20} />
         </div>
       )}
       <div className="min-w-0">
-        <div className="text-xl sm:text-2xl font-bold text-stone-800 leading-none break-words">{num}</div>
-        <div className="text-xs text-stone-500 mt-1 font-medium">{label}</div>
+        <div className="text-xl sm:text-2xl font-semibold tracking-tight text-emerald-950 leading-none break-words">{num}</div>
+        <div className="text-xs text-stone-500 mt-1.5 font-medium">{label}</div>
       </div>
     </div>
   );
@@ -26,16 +41,14 @@ export function StatCard({ num, label, icon: Icon, color = "emerald" }) {
 
 export function ModalShell({ title, onClose, children }) {
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto animate-in fade-in duration-200">
-      {/* max-h-dvh (hindi vh): sa Android, ang 90vh ay mas mataas pa sa totoong
-          nakikitang screen kapag may address bar, kaya napuputol ang modal. */}
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl my-auto max-h-[90dvh] overflow-y-auto animate-in zoom-in-95 duration-200">
+    <div className="fixed inset-0 bg-emerald-950/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 overflow-y-auto animate-in fade-in duration-200">
+      <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl my-auto max-h-[90dvh] overflow-y-auto animate-in zoom-in-95 duration-200 border border-stone-100">
         <div className="flex justify-between items-center p-5 border-b border-stone-100">
-          <h3 className="font-bold text-emerald-900 text-base">{title}</h3>
+          <h3 className="font-serif font-semibold text-emerald-950 text-lg tracking-tight">{title}</h3>
           <button
             onClick={onClose}
             aria-label="Close"
-            className="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-stone-100 transition-colors"
+            className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-stone-100 transition-colors"
           >
             <X size={18} className="text-stone-400" />
           </button>
@@ -94,13 +107,13 @@ export function ImageLightbox({ src, alt, caption, onClose }) {
 }
 
 // 16px sa mobile para hindi mag-auto-zoom ang iOS kapag nag-focus sa input.
-export const inputCls = "w-full px-3.5 py-2.5 min-h-11 border border-stone-200 rounded-xl text-base sm:text-sm bg-stone-50 focus:bg-white focus:border-emerald-400 focus:ring-2 focus:ring-emerald-100 outline-none transition-all duration-150 placeholder:text-stone-400";
+export const inputCls = "w-full px-3.5 py-2.5 min-h-11 border border-stone-200/90 rounded-xl text-base sm:text-sm bg-white/80 focus:bg-white focus:border-emerald-400 focus:ring-4 focus:ring-emerald-100/80 outline-none transition-all duration-150 placeholder:text-stone-400";
 
-export const btnPrimary = "inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-11 bg-emerald-700 hover:bg-emerald-800 active:bg-emerald-900 text-white text-sm font-semibold rounded-xl shadow-sm transition-all duration-150";
+export const btnPrimary = "inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-11 bg-emerald-800 hover:bg-emerald-900 active:bg-emerald-950 text-white text-sm font-semibold rounded-xl shadow-[0_8px_18px_rgba(6,95,70,0.22)] hover:-translate-y-px transition-all duration-150";
 
 export const btnDanger = "inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-11 bg-rose-500 hover:bg-rose-600 active:bg-rose-700 text-white text-sm font-semibold rounded-xl shadow-sm transition-all duration-150";
 
-export const btnSecondary = "inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-11 border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 text-sm font-semibold rounded-xl transition-all duration-150";
+export const btnSecondary = "inline-flex items-center justify-center gap-2 px-4 py-2.5 min-h-11 border border-stone-200 bg-white/80 hover:bg-white text-stone-700 text-sm font-semibold rounded-xl transition-all duration-150";
 
 // Shared mobile card primitives. Desktop tables stay as-is; these keep every
 // mobile list consistent and make sure actions are visible without sideways scroll.
@@ -121,7 +134,7 @@ export function MobileCard({ children, className = "", onClick, ...props }) {
             }
           : undefined
       }
-      className={`bg-white rounded-xl border border-stone-200 p-4 min-w-0 ${
+      className={`surface rounded-2xl p-4 min-w-0 ${
         interactive ? "cursor-pointer hover:border-emerald-200 active:bg-stone-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-300" : ""
       } ${className}`}
       {...props}
@@ -167,10 +180,10 @@ export function Badge({ children, tone = "neutral" }) {
 
 export function SectionCard({ title, icon: Icon, children, action }) {
   return (
-    <div className="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-100 bg-stone-50/60">
-        <h3 className="font-semibold text-emerald-900 text-sm flex items-center gap-2">
-          {Icon && <Icon size={15} className="text-emerald-600" />}
+    <div className="surface rounded-2xl overflow-hidden">
+      <div className="flex items-center justify-between px-5 py-3.5 border-b border-stone-100/80 bg-gradient-to-r from-emerald-50/70 to-transparent">
+        <h3 className="font-semibold text-emerald-950 text-sm flex items-center gap-2">
+          {Icon && <Icon size={15} className="text-emerald-700" />}
           {title}
         </h3>
         {action}
@@ -183,8 +196,12 @@ export function SectionCard({ title, icon: Icon, children, action }) {
 export function EmptyState({ icon: Icon, message }) {
   return (
     <div className="flex flex-col items-center justify-center py-12 text-center">
-      {Icon && <Icon size={36} className="text-stone-300 mb-3" />}
-      <p className="text-sm text-stone-400 font-medium">{message}</p>
+      {Icon && (
+        <div className="mb-3 w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700/70 flex items-center justify-center">
+          <Icon size={22} />
+        </div>
+      )}
+      <p className="text-sm text-stone-500 font-medium">{message}</p>
     </div>
   );
 }

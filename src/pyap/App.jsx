@@ -161,7 +161,7 @@ export default function App() {
           toast.info("To install: tap the Share button in Safari (square with an arrow), then choose 'Add to Home Screen'.");
         }
       }}
-      className="fixed bottom-4 right-4 z-40 bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-semibold pl-3 pr-4 py-3 rounded-full shadow-lg flex items-center gap-2"
+      className="fixed bottom-4 right-4 z-40 bg-emerald-900 hover:bg-emerald-950 text-white text-sm font-semibold pl-3.5 pr-4 py-3 rounded-full shadow-[0_12px_28px_rgba(6,78,59,0.35)] flex items-center gap-2"
     >
       <Smartphone size={15} /> Install App
     </button>
@@ -460,7 +460,12 @@ export default function App() {
   // Loading state while auth boots
   if (auth.loading && !isSignedIn && !isGuest) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50 text-stone-500 text-sm">Loading…</div>
+      <div className="min-h-screen app-shell flex items-center justify-center text-emerald-900/60 text-sm">
+        <div className="text-center">
+          <div className="w-10 h-10 mx-auto mb-3 rounded-2xl bg-emerald-900 animate-pulse" />
+          Loading PYAP Samac…
+        </div>
+      </div>
     );
   }
 
@@ -505,10 +510,10 @@ export default function App() {
 
   if (isPending || isRejected || isInactive) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-stone-50 p-6">
+      <div className="min-h-screen app-shell flex items-center justify-center p-6">
         {installButton}
-        <div className="bg-white rounded-3xl border border-stone-200 shadow-sm p-8 max-w-xl text-center">
-          <div className="text-emerald-900 text-3xl font-bold mb-4">{isPending ? "Account Pending Approval" : isInactive ? "Account Deactivated" : "Account Rejected"}</div>
+        <div className="surface rounded-3xl p-8 max-w-xl text-center">
+          <div className="font-serif text-3xl font-medium text-emerald-950 mb-4">{isPending ? "Account Pending Approval" : isInactive ? "Account Deactivated" : "Account Rejected"}</div>
           <p className="text-sm text-stone-600 mb-5">
             {isPending
               ? "Your account is currently pending approval. Please wait for a leader to activate your account before accessing the dashboard."
@@ -522,7 +527,7 @@ export default function App() {
               <LoginDetailsCard email={requestDone.email} password={requestDone.password} />
             </div>
           )}
-          <button onClick={handleLogout} className="bg-emerald-700 text-white rounded-full px-6 py-3 text-sm font-semibold">Logout</button>
+          <button onClick={handleLogout} className="bg-emerald-900 text-white rounded-full px-6 py-3 text-sm font-semibold shadow-[0_8px_18px_rgba(6,95,70,0.22)]">Logout</button>
         </div>
       </div>
     );
@@ -545,7 +550,7 @@ export default function App() {
   // ---------- SHELL ----------
 
   return (
-    <div className="min-h-dvh w-full flex bg-stone-50 text-stone-800 font-sans relative">
+    <div className="min-h-dvh w-full flex app-shell text-stone-800 font-sans relative">
       <Sidebar
         featureAccess={featureAccess}
         screen={screen}
@@ -564,8 +569,8 @@ export default function App() {
       />
 
       {/* Main content */}
-      <div className="flex-1 min-w-0 p-5 md:p-8 pt-20 md:pt-8 w-full">
-        {screen === "dashboard" && <Dashboard members={members} events={events} attendance={attendance} announcements={announcements} finance={finance} snapshots={snapshots} accountBirthdays={accountBirthdaysApi.items} isSuperAdmin={role === "superadmin"} widgets={dashboardWidgets} onSaveWidgets={dashApi.save} onViewSnapshots={() => setScreen("snapshots")} onViewAnnouncements={() => setScreen("announcements")} onViewEvents={() => setScreen("events")} isGuest={isGuest} onLoginClick={() => { setGuestMode(false); setShowLoginModal(true); setLoginError(""); }} />}
+      <div className="flex-1 min-w-0 p-5 md:p-8 pt-20 md:pt-8 w-full max-w-[1400px]">
+        {screen === "dashboard" && <Dashboard displayName={displayName} members={members} events={events} attendance={attendance} announcements={announcements} finance={finance} snapshots={snapshots} accountBirthdays={accountBirthdaysApi.items} isSuperAdmin={role === "superadmin"} widgets={dashboardWidgets} onSaveWidgets={dashApi.save} onViewSnapshots={() => setScreen("snapshots")} onViewAnnouncements={() => setScreen("announcements")} onViewEvents={() => setScreen("events")} isGuest={isGuest} onLoginClick={() => { setGuestMode(false); setShowLoginModal(true); setLoginError(""); }} />}
         {screen === "announcements" && (
           <Announcements
             announcements={announcements}

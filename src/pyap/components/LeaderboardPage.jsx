@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import { Medal, Trophy } from "lucide-react";
-import { StatCard } from "./ui.jsx";
+import { PageHeader, StatCard } from "./ui.jsx";
 import { MemberAvatar } from "./MembersPage.jsx";
 
 // Kulay ng attendance rate — >=80% emerald, 50-79% amber, <50% rose.
@@ -110,7 +110,7 @@ export function Leaderboard({ members = [], events = [], attendance = {}, curren
   if (recordedEventIds.length === 0) {
     return (
       <div>
-        <h1 className="text-xl font-bold text-emerald-900 mb-5">Leaderboard</h1>
+        <PageHeader title="Leaderboard" subtitle="Attendance ranking will appear after events are recorded." />
         <div className="bg-white rounded-xl border border-stone-200 p-10 text-center max-w-xl">
           <Trophy size={32} className="mx-auto text-stone-300 mb-3" />
           <p className="text-sm font-semibold text-stone-700">No attendance data yet</p>
@@ -124,10 +124,10 @@ export function Leaderboard({ members = [], events = [], attendance = {}, curren
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-emerald-900 mb-1">Leaderboard</h1>
-      <p className="text-sm text-stone-500 mb-5">
-        Attendance ranking ng mga members batay sa {recordedEventIds.length} recorded event{recordedEventIds.length === 1 ? "" : "s"}.
-      </p>
+      <PageHeader
+        title="Leaderboard"
+        subtitle={`Attendance ranking ng mga members batay sa ${recordedEventIds.length} recorded event${recordedEventIds.length === 1 ? "" : "s"}.`}
+      />
 
       {/* Summary row */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-3 md:gap-4 mb-6">

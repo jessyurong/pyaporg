@@ -1,20 +1,21 @@
 import React, { useState } from "react";
 import { Plus, Trash2, X } from "lucide-react";
 import { URGENCY, getUrgency } from "../constants.js";
-import { inputCls } from "./ui.jsx";
+import { PageHeader, btnPrimary, inputCls } from "./ui.jsx";
 import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function Announcements({ announcements, isGuest, canPost, onAdd, onDelete }) {
   return (
     <div>
-      <div className="flex justify-between items-center mb-5">
-        <h1 className="text-xl font-bold text-emerald-900">Announcements</h1>
-        {canPost && <button onClick={onAdd} className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5"><Plus size={14} /> Post Announcement</button>}
-      </div>
+      <PageHeader
+        title="Announcements"
+        subtitle="News and updates for the youth of Barangay Samac."
+        action={canPost ? <button onClick={onAdd} className={btnPrimary}><Plus size={14} /> Post Announcement</button> : null}
+      />
       {announcements.map(a => {
         const u = getUrgency(a);
         return (
-          <div key={a.id} className={`border-l-4 ${u.border} ${u.bg} rounded-r-lg p-4 mb-3`}>
+          <div key={a.id} className={`surface border-l-4 ${u.border} ${u.bg} rounded-2xl p-4 mb-3`}>
             <div className="flex justify-between items-start gap-3">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2 flex-wrap">

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Camera, Plus, Trash2 } from "lucide-react";
 import { SNAPSHOT_LIMIT } from "../constants.js";
-import { ImageLightbox, ModalShell, inputCls } from "./ui.jsx";
+import { ImageLightbox, ModalShell, PageHeader, btnPrimary, inputCls } from "./ui.jsx";
 import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function Snapshots({ items, loading, canManage, onAdd, onDelete }) {
@@ -9,24 +9,20 @@ export function Snapshots({ items, loading, canManage, onAdd, onDelete }) {
   const atLimit = items.length >= SNAPSHOT_LIMIT;
   return (
     <div>
-      <div className="flex justify-between items-center gap-3 mb-5">
-        <div>
-          <h1 className="text-xl font-bold text-emerald-900">Snapshots</h1>
-          <p className={`text-[11px] mt-0.5 ${atLimit ? "text-rose-600 font-semibold" : "text-stone-400"}`}>
-            {items.length} / {SNAPSHOT_LIMIT} photos
-          </p>
-        </div>
-        {canManage && (
+      <PageHeader
+        title="Snapshots"
+        subtitle={<span className={atLimit ? "text-rose-600 font-semibold" : undefined}>{items.length} / {SNAPSHOT_LIMIT} photos</span>}
+        action={canManage ? (
           <button
             onClick={onAdd}
             disabled={atLimit}
             title={atLimit ? "Limit reached — delete old photos to upload more." : undefined}
-            className="bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={`${btnPrimary} disabled:opacity-50 disabled:cursor-not-allowed`}
           >
             <Plus size={14} /> Add Photos
           </button>
-        )}
-      </div>
+        ) : null}
+      />
       {atLimit && (
         <div className="bg-amber-50 border border-amber-200 rounded-xl p-3.5 mb-4 text-xs text-amber-800">
           Na-hit na ang limit na <b>{SNAPSHOT_LIMIT} photos</b>. Mag-delete muna ng lumang snapshots para maka-upload ulit ng bago.

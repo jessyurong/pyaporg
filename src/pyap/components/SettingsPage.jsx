@@ -2,7 +2,7 @@ import React from "react";
 import { Banknote, Download, Heart, Sprout } from "lucide-react";
 import Welcome from "../Welcome.jsx";
 import { downloadBlob, downloadCSV, todayStr } from "../lib/utils.js";
-import { ModalShell } from "./ui.jsx";
+import { ModalShell, PageHeader } from "./ui.jsx";
 
 export function BackupExport({ members, events, attendance, attendanceNotes, finance, achievements, announcements, suggestions, snapshots }) {
   const memberName = (id) => members.find((m) => m.id === id)?.name || "—";
@@ -34,8 +34,10 @@ export function BackupExport({ members, events, attendance, attendanceNotes, fin
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-emerald-900 mb-1">Backup &amp; Export</h1>
-      <p className="text-sm text-stone-500 mb-5">Download a copy of the organization's data. CSV files open in Excel or Google Sheets.</p>
+      <PageHeader
+        title="Backup & Export"
+        subtitle="Download a copy of the organization's data. CSV files open in Excel or Google Sheets."
+      />
       <div className="grid md:grid-cols-2 gap-3 mb-4">
         {sets.map((s) => (
           <div key={s.key} className="bg-white rounded-xl border border-stone-200 p-4 flex items-center justify-between gap-3">
@@ -70,8 +72,10 @@ export function BackupExport({ members, events, attendance, attendanceNotes, fin
 export function DonateBox() {
   return (
     <div>
-      <h1 className="text-xl font-bold text-emerald-900 mb-2">Support PYAP Samac</h1>
-      <p className="text-sm text-stone-500 mb-5">Ang bawat donasyon, malaking tulong para sa mga proyekto at aktibidad ng kabataan sa Barangay Samac. Maraming salamat sa inyong suporta! <Heart size={13} className="inline text-rose-500 -mt-0.5" /></p>
+      <PageHeader
+        title="Support PYAP Samac"
+        subtitle={<>Ang bawat donasyon, malaking tulong para sa mga proyekto at aktibidad ng kabataan sa Barangay Samac. Maraming salamat sa inyong suporta! <Heart size={13} className="inline text-rose-500 -mt-0.5" /></>}
+      />
 
       <div className="bg-white rounded-xl border border-stone-200 p-5 max-w-md mb-4">
         <h3 className="font-semibold text-emerald-900 text-sm mb-3 flex items-center gap-1.5"><Banknote size={14} /> Paraan ng Pagdo-donate</h3>

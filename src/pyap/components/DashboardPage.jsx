@@ -1,8 +1,8 @@
 import React, { useState } from "react";
-import { CalendarDays, Camera, Cake, Eye, Medal, Megaphone, Settings, TrendingUp, X } from "lucide-react";
+import { CalendarDays, Camera, Cake, Eye, Medal, Megaphone, Settings, TrendingUp, Users, Wallet, X } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { getUrgency } from "../constants.js";
-import { ImageLightbox, StatCard } from "./ui.jsx";
+import { ImageLightbox, PageHeader, StatCard, btnPrimary, btnSecondary } from "./ui.jsx";
 
 // Nakaayos ayon sa display order ng dashboard.
 export const WIDGET_LABELS = {
@@ -20,7 +20,7 @@ export const WIDGET_LABELS = {
   snapshots: "Snapshots (Photos)",
 };
 
-export function Dashboard({ members, events, attendance, announcements, finance, snapshots, accountBirthdays, isSuperAdmin, widgets, onSaveWidgets, onViewSnapshots, onViewAnnouncements, onViewEvents, isGuest, onLoginClick }) {
+export function Dashboard({ members, events, attendance, announcements, finance, snapshots, accountBirthdays, isSuperAdmin, widgets, onSaveWidgets, onViewSnapshots, onViewAnnouncements, onViewEvents, isGuest, onLoginClick, displayName }) {
   const [editing, setEditing] = useState(false);
   const [preview, setPreview] = useState(null);
   const w = widgets || {};
@@ -81,29 +81,34 @@ export function Dashboard({ members, events, attendance, announcements, finance,
       return { name: e.title.length > 12 ? e.title.slice(0, 12) + "…" : e.title, rate };
     });
 
+  const hour = new Date().getHours();
+  const hello = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const todayLabel = new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric" });
+
   return (
     <div>
-      <div className="flex items-center justify-between mb-5">
-        <h1 className="text-xl font-bold text-emerald-900">Dashboard</h1>
-        {isSuperAdmin && (
-          <button onClick={() => setEditing(true)} className="text-xs bg-emerald-700 text-white px-3 py-1.5 rounded-lg flex items-center gap-1">
-            <Settings size={12} /> Customize
+      <PageHeader
+        title={isGuest ? "Community Board" : `${hello}${displayName ? `, ${displayName.split(" ")[0]}` : ""}`}
+        subtitle={isGuest ? "A public look at PYAP Samac announcements and snapshots." : todayLabel}
+        action={isSuperAdmin ? (
+          <button onClick={() => setEditing(true)} className={`${btnSecondary} text-xs`}>
+            <Settings size={14} /> Customize
           </button>
-        )}
-      </div>
+        ) : null}
+      />
 
       <div className="grid gap-5 lg:grid-cols-2 2xl:grid-cols-3 items-start">
         {isGuest && (
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-5 flex items-start gap-3 lg:col-span-2 2xl:col-span-3">
-            <div className="w-10 h-10 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+          <div className="surface rounded-2xl p-5 flex items-start gap-3 lg:col-span-2 2xl:col-span-3 bg-gradient-to-r from-amber-50 to-white">
+            <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
               <Eye size={18} />
             </div>
             <div className="flex-1">
-              <div className="font-semibold text-amber-900 text-sm">Naka-Guest Mode ka ngayon</div>
-              <p className="text-xs text-amber-800 mt-1">
-                Para makita ang live na stats — members, events, attendance, finance, at birthdays — mag-login gamit ang account mo.
+              <div className="font-semibold text-amber-950 text-sm">You're browsing as a guest</div>
+              <p className="text-xs text-amber-900/80 mt-1">
+                Sign in to see live stats — members, events, attendance, finance, and birthdays.
               </p>
-              <button type="button" onClick={onLoginClick} className="mt-3 bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-semibold px-4 py-2 rounded-lg transition">
+              <button type="button" onClick={onLoginClick} className={`${btnPrimary} mt-3 text-xs`}>
                 Mag-login
               </button>
             </div>
@@ -112,7 +117,7 @@ export function Dashboard({ members, events, attendance, announcements, finance,
 
         {/* 1. Announcements — pinaka-una: balita/urgent na dapat makita agad */}
         {w.recentAnnouncements && (
-          <div className={`bg-white rounded-xl border border-stone-200 p-5 ${isGuest ? "lg:col-span-2 2xl:col-span-3" : ""}`}>
+          <div className={`surface rounded-2xl p-5 ${isGuest ? "lg:col-span-2 2xl:col-span-3" : ""}`}>
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-emerald-900 text-sm flex items-center gap-1.5"><Megaphone size={14} /> Announcements</h3>
               {onViewAnnouncements && (
@@ -145,7 +150,7 @@ export function Dashboard({ members, events, attendance, announcements, finance,
 
         {/* 2. Upcoming Events — ang "Susunod" na activity ay naka-highlight */}
         {!isGuest && w.upcomingEvents && (
-          <div className="bg-white rounded-xl border border-stone-200 p-5">
+          <div className="surface rounded-2xl p-5">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-emerald-900 text-sm flex items-center gap-1.5">
                 <CalendarDays size={14} /> Upcoming Events
@@ -198,7 +203,7 @@ export function Dashboard({ members, events, attendance, announcements, finance,
 
         {/* 3. Birthdays This Month */}
         {!isGuest && w.birthdayList && (
-          <div className="bg-white rounded-xl border border-stone-200 p-5 lg:col-span-2 2xl:col-span-1">
+          <div className="surface rounded-2xl p-5 lg:col-span-2 2xl:col-span-1">
             <h3 className="font-semibold text-emerald-900 text-sm mb-2 flex items-center gap-1.5"><Cake size={14} /> Birthdays This Month</h3>
             {birthdays.length === 0 ? <p className="text-sm text-stone-400">No birthdays this month.</p> :
               <ul className="text-sm space-y-1">{birthdays.map(b => <li key={b.id || b.name}>{b.name} — {new Date(String(b.birthday).slice(0, 10) + "T00:00:00").toLocaleDateString("en-US", { month: "long", day: "numeric" })}</li>)}</ul>}
@@ -208,18 +213,18 @@ export function Dashboard({ members, events, attendance, announcements, finance,
         {/* 4. Stats */}
         {showStats && (
           <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3 md:gap-4 lg:col-span-2 2xl:col-span-3">
-            {w.totalMembers && <StatCard num={members.length} label="Total Members" />}
-            {w.activeMembers && <StatCard num={active} label="Active Members" />}
-            {w.totalEvents && <StatCard num={events.length} label="Total Events" />}
-            {w.attendanceRate && <StatCard num={`${rate}%`} label="Attendance Rate" />}
-            {w.fundBalance && <StatCard num={`₱${(income - expense).toFixed(0)}`} label="Fund Balance" />}
-            {w.birthdays && <StatCard num={birthdays.length} label="Birthdays This Month" />}
+            {w.totalMembers && <StatCard num={members.length} label="Total Members" icon={Users} />}
+            {w.activeMembers && <StatCard num={active} label="Active Members" icon={Users} color="blue" />}
+            {w.totalEvents && <StatCard num={events.length} label="Total Events" icon={CalendarDays} color="violet" />}
+            {w.attendanceRate && <StatCard num={`${rate}%`} label="Attendance Rate" icon={TrendingUp} />}
+            {w.fundBalance && <StatCard num={`₱${(income - expense).toFixed(0)}`} label="Fund Balance" icon={Wallet} color="amber" />}
+            {w.birthdays && <StatCard num={birthdays.length} label="Birthdays This Month" icon={Cake} color="rose" />}
           </div>
         )}
 
         {/* 5. Attendance Trend */}
         {!isGuest && w.attendanceTrend && trendData.length > 0 && (
-          <div className="bg-white rounded-xl border border-stone-200 p-5 lg:col-span-2">
+          <div className="surface rounded-2xl p-5 lg:col-span-2">
             <h3 className="font-semibold text-emerald-900 text-sm mb-3 flex items-center gap-1.5">
               <TrendingUp size={14} /> Attendance Trend (Last 6 Events)
             </h3>
@@ -236,7 +241,7 @@ export function Dashboard({ members, events, attendance, announcements, finance,
 
         {/* 6. Top Attenders */}
         {!isGuest && w.topAttenders && topAttenders.length > 0 && (
-          <div className="bg-white rounded-xl border border-stone-200 p-5 lg:col-span-2 2xl:col-span-1">
+          <div className="surface rounded-2xl p-5 lg:col-span-2 2xl:col-span-1">
             <h3 className="font-semibold text-emerald-900 text-sm mb-3 flex items-center gap-1.5">
               <Medal size={14} /> Top Attenders
             </h3>
@@ -263,7 +268,7 @@ export function Dashboard({ members, events, attendance, announcements, finance,
 
         {/* 7. Snapshots */}
         {w.snapshots && snapshots.length > 0 && (
-          <div className="bg-white rounded-xl border border-stone-200 p-5 lg:col-span-2 2xl:col-span-3">
+          <div className="surface rounded-2xl p-5 lg:col-span-2 2xl:col-span-3">
             <div className="flex items-center justify-between mb-3">
               <h3 className="font-semibold text-emerald-900 text-sm flex items-center gap-1.5"><Camera size={14} /> Snapshots</h3>
               <button onClick={onViewSnapshots} className="text-xs text-emerald-700 font-semibold hover:underline">View all</button>
@@ -304,9 +309,9 @@ export function DashboardCustomizeModal({ current, onClose, onSave }) {
   const [v, setV] = useState(current);
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 overflow-y-auto" onClick={onClose}>
-      <div className="bg-white rounded-2xl p-5 w-full max-w-md my-auto max-h-[90dvh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+      <div className="bg-white rounded-3xl p-5 w-full max-w-md my-auto max-h-[90dvh] overflow-y-auto border border-stone-100 shadow-2xl" onClick={e => e.stopPropagation()}>
         <div className="flex justify-between items-center mb-4">
-          <h3 className="font-bold text-emerald-900">Customize Dashboard</h3>
+          <h3 className="font-serif text-lg font-medium text-emerald-950">Customize Dashboard</h3>
           <button onClick={onClose}><X size={18} /></button>
         </div>
         <p className="text-xs text-stone-500 mb-3">Pick what to show on the dashboard.</p>

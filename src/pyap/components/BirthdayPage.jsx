@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import { differenceInCalendarDays, differenceInYears, format } from "date-fns";
 import { MemberAvatar } from "./MembersPage.jsx";
+import { PageHeader } from "./ui.jsx";
 
 // Mga caption choices — automatic na napapalitan ang pangalan (at age kung kilala).
 // build(firstName, fullName, age) => string
@@ -474,7 +475,7 @@ export function BirthdayGreetings({ members = [], accountBirthdays = [], onViewP
   if (all.length === 0) {
     return (
       <div>
-        <h1 className="mb-5 text-xl font-bold text-emerald-900">Birthday Greetings</h1>
+        <PageHeader title="Birthday Greetings" subtitle="Add birthdays to member profiles so they show up here." />
         <div className="max-w-xl rounded-xl border border-stone-200 bg-white p-10 text-center">
           <Cake size={32} className="mx-auto mb-3 text-stone-300" />
           <p className="text-sm font-semibold text-stone-700">No birthdays on record</p>
@@ -520,10 +521,10 @@ export function BirthdayGreetings({ members = [], accountBirthdays = [], onViewP
 
   return (
     <div>
-      <h1 className="mb-1 text-xl font-bold text-emerald-900">Birthday Greetings</h1>
-      <p className="mb-5 text-sm text-stone-500">
-        Celebrate today and prepare greetings for every birthday. Tap a member to copy a caption.
-      </p>
+      <PageHeader
+        title="Birthday Greetings"
+        subtitle="Celebrate today and prepare greetings for every birthday. Tap a member to copy a caption."
+      />
 
       {/* ---------- Today's celebrants (spotlight) ---------- */}
       {featured.length > 0 && (

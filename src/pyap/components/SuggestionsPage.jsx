@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { FileText, Trash2 } from "lucide-react";
-import { ModalShell, inputCls } from "./ui.jsx";
+import { ModalShell, PageHeader, btnPrimary, inputCls } from "./ui.jsx";
 import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export const FLAGGED_WORDS = ["bobo", "gago", "tanga", "putangina", "ulol"]; // basic placeholder filter — expand as needed
@@ -41,8 +41,10 @@ export function Suggestions({ canRead = false, suggestions, loading, onSubmit, o
   if (!canRead) {
     return (
       <div>
-        <h1 className="text-xl font-bold text-emerald-900 mb-2">Suggestions / Feedback</h1>
-        <p className="text-sm text-stone-500 mb-3">May gusto ka bang iparating sa mga officers? Ipadala mo lang dito — mababasa lang ito ng Super Admin, President, Secretary, at Organizer.</p>
+        <PageHeader
+          title="Suggestions / Feedback"
+          subtitle="May gusto ka bang iparating sa mga officers? Ipadala mo lang dito — mababasa lang ito ng Super Admin, President, Secretary, at Organizer."
+        />
         <button onClick={() => setShowPolicy(true)} className="text-xs text-emerald-700 underline mb-4 flex items-center gap-1.5"><FileText size={12} /> View Policy of Use</button>
         <div className="bg-white rounded-xl border border-stone-200 p-5 max-w-lg">
           {sent && <div className="bg-emerald-50 text-emerald-700 text-sm rounded-lg p-2.5 mb-3">Salamat! Naipadala na ang suggestion mo.</div>}
@@ -52,7 +54,7 @@ export function Suggestions({ canRead = false, suggestions, loading, onSubmit, o
           <button
             onClick={handleSend}
             disabled={busy}
-            className={`mt-3 bg-emerald-700 hover:bg-emerald-800 text-white text-sm px-4 py-2 rounded-lg ${submittingCls}`}
+            className={`mt-3 ${btnPrimary} ${submittingCls}`}
           >
             {busy ? "Sending…" : "Send Suggestion"}
           </button>
@@ -64,8 +66,10 @@ export function Suggestions({ canRead = false, suggestions, loading, onSubmit, o
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-emerald-900 mb-2">Suggestions Inbox</h1>
-      <p className="text-sm text-stone-500 mb-5">Visible lang sa Super Admin, President, Secretary, at Organizer. Mga natanggap na suggestion/feedback mula sa mga member at Guest Mode.</p>
+      <PageHeader
+        title="Suggestions Inbox"
+        subtitle="Visible lang sa Super Admin, President, Secretary, at Organizer. Mga natanggap na suggestion/feedback mula sa mga member at Guest Mode."
+      />
       {loading ? (
         <p className="text-sm text-stone-400">Loading suggestions…</p>
       ) : suggestions.length === 0 ? (

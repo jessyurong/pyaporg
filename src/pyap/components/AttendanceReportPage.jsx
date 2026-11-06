@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { ClipboardList, Download, Printer } from "lucide-react";
-import { Badge, MobileCard, MobileField, MobileFields, StatCard, inputCls } from "./ui.jsx";
+import { Badge, MobileCard, MobileField, MobileFields, PageHeader, StatCard, inputCls } from "./ui.jsx";
 import { downloadCSV, todayStr } from "../lib/utils.js";
 
 const ALL = "all";
@@ -69,7 +69,7 @@ export function AttendanceReport({ members = [], events = [], attendance = {}, a
   if (allRows.length === 0) {
     return (
       <div>
-        <h1 className="text-xl font-bold text-emerald-900 mb-5">Attendance Report</h1>
+        <PageHeader title="Attendance Report" subtitle="Wala pang na-mark na attendance sa kahit anong event." />
         <div className="bg-white rounded-xl border border-stone-200 p-10 text-center max-w-xl">
           <ClipboardList size={32} className="mx-auto text-stone-300 mb-3" />
           <p className="text-sm font-semibold text-stone-700">No attendance records yet</p>
@@ -86,10 +86,10 @@ export function AttendanceReport({ members = [], events = [], attendance = {}, a
       {/* Print CSS — itatago ang filter at buttons kapag nagpi-print */}
       <style>{"@media print { .no-print { display: none !important; } }"}</style>
 
-      <h1 className="text-xl font-bold text-emerald-900 mb-1">Attendance Report</h1>
-      <p className="text-sm text-stone-500 mb-5">
-        {selectedEvent ? `${selectedEvent.title} — ${selectedEvent.date}` : "Lahat ng recorded events."}
-      </p>
+      <PageHeader
+        title="Attendance Report"
+        subtitle={selectedEvent ? `${selectedEvent.title} — ${selectedEvent.date}` : "Lahat ng recorded events."}
+      />
 
       {/* Filter + actions — naka-hide kapag nagpi-print */}
       <div className="no-print grid gap-3 mb-5 sm:flex sm:flex-wrap sm:items-end">

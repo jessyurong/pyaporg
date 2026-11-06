@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { ArrowLeft, Cake, CalendarDays, Camera, CheckSquare, ChevronRight, Mail, MapPin, Phone, Plus, Trash2, User } from "lucide-react";
 import { fmtBirthday } from "../lib/utils.js";
-import { Badge, EmptyState, ModalShell, inputCls } from "./ui.jsx";
+import { Badge, EmptyState, ModalShell, PageHeader, btnPrimary, inputCls } from "./ui.jsx";
 import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 export function MemberAvatar({ member, size = 32, className = "" }) {
@@ -27,14 +27,15 @@ export function MemberAvatar({ member, size = 32, className = "" }) {
 export function MembersList({ members, onSelect, onAdd }) {
   return (
     <div>
-      <div className="flex justify-between items-center gap-3 mb-5">
-        <h1 className="text-xl font-bold text-emerald-900">Members</h1>
-        {onAdd && (
-          <button onClick={onAdd} className="min-h-11 bg-emerald-700 text-white text-sm px-3 py-2 rounded-lg flex items-center gap-1.5 shrink-0">
+      <PageHeader
+        title="Members"
+        subtitle="Directory of PYAP Samac youth and officers."
+        action={onAdd ? (
+          <button onClick={onAdd} className={btnPrimary}>
             <Plus size={14} /> Add Member
           </button>
-        )}
-      </div>
+        ) : null}
+      />
 
       <div className="lg:hidden grid gap-3">
         {members.length === 0 ? (
@@ -67,7 +68,7 @@ export function MembersList({ members, onSelect, onAdd }) {
         ))}
       </div>
 
-      <div className="hidden lg:block bg-white rounded-xl border border-stone-200 overflow-x-auto">
+      <div className="hidden lg:block surface rounded-2xl overflow-x-auto">
         <table className="w-full text-sm min-w-[500px]">
           <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3"></th><th className="p-3">Name</th><th className="p-3">Position</th><th className="p-3">Status</th><th className="p-3">Contact</th></tr></thead>
           <tbody>

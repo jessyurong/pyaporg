@@ -43,37 +43,36 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
   };
 
   return (
-    <div className="min-h-screen w-full bg-stone-50 text-stone-800 font-sans">
-      {/* NAV */}
-      <header className="sticky top-0 z-30 bg-white/90 backdrop-blur border-b border-stone-200">
+    <div className="min-h-screen w-full app-shell text-stone-800 font-sans">
+      <header className="sticky top-0 z-30 bg-white/75 backdrop-blur-xl border-b border-emerald-900/8">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-5 py-3">
           <div className="flex items-center gap-2.5">
-            <img src={logo} alt="PYAP Samac" className="w-9 h-9" />
+            <img src={logo} alt="PYAP Samac" className="w-9 h-9 rounded-xl" />
             <div className="leading-tight">
-              <div className="text-sm font-bold text-emerald-900">PYAP</div>
-              <div className="text-[10px] text-stone-500 -mt-0.5">Barangay Samac</div>
+              <div className="text-sm font-semibold text-emerald-950 tracking-tight">PYAP</div>
+              <div className="text-[10px] uppercase tracking-[0.16em] text-stone-500 -mt-0.5">Barangay Samac</div>
             </div>
           </div>
-          <nav className="hidden md:flex items-center gap-6 text-sm text-stone-600">
-            <button onClick={() => scrollTo("about")} className="hover:text-emerald-700">About</button>
-            <button onClick={() => scrollTo("mission")} className="hover:text-emerald-700">Mission</button>
-            <button onClick={() => scrollTo("activities")} className="hover:text-emerald-700">Activities</button>
-            <button onClick={() => scrollTo("join")} className="hover:text-emerald-700">Join Us</button>
-            <button onClick={() => scrollTo("contact")} className="hover:text-emerald-700">Contact</button>
+          <nav className="hidden md:flex items-center gap-7 text-sm text-stone-600">
+            <button onClick={() => scrollTo("about")} className="hover:text-emerald-800 transition-colors">About</button>
+            <button onClick={() => scrollTo("mission")} className="hover:text-emerald-800 transition-colors">Mission</button>
+            <button onClick={() => scrollTo("activities")} className="hover:text-emerald-800 transition-colors">Activities</button>
+            <button onClick={() => scrollTo("join")} className="hover:text-emerald-800 transition-colors">Join Us</button>
+            <button onClick={() => scrollTo("contact")} className="hover:text-emerald-800 transition-colors">Contact</button>
           </nav>
           <div className="flex items-center gap-2">
             {isSuperAdmin && (
               <button
                 onClick={() => setEditing(true)}
                 title="Edit Welcome Page"
-                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700 border border-emerald-700 hover:bg-emerald-700 hover:text-white px-3 py-1.5 rounded-lg transition"
+                className="hidden sm:inline-flex items-center gap-1.5 text-xs font-medium text-emerald-800 border border-emerald-800/30 hover:bg-emerald-800 hover:text-white px-3 py-1.5 rounded-full transition"
               >
                 <Edit3 size={13} /> Edit Page
               </button>
             )}
             <button
               onClick={onLoginClick}
-              className="text-xs font-semibold bg-emerald-700 hover:bg-emerald-800 text-white px-4 py-1.5 rounded-lg transition"
+              className="text-xs font-semibold bg-emerald-800 hover:bg-emerald-950 text-white px-4 py-2 rounded-full transition shadow-[0_8px_18px_rgba(6,95,70,0.18)]"
             >
               Login
             </button>
@@ -81,38 +80,49 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
         </div>
       </header>
 
-      {/* HERO */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-emerald-900 via-emerald-800 to-emerald-700 text-white">
+      <section className="relative overflow-hidden text-white">
         <div
-          className="absolute inset-0 opacity-10"
+          className="absolute inset-0"
           style={{
-            backgroundImage:
-              "radial-gradient(circle at 25% 20%, rgba(255,255,255,0.4) 0%, transparent 40%), radial-gradient(circle at 75% 80%, rgba(255,255,255,0.3) 0%, transparent 45%)",
+            background:
+              "radial-gradient(120% 90% at 50% -8%, #1f6b4e 0%, #0d4a38 38%, #07352a 68%, #041f1a 100%)",
           }}
         />
-        <div className="relative max-w-6xl mx-auto px-5 pt-16 pb-20 md:pt-24 md:pb-28 text-center">
-          <img src={logo} alt="PYAP Samac Logo" className="w-24 h-24 md:w-28 md:h-28 mx-auto mb-6 drop-shadow-lg" />
-          <p className="text-xs md:text-sm uppercase tracking-[0.25em] text-emerald-200 mb-3">{content.heroTagline}</p>
-          <h1 className="text-3xl md:text-5xl font-bold leading-tight max-w-3xl mx-auto">{content.heroTitle}</h1>
-          <p className="mt-5 text-sm md:text-base text-emerald-50/90 max-w-2xl mx-auto leading-relaxed">
+        <div className="pointer-events-none absolute -top-32 left-1/2 h-[38rem] w-[46rem] -translate-x-1/2 rounded-full bg-amber-200/40 blur-[120px]" />
+        <div className="pointer-events-none absolute -left-24 top-8 h-80 w-80 rounded-full bg-emerald-300/30 blur-[90px]" />
+        <div className="pointer-events-none absolute -right-20 bottom-[-4rem] h-96 w-96 rounded-full bg-teal-200/22 blur-[120px]" />
+        <div className="pointer-events-none absolute left-1/2 top-16 h-64 w-64 -translate-x-1/2 rounded-full bg-white/16 blur-[80px]" />
+        <HeroMotion />
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{
+            background:
+              "radial-gradient(ellipse at center, transparent 42%, rgba(2, 18, 14, 0.45) 100%)",
+          }}
+        />
+        <div className="relative z-10 max-w-6xl mx-auto px-5 pt-16 pb-20 md:pt-24 md:pb-28 text-center">
+          <img src={logo} alt="PYAP Samac Logo" className="w-24 h-24 md:w-28 md:h-28 mx-auto mb-6 rounded-3xl bg-white/10 p-2 ring-1 ring-white/20 shadow-2xl" />
+          <p className="text-xs md:text-sm uppercase tracking-[0.28em] text-amber-200/90 mb-3">{content.heroTagline}</p>
+          <h1 className="font-serif text-4xl md:text-6xl font-medium leading-[1.08] max-w-3xl mx-auto">{content.heroTitle}</h1>
+          <p className="mt-6 text-sm md:text-base text-emerald-50/90 max-w-2xl mx-auto leading-relaxed">
             {content.heroSubtitle}
           </p>
-          <div className="mt-8 flex flex-wrap gap-3 justify-center">
+          <div className="mt-9 flex flex-wrap gap-3 justify-center">
             <button
               onClick={() => scrollTo("about")}
-              className="bg-white text-emerald-800 hover:bg-emerald-50 font-semibold text-sm px-6 py-3 rounded-lg transition shadow-lg"
+              className="bg-white text-emerald-950 hover:bg-amber-50 font-semibold text-sm px-6 py-3 rounded-full transition shadow-lg"
             >
               Learn More
             </button>
             <button
               onClick={onRequestClick}
-              className="bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-sm px-6 py-3 rounded-lg transition shadow-lg"
+              className="bg-amber-300 hover:bg-amber-200 text-emerald-950 font-semibold text-sm px-6 py-3 rounded-full transition shadow-lg"
             >
               Request Account
             </button>
             <button
               onClick={onGuestClick}
-              className="bg-emerald-950/40 hover:bg-emerald-950/60 border border-white/30 text-white font-semibold text-sm px-6 py-3 rounded-lg transition"
+              className="bg-white/8 hover:bg-white/14 border border-white/25 text-white font-semibold text-sm px-6 py-3 rounded-full transition"
             >
               Continue as Guest
             </button>
@@ -131,8 +141,8 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
       <section id="about" className="max-w-6xl mx-auto px-5 py-16 md:py-20">
         <div className="grid md:grid-cols-2 gap-10 items-center">
           <div>
-            <span className="text-xs uppercase tracking-widest text-emerald-700 font-semibold">About PYAP Samac</span>
-            <h2 className="mt-2 text-2xl md:text-3xl font-bold text-emerald-900">{content.aboutTitle}</h2>
+            <span className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-semibold">About PYAP Samac</span>
+            <h2 className="mt-2 font-serif text-3xl md:text-4xl font-medium text-emerald-950 tracking-tight">{content.aboutTitle}</h2>
             <p className="mt-5 text-sm md:text-base text-stone-600 leading-relaxed whitespace-pre-line">
               {content.aboutBody}
             </p>
@@ -149,18 +159,18 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
       {/* MISSION & VISION */}
       <section id="mission" className="bg-emerald-50/60 border-y border-emerald-100">
         <div className="max-w-6xl mx-auto px-5 py-16 md:py-20 grid md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-2xl p-7 shadow-sm border border-emerald-100">
-            <div className="w-11 h-11 rounded-xl bg-emerald-700 text-white flex items-center justify-center mb-4">
+          <div className="surface rounded-3xl p-8">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-800 text-white flex items-center justify-center mb-4">
               <Target size={20} />
             </div>
-            <h3 className="text-lg font-bold text-emerald-900">Our Mission</h3>
+            <h3 className="font-serif text-2xl font-medium text-emerald-950">Our Mission</h3>
             <p className="mt-3 text-sm text-stone-600 leading-relaxed whitespace-pre-line">{content.mission}</p>
           </div>
-          <div className="bg-white rounded-2xl p-7 shadow-sm border border-emerald-100">
-            <div className="w-11 h-11 rounded-xl bg-emerald-700 text-white flex items-center justify-center mb-4">
+          <div className="surface rounded-3xl p-8">
+            <div className="w-11 h-11 rounded-2xl bg-amber-300 text-emerald-950 flex items-center justify-center mb-4">
               <Sparkles size={20} />
             </div>
-            <h3 className="text-lg font-bold text-emerald-900">Our Vision</h3>
+            <h3 className="font-serif text-2xl font-medium text-emerald-950">Our Vision</h3>
             <p className="mt-3 text-sm text-stone-600 leading-relaxed whitespace-pre-line">{content.vision}</p>
           </div>
         </div>
@@ -169,16 +179,16 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
       {/* VALUES */}
       <section className="max-w-6xl mx-auto px-5 py-16 md:py-20">
         <div className="text-center max-w-2xl mx-auto mb-10">
-          <span className="text-xs uppercase tracking-widest text-emerald-700 font-semibold">Core Values</span>
-          <h2 className="mt-2 text-2xl md:text-3xl font-bold text-emerald-900">What We Stand For</h2>
+          <span className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-semibold">Core Values</span>
+          <h2 className="mt-2 font-serif text-3xl md:text-4xl font-medium text-emerald-950 tracking-tight">What We Stand For</h2>
         </div>
         <div className="grid md:grid-cols-3 gap-5">
           {content.values.map((v, i) => (
-            <div key={i} className="bg-white border border-stone-200 rounded-2xl p-6 hover:shadow-md hover:border-emerald-200 transition">
-              <div className="w-10 h-10 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center mb-4">
+            <div key={i} className="surface rounded-3xl p-6 hover:-translate-y-0.5 transition duration-200">
+              <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center mb-4">
                 <Heart size={18} />
               </div>
-              <h4 className="font-bold text-emerald-900">{v.title}</h4>
+              <h4 className="font-serif text-xl font-medium text-emerald-950">{v.title}</h4>
               <p className="mt-2 text-sm text-stone-600 leading-relaxed">{v.desc}</p>
             </div>
           ))}
@@ -189,16 +199,16 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
       <section id="activities" className="bg-stone-100/70 border-y border-stone-200">
         <div className="max-w-6xl mx-auto px-5 py-16 md:py-20">
           <div className="text-center max-w-2xl mx-auto mb-10">
-            <span className="text-xs uppercase tracking-widest text-emerald-700 font-semibold">Our Programs</span>
-            <h2 className="mt-2 text-2xl md:text-3xl font-bold text-emerald-900">What We Do</h2>
+            <span className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-semibold">Our Programs</span>
+            <h2 className="mt-2 font-serif text-3xl md:text-4xl font-medium text-emerald-950 tracking-tight">What We Do</h2>
             <p className="mt-3 text-sm text-stone-600">Programs and activities that bring our youth together and uplift the barangay.</p>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {content.activities.map((a, i) => {
               const Icon = iconMap[a.icon] || Sparkles;
               return (
-                <div key={i} className="bg-white rounded-2xl p-6 border border-stone-200 hover:shadow-md hover:-translate-y-0.5 transition">
-                  <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-emerald-600 to-emerald-800 text-white flex items-center justify-center mb-4">
+                <div key={i} className="surface rounded-3xl p-6 hover:-translate-y-0.5 transition duration-200">
+                  <div className="w-11 h-11 rounded-2xl bg-emerald-800 text-white flex items-center justify-center mb-4">
                     <Icon size={19} />
                   </div>
                   <h4 className="font-bold text-emerald-900 text-sm">{a.title}</h4>
@@ -212,19 +222,20 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
 
       {/* CTA / JOIN */}
       <section id="join" className="max-w-6xl mx-auto px-5 py-16 md:py-20">
-        <div className="bg-gradient-to-br from-emerald-700 to-emerald-900 text-white rounded-3xl p-10 md:p-14 text-center shadow-xl">
-          <h2 className="text-2xl md:text-3xl font-bold">{content.ctaTitle}</h2>
-          <p className="mt-4 text-sm md:text-base text-emerald-50/90 max-w-2xl mx-auto leading-relaxed">{content.ctaBody}</p>
-          <div className="mt-7 flex flex-wrap gap-3 justify-center">
+        <div className="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 text-white rounded-[2rem] p-10 md:p-14 text-center shadow-xl overflow-hidden relative">
+          <div className="absolute inset-0 opacity-30 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 80% 20%, rgba(251,191,36,0.35), transparent 40%)" }} />
+          <h2 className="relative font-serif text-3xl md:text-4xl font-medium">{content.ctaTitle}</h2>
+          <p className="relative mt-4 text-sm md:text-base text-emerald-50/90 max-w-2xl mx-auto leading-relaxed">{content.ctaBody}</p>
+          <div className="relative mt-7 flex flex-wrap gap-3 justify-center">
             <button
               onClick={onLoginClick}
-              className="bg-white text-emerald-800 hover:bg-emerald-50 font-semibold text-sm px-6 py-3 rounded-lg transition shadow-lg"
+              className="bg-white text-emerald-950 hover:bg-amber-50 font-semibold text-sm px-6 py-3 rounded-full transition shadow-lg"
             >
               Login to Your Account
             </button>
             <button
               onClick={() => scrollTo("contact")}
-              className="border border-white/40 hover:bg-white/10 text-white font-semibold text-sm px-6 py-3 rounded-lg transition"
+              className="border border-white/40 hover:bg-white/10 text-white font-semibold text-sm px-6 py-3 rounded-full transition"
             >
               Contact Us
             </button>
@@ -289,10 +300,56 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
   );
 }
 
+function HeroMotion() {
+  const motes = [
+    { left: "12%", bottom: "18%", delay: "0s", duration: "9s" },
+    { left: "22%", bottom: "10%", delay: "1.4s", duration: "11s" },
+    { left: "78%", bottom: "16%", delay: "0.6s", duration: "10s" },
+    { left: "88%", bottom: "28%", delay: "2.2s", duration: "12s" },
+    { left: "8%", bottom: "42%", delay: "3s", duration: "13s" },
+    { left: "70%", bottom: "8%", delay: "1.8s", duration: "9.5s" },
+    { left: "40%", bottom: "6%", delay: "2.8s", duration: "14s" },
+    { left: "58%", bottom: "12%", delay: "0.3s", duration: "11.5s" },
+  ];
+
+  return (
+    <div className="hero-motion pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
+      <svg className="absolute inset-0 h-full w-full opacity-50" viewBox="0 0 1200 720" preserveAspectRatio="xMidYMid slice">
+        <g fill="none" stroke="rgba(253, 230, 138, 0.28)" strokeWidth="1">
+          <path d="M160 180 C 280 140, 340 240, 430 210" strokeDasharray="6 10" style={{ animation: "hero-dash 18s linear infinite" }} />
+          <path d="M430 210 C 520 180, 610 250, 740 190" strokeDasharray="6 10" style={{ animation: "hero-dash 22s linear infinite" }} />
+          <path d="M740 190 C 860 150, 940 230, 1040 200" strokeDasharray="6 10" style={{ animation: "hero-dash 16s linear infinite reverse" }} />
+          <path d="M180 480 C 300 430, 390 520, 510 470" strokeDasharray="7 12" style={{ animation: "hero-dash 20s linear infinite" }} />
+          <path d="M510 470 C 640 430, 760 530, 900 460" strokeDasharray="7 12" style={{ animation: "hero-dash 24s linear infinite reverse" }} />
+          <path d="M220 300 C 280 360, 250 430, 180 480" strokeDasharray="5 11" style={{ animation: "hero-dash 19s linear infinite" }} />
+          <path d="M980 250 C 1020 330, 990 410, 900 460" strokeDasharray="5 11" style={{ animation: "hero-dash 21s linear infinite" }} />
+        </g>
+        {[
+          [160, 180], [430, 210], [740, 190], [1040, 200],
+          [180, 480], [510, 470], [900, 460], [250, 330], [980, 250],
+        ].map(([cx, cy], i) => (
+          <g key={i}>
+            <circle cx={cx} cy={cy} r="11" fill="rgba(16, 185, 129, 0.18)" stroke="rgba(253,230,138,0.35)" />
+            <circle cx={cx} cy={cy} r="3.5" fill="rgba(254, 243, 199, 0.9)" style={{ animation: `hero-pulse ${3.2 + (i % 3)}s ease-in-out infinite`, animationDelay: `${i * 0.35}s` }} />
+          </g>
+        ))}
+      </svg>
+
+      {motes.map((m, i) => (
+        <span
+          key={i}
+          className="absolute h-1.5 w-1.5 rounded-full bg-amber-100/70"
+          style={{ left: m.left, bottom: m.bottom, animation: `hero-rise ${m.duration} ease-in-out infinite`, animationDelay: m.delay }}
+        />
+      ))}
+    </div>
+  );
+}
+
 function StatBox({ big, small }) {
   return (
-    <div className="bg-white border border-stone-200 rounded-2xl px-4 py-5 text-center">
-      <div className="text-sm font-bold text-emerald-800">{big}</div>
+    <div className="surface rounded-2xl px-4 py-5 text-center">
+      <div className="font-serif text-base font-medium text-emerald-950">{big}</div>
       <div className="text-[11px] text-stone-500 mt-1">{small}</div>
     </div>
   );

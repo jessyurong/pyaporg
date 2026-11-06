@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { CalendarDays, Check, ChevronRight, ClipboardList } from "lucide-react";
-import { Badge, EmptyState, MobileCard, MobileField, MobileFields, inputCls } from "./ui.jsx";
+import { Badge, EmptyState, MobileCard, MobileField, MobileFields, PageHeader, inputCls } from "./ui.jsx";
 import { MemberAvatar } from "./MembersPage.jsx";
 import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
@@ -24,8 +24,10 @@ export function AttendanceSelect({ events, members, attendance, canManage, onSel
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-emerald-900 mb-1">Attendance</h1>
-      <p className="text-sm text-stone-500 mb-5">{canManage ? "Select an event to mark or view attendance." : "Tap a recorded event below to view per-member attendance."}</p>
+      <PageHeader
+        title="Attendance"
+        subtitle={canManage ? "Select an event to mark or view attendance." : "Tap a recorded event below to view per-member attendance."}
+      />
 
       <div className="lg:hidden grid gap-3 mb-6">
         {events.length === 0 ? (
@@ -56,7 +58,7 @@ export function AttendanceSelect({ events, members, attendance, canManage, onSel
         ))}
       </div>
 
-      <div className="hidden lg:block bg-white rounded-xl border border-stone-200 overflow-x-auto mb-6">
+      <div className="hidden lg:block surface rounded-2xl overflow-x-auto mb-6">
         <table className="w-full text-sm min-w-[500px]">
           <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Event</th><th className="p-3">Date</th><th className="p-3"></th></tr></thead>
           <tbody>{events.map(e => (
@@ -93,7 +95,7 @@ export function AttendanceSelect({ events, members, attendance, canManage, onSel
             ))}
           </div>
 
-          <div className="hidden lg:block bg-white rounded-xl border border-stone-200 overflow-x-auto">
+          <div className="hidden lg:block surface rounded-2xl overflow-x-auto">
             <table className="w-full text-sm min-w-[550px]">
               <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Event</th><th className="p-3">Date</th><th className="p-3 text-center">Present</th><th className="p-3 text-center">Absent</th><th className="p-3 text-center">Excused</th><th className="p-3 text-center">Rate</th></tr></thead>
               <tbody>{history.map(h => (
@@ -145,7 +147,7 @@ export function AttendanceHistoryDetail({ event, members, record, noteRecord, on
         ))}
       </div>
 
-      <div className="hidden lg:block bg-white rounded-xl border border-stone-200 overflow-x-auto">
+      <div className="hidden lg:block surface rounded-2xl overflow-x-auto">
         <table className="w-full text-sm min-w-[500px]">
           <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Member</th><th className="p-3">Status</th><th className="p-3">Note</th></tr></thead>
           <tbody>{rows.map(r => (
@@ -262,7 +264,7 @@ export function AttendanceMark({ event, members, record, noteRecord, onBack, onS
             })}
           </div>
 
-          <div className="hidden lg:block bg-white rounded-xl border border-stone-200 overflow-x-auto">
+          <div className="hidden lg:block surface rounded-2xl overflow-x-auto">
             <table className="w-full text-sm min-w-[600px]">
               <thead><tr className="bg-emerald-50 text-emerald-900 text-left"><th className="p-3">Member</th><th className="p-3 text-center">Present</th><th className="p-3 text-center">Absent</th><th className="p-3 text-center">Excused</th><th className="p-3">Note</th></tr></thead>
               <tbody>{members.map(m => (

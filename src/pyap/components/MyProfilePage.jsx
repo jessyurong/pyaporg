@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { CalendarDays, Camera, Mail, MapPin, Pencil, Phone, UserRound } from "lucide-react";
 import { fmtBirthday } from "../lib/utils.js";
 import { MemberAvatar } from "./MembersPage.jsx";
-import { Badge, inputCls } from "./ui.jsx";
+import { Badge, PageHeader, inputCls } from "./ui.jsx";
 
 // Sariling profile screen — makikita ng LAHAT ng naka-login.
 // Dito pwedeng mag-add/palit ng profile photo at i-edit ang sariling info
@@ -18,7 +18,7 @@ export function MyProfile({ member, accountName, accountEmail, photoBusy = false
   if (!member) {
     return (
       <div>
-        <h1 className="text-xl font-bold text-emerald-900 mb-5">My Profile</h1>
+        <PageHeader title="My Profile" subtitle="Link a member record to manage your photo and details." />
         <div className="bg-white rounded-xl border border-stone-200 p-8 text-center max-w-xl">
           <UserRound size={32} className="mx-auto text-stone-300 mb-3" />
           <p className="text-sm font-semibold text-stone-700">Wala pang naka-link na member record sa account mo</p>
@@ -64,7 +64,7 @@ export function MyProfile({ member, accountName, accountEmail, photoBusy = false
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-emerald-900 mb-5">My Profile</h1>
+      <PageHeader title="My Profile" subtitle="Your photo and personal information." />
 
       <div className="bg-white rounded-xl border border-stone-200 p-5 mb-5 flex items-center gap-5">
         <div className="relative shrink-0">

@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from "react";
+import { PageHeader } from "./ui.jsx";
 import { CalendarDays, ChevronLeft, ChevronRight, MapPin } from "lucide-react";
 import {
   addDays,
@@ -126,7 +127,7 @@ export function EventCalendar({ events = [] }) {
 
   return (
     <div>
-      <h1 className="text-xl font-bold text-emerald-900 mb-5">Event Calendar</h1>
+      <PageHeader title="Event Calendar" subtitle="See upcoming activities by month." />
 
       <div className="grid lg:grid-cols-[1fr_300px] gap-5 items-start">
         {/* Calendar */}
