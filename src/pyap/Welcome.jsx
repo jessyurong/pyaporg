@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Users, Calendar, Award, Megaphone, Heart, Target, Sparkles, Mail, Phone, MapPin, X, Edit3, ChevronDown } from "lucide-react";
 import { useSubmitLock, submittingCls } from "./hooks/useSubmitLock.jsx";
 
@@ -36,14 +36,36 @@ const iconMap = { users: Users, calendar: Calendar, award: Award, megaphone: Meg
 
 export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onGuestClick, onRequestClick, onSave }) {
   const [editing, setEditing] = useState(false);
+  const [scrollProgress, setScrollProgress] = useState(0);
+  const heroGlow = useRef(null);
 
   const scrollTo = (id) => {
     const el = document.getElementById(id);
     if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
+  useEffect(() => {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const onScroll = () => {
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      setScrollProgress(max > 0 ? Math.min(1, window.scrollY / max) : 0);
+      if (!reduce && heroGlow.current) {
+        heroGlow.current.style.transform = `translate3d(0, ${Math.min(window.scrollY, 480) * 0.22}px, 0)`;
+      }
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <div className="min-h-screen w-full app-shell text-stone-800 font-sans">
+      <div className="fixed top-0 left-0 right-0 z-50 h-[3px] pointer-events-none" aria-hidden="true">
+        <div
+          className="h-full origin-left bg-gradient-to-r from-emerald-700 via-emerald-500 to-amber-300"
+          style={{ width: `${scrollProgress * 100}%` }}
+        />
+      </div>
       <header className="sticky top-0 z-30 bg-white/75 backdrop-blur-xl border-b border-emerald-900/8">
         <div className="max-w-6xl mx-auto flex items-center justify-between px-5 py-3">
           <div className="flex items-center gap-2.5">
@@ -88,10 +110,12 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
               "radial-gradient(120% 90% at 50% -8%, #1f6b4e 0%, #0d4a38 38%, #07352a 68%, #041f1a 100%)",
           }}
         />
-        <div className="pointer-events-none absolute -top-32 left-1/2 h-[38rem] w-[46rem] -translate-x-1/2 rounded-full bg-amber-200/40 blur-[120px]" />
-        <div className="pointer-events-none absolute -left-24 top-8 h-80 w-80 rounded-full bg-emerald-300/30 blur-[90px]" />
-        <div className="pointer-events-none absolute -right-20 bottom-[-4rem] h-96 w-96 rounded-full bg-teal-200/22 blur-[120px]" />
-        <div className="pointer-events-none absolute left-1/2 top-16 h-64 w-64 -translate-x-1/2 rounded-full bg-white/16 blur-[80px]" />
+        <div ref={heroGlow} className="pointer-events-none absolute inset-0 will-change-transform">
+          <div className="absolute -top-32 left-1/2 h-[38rem] w-[46rem] -translate-x-1/2 rounded-full bg-amber-200/40 blur-[120px]" />
+          <div className="absolute -left-24 top-8 h-80 w-80 rounded-full bg-emerald-300/30 blur-[90px]" />
+          <div className="absolute -right-20 bottom-[-4rem] h-96 w-96 rounded-full bg-teal-200/22 blur-[120px]" />
+          <div className="absolute left-1/2 top-16 h-64 w-64 -translate-x-1/2 rounded-full bg-white/16 blur-[80px]" />
+        </div>
         <HeroMotion />
         <div
           className="pointer-events-none absolute inset-0"
@@ -140,18 +164,24 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
       {/* ABOUT */}
       <section id="about" className="max-w-6xl mx-auto px-5 py-16 md:py-20">
         <div className="grid md:grid-cols-2 gap-10 items-center">
-          <div>
+          <Reveal from="left">
             <span className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-semibold">About PYAP Samac</span>
             <h2 className="mt-2 font-serif text-3xl md:text-4xl font-medium text-emerald-950 tracking-tight">{content.aboutTitle}</h2>
             <p className="mt-5 text-sm md:text-base text-stone-600 leading-relaxed whitespace-pre-line">
               {content.aboutBody}
             </p>
-          </div>
+          </Reveal>
           <div className="grid grid-cols-2 gap-4">
-            <StatBox big="Youth-Led" small="By youth, for youth" />
-            <StatBox big="Community-Rooted" small="Serving Barangay Samac" />
-            <StatBox big="Nationwide" small="Part of PYAP Philippines" />
-            <StatBox big="Volunteer-Driven" small="Powered by bayanihan" />
+            {[
+              ["Youth-Led", "By youth, for youth"],
+              ["Community-Rooted", "Serving Barangay Samac"],
+              ["Nationwide", "Part of PYAP Philippines"],
+              ["Volunteer-Driven", "Powered by bayanihan"],
+            ].map(([big, small], i) => (
+              <Reveal key={big} from="right" delay={i * 90}>
+                <StatBox big={big} small={small} />
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>
@@ -159,38 +189,44 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
       {/* MISSION & VISION */}
       <section id="mission" className="bg-emerald-50/60 border-y border-emerald-100">
         <div className="max-w-6xl mx-auto px-5 py-16 md:py-20 grid md:grid-cols-2 gap-6">
-          <div className="surface rounded-3xl p-8">
-            <div className="w-11 h-11 rounded-2xl bg-emerald-800 text-white flex items-center justify-center mb-4">
-              <Target size={20} />
+          <Reveal from="left">
+            <div className="surface rounded-3xl p-8">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-800 text-white flex items-center justify-center mb-4">
+                <Target size={20} />
+              </div>
+              <h3 className="font-serif text-2xl font-medium text-emerald-950">Our Mission</h3>
+              <p className="mt-3 text-sm text-stone-600 leading-relaxed whitespace-pre-line">{content.mission}</p>
             </div>
-            <h3 className="font-serif text-2xl font-medium text-emerald-950">Our Mission</h3>
-            <p className="mt-3 text-sm text-stone-600 leading-relaxed whitespace-pre-line">{content.mission}</p>
-          </div>
-          <div className="surface rounded-3xl p-8">
-            <div className="w-11 h-11 rounded-2xl bg-amber-300 text-emerald-950 flex items-center justify-center mb-4">
-              <Sparkles size={20} />
+          </Reveal>
+          <Reveal from="right" delay={120}>
+            <div className="surface rounded-3xl p-8">
+              <div className="w-11 h-11 rounded-2xl bg-emerald-800 text-white flex items-center justify-center mb-4">
+                <Sparkles size={20} />
+              </div>
+              <h3 className="font-serif text-2xl font-medium text-emerald-950">Our Vision</h3>
+              <p className="mt-3 text-sm text-stone-600 leading-relaxed whitespace-pre-line">{content.vision}</p>
             </div>
-            <h3 className="font-serif text-2xl font-medium text-emerald-950">Our Vision</h3>
-            <p className="mt-3 text-sm text-stone-600 leading-relaxed whitespace-pre-line">{content.vision}</p>
-          </div>
+          </Reveal>
         </div>
       </section>
 
       {/* VALUES */}
       <section className="max-w-6xl mx-auto px-5 py-16 md:py-20">
-        <div className="text-center max-w-2xl mx-auto mb-10">
+        <Reveal className="text-center max-w-2xl mx-auto mb-10">
           <span className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-semibold">Core Values</span>
           <h2 className="mt-2 font-serif text-3xl md:text-4xl font-medium text-emerald-950 tracking-tight">What We Stand For</h2>
-        </div>
+        </Reveal>
         <div className="grid md:grid-cols-3 gap-5">
           {content.values.map((v, i) => (
-            <div key={i} className="surface rounded-3xl p-6 hover:-translate-y-0.5 transition duration-200">
+            <Reveal key={i} delay={i * 100}>
+            <div className="surface rounded-3xl p-6 hover:-translate-y-0.5 transition duration-200 h-full">
               <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-800 flex items-center justify-center mb-4">
                 <Heart size={18} />
               </div>
               <h4 className="font-serif text-xl font-medium text-emerald-950">{v.title}</h4>
               <p className="mt-2 text-sm text-stone-600 leading-relaxed">{v.desc}</p>
             </div>
+            </Reveal>
           ))}
         </div>
       </section>
@@ -198,22 +234,24 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
       {/* ACTIVITIES */}
       <section id="activities" className="bg-stone-100/70 border-y border-stone-200">
         <div className="max-w-6xl mx-auto px-5 py-16 md:py-20">
-          <div className="text-center max-w-2xl mx-auto mb-10">
+          <Reveal className="text-center max-w-2xl mx-auto mb-10">
             <span className="text-xs uppercase tracking-[0.2em] text-emerald-700 font-semibold">Our Programs</span>
             <h2 className="mt-2 font-serif text-3xl md:text-4xl font-medium text-emerald-950 tracking-tight">What We Do</h2>
             <p className="mt-3 text-sm text-stone-600">Programs and activities that bring our youth together and uplift the barangay.</p>
-          </div>
+          </Reveal>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {content.activities.map((a, i) => {
               const Icon = iconMap[a.icon] || Sparkles;
               return (
-                <div key={i} className="surface rounded-3xl p-6 hover:-translate-y-0.5 transition duration-200">
+                <Reveal key={i} delay={i * 80}>
+                <div className="surface rounded-3xl p-6 hover:-translate-y-0.5 transition duration-200 h-full">
                   <div className="w-11 h-11 rounded-2xl bg-emerald-800 text-white flex items-center justify-center mb-4">
                     <Icon size={19} />
                   </div>
                   <h4 className="font-bold text-emerald-900 text-sm">{a.title}</h4>
                   <p className="mt-2 text-xs text-stone-600 leading-relaxed">{a.desc}</p>
                 </div>
+                </Reveal>
               );
             })}
           </div>
@@ -222,6 +260,7 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
 
       {/* CTA / JOIN */}
       <section id="join" className="max-w-6xl mx-auto px-5 py-16 md:py-20">
+        <Reveal from="scale">
         <div className="bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-800 text-white rounded-[2rem] p-10 md:p-14 text-center shadow-xl overflow-hidden relative">
           <div className="absolute inset-0 opacity-30 pointer-events-none" style={{ backgroundImage: "radial-gradient(circle at 80% 20%, rgba(251,191,36,0.35), transparent 40%)" }} />
           <h2 className="relative font-serif text-3xl md:text-4xl font-medium">{content.ctaTitle}</h2>
@@ -241,11 +280,13 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
             </button>
           </div>
         </div>
+        </Reveal>
       </section>
 
       {/* CONTACT */}
       <section id="contact" className="bg-emerald-950 text-emerald-50">
         <div className="max-w-6xl mx-auto px-5 py-14 grid md:grid-cols-4 gap-8">
+          <Reveal from="up">
           <div>
             <div className="flex items-center gap-2.5">
               <img src={logo} alt="PYAP" className="w-10 h-10" />
@@ -258,8 +299,14 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
               Empowering the youth of Barangay Samac to lead, serve, and inspire.
             </p>
           </div>
-          <ContactItem icon={Mail} label="Email" value={content.contactEmail} href={`mailto:${content.contactEmail}`} />
-          <ContactItem icon={Phone} label="Phone" value={content.contactPhone} href={`tel:${content.contactPhone.replace(/\s/g, "")}`} />
+          </Reveal>
+          <Reveal from="up" delay={80}>
+            <ContactItem icon={Mail} label="Email" value={content.contactEmail} href={`mailto:${content.contactEmail}`} />
+          </Reveal>
+          <Reveal from="up" delay={160}>
+            <ContactItem icon={Phone} label="Phone" value={content.contactPhone} href={`tel:${content.contactPhone.replace(/\s/g, "")}`} />
+          </Reveal>
+          <Reveal from="up" delay={240}>
           <div>
             <div className="text-xs uppercase tracking-wider text-emerald-300 mb-2">Find Us</div>
             <div className="flex items-start gap-2 text-sm text-emerald-50">
@@ -277,6 +324,7 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
               </a>
             )}
           </div>
+          </Reveal>
         </div>
         <div className="border-t border-white/10">
           <div className="max-w-6xl mx-auto px-5 py-4 text-[11px] text-emerald-200/70 flex flex-wrap justify-between gap-2">
@@ -296,6 +344,37 @@ export default function Welcome({ content, logo, isSuperAdmin, onLoginClick, onG
           }}
         />
       )}
+    </div>
+  );
+}
+
+function Reveal({ children, className = "", from = "up", delay = 0 }) {
+  const ref = useRef(null);
+  const [shown, setShown] = useState(false);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      setShown(true);
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setShown(entry.isIntersecting),
+      { threshold: 0.18, rootMargin: "0px 0px -8% 0px" },
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <div
+      ref={ref}
+      data-from={from}
+      className={`reveal ${shown ? "is-in" : ""} ${className}`}
+      style={{ "--reveal-delay": `${delay}ms` }}
+    >
+      {children}
     </div>
   );
 }

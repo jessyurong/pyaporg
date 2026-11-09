@@ -222,8 +222,45 @@
   }
 }
 
+.reveal {
+  opacity: 0;
+  transform: translate3d(0, 32px, 0);
+  filter: blur(6px);
+  transition:
+    opacity 0.75s ease,
+    transform 0.8s cubic-bezier(0.22, 0.8, 0.28, 1),
+    filter 0.75s ease;
+  transition-delay: var(--reveal-delay, 0ms);
+  will-change: opacity, transform, filter;
+}
+
+.reveal[data-from="left"] {
+  transform: translate3d(-36px, 12px, 0);
+}
+
+.reveal[data-from="right"] {
+  transform: translate3d(36px, 12px, 0);
+}
+
+.reveal[data-from="scale"] {
+  transform: translate3d(0, 24px, 0) scale(0.96);
+}
+
+.reveal.is-in {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .hero-motion * {
     animation: none !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
   }
 }

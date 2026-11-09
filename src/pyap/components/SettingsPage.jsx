@@ -77,21 +77,17 @@ export function DonateBox() {
         subtitle={<>Ang bawat donasyon, malaking tulong para sa mga proyekto at aktibidad ng kabataan sa Barangay Samac. Maraming salamat sa inyong suporta! <Heart size={13} className="inline text-rose-500 -mt-0.5" /></>}
       />
 
-      <div className="bg-white rounded-xl border border-stone-200 p-5 max-w-md mb-4">
-        <h3 className="font-semibold text-emerald-900 text-sm mb-3 flex items-center gap-1.5"><Banknote size={14} /> Paraan ng Pagdo-donate</h3>
-        <div className="space-y-3 text-sm">
-          <div className="flex justify-between border-b border-stone-100 pb-2">
-            <span className="text-stone-500">GCash</span>
-            <span className="font-medium">0939-232-1901 (J****. J* Y****)</span>
-          </div>
-          <div className="flex justify-between border-b border-stone-100 pb-2">
-            <span className="text-stone-500">In-person</span>
-            <span className="font-medium">Barangay Samac Hall, Mabinay</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-stone-500">Contact Person</span>
-            <span className="font-medium">PYAP Treasurer</span>
-          </div>
+      <div className="surface rounded-2xl p-5 max-w-md mb-4">
+        <h3 className="font-semibold text-emerald-950 text-sm mb-1 flex items-center gap-1.5"><Banknote size={14} /> InstaPay</h3>
+        <p className="text-xs text-stone-500 mb-4">I-scan ang QR code gamit ang GCash, Maya, o kahit anong InstaPay app.</p>
+        <img
+          src="/donate/instapay-qr.jpg"
+          alt="InstaPay QR code for PYAP Samac donations"
+          className="mx-auto w-full max-w-[280px] rounded-2xl border border-stone-200 bg-white p-2"
+        />
+        <div className="mt-4 flex justify-between border-t border-stone-100 pt-3 text-sm">
+          <span className="text-stone-500">In-person</span>
+          <span className="font-medium text-emerald-950">Barangay Samac Hall, Mabinay</span>
         </div>
       </div>
 

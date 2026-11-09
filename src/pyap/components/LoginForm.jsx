@@ -1,6 +1,32 @@
-import React from "react";
-import { Camera, CheckCircle, KeyRound, UserPlus, X } from "lucide-react";
+import React, { useState } from "react";
+import { Camera, CheckCircle, Eye, EyeOff, KeyRound, UserPlus, X } from "lucide-react";
 import { inputCls, btnPrimary, btnSecondary } from "./ui.jsx";
+
+function PasswordField({ name, placeholder = "••••••••", autoComplete, minLength = 6 }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input
+        name={name}
+        type={show ? "text" : "password"}
+        placeholder={placeholder}
+        required
+        minLength={minLength}
+        autoComplete={autoComplete}
+        className={`${inputCls} pr-12`}
+      />
+      <button
+        type="button"
+        onClick={() => setShow((visible) => !visible)}
+        aria-label={show ? "Hide password" : "Show password"}
+        aria-pressed={show}
+        className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 rounded-lg text-stone-400 hover:text-emerald-800 hover:bg-emerald-50 flex items-center justify-center"
+      >
+        {show ? <EyeOff size={16} /> : <Eye size={16} />}
+      </button>
+    </div>
+  );
+}
 
 function Field({ label, hint, children }) {
   return (
@@ -58,7 +84,9 @@ export function LoginModal({ logo, error, busy, onSubmit, onClose, onRequestClic
           </label>
           <label className="block">
             <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500">Password</span>
-            <input name="password" type="password" placeholder="••••••••" required minLength={6} autoComplete="current-password" className={`${inputCls} mt-1`} />
+            <div className="mt-1">
+              <PasswordField name="password" autoComplete="current-password" />
+            </div>
           </label>
           <button type="submit" disabled={busy} className={`${btnPrimary} w-full disabled:opacity-60`}>
             {busy ? "Please wait…" : "Login"}
@@ -118,7 +146,7 @@ export function RequestAccountModal({ error, busy, done, onSubmit, onClose }) {
                   <input name="requestEmail" type="email" placeholder="you@email.com" required autoComplete="email" className={inputCls} />
                 </Field>
                 <Field label="Password" hint="At least 6 characters. Save this — you'll need it after approval.">
-                  <input name="requestPassword" type="password" placeholder="••••••••" required minLength={6} autoComplete="new-password" className={inputCls} />
+                  <PasswordField name="requestPassword" autoComplete="new-password" />
                 </Field>
               </div>
               <div className="space-y-3">
