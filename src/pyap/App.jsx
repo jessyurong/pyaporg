@@ -30,8 +30,9 @@ import { Announcements, AnnounceFormModal } from "./components/AnnouncementsPage
 import { Suggestions } from "./components/SuggestionsPage.jsx";
 import { Snapshots, SnapshotUploadModal } from "./components/SnapshotsPage.jsx";
 import { BackupExport, DonateBox, AboutModal, WelcomePage } from "./components/SettingsPage.jsx";
-import { PendingUsers, AccountRequests, FeatureAccess, UserManagement } from "./components/AccountsPage.jsx";
+import { PendingUsers, AccountRequests, FeatureAccess, UserManagement, ResetPasswordModal } from "./components/AccountsPage.jsx";
 import { Sidebar } from "./components/Sidebar.jsx";
+import { setMemberPassword } from "./lib/admin-password.functions";
 import { MyProfile } from "./components/MyProfilePage.jsx";
 import { EventCalendar } from "./components/EventCalendarPage.jsx";
 import { Leaderboard } from "./components/LeaderboardPage.jsx";
@@ -74,6 +75,7 @@ export default function App() {
   const [requestBusy, setRequestBusy] = useState(false);
   const [requestDone, setRequestDone] = useState(null);
   const [accountRequests, setAccountRequests] = useState([]);
+  const [passwordTarget, setPasswordTarget] = useState(null);
   const [pendingUsers, setPendingUsers] = useState([]);
   const [pendingRoleSelection, setPendingRoleSelection] = useState({});
   const [pendingLoading, setPendingLoading] = useState(true);
@@ -453,6 +455,20 @@ export default function App() {
     if (ok) accountBirthdaysApi.refresh();
   }
 
+  // Superadmin-only: palitan ang password ng isang member sa pamamagitan ng
+  // server function (service role). Bumabalik ang { ok, error } para sa modal.
+  async function handleResetPassword(userId, newPassword) {
+    const { data } = await supabase.auth.getSession();
+    const accessToken = data?.session?.access_token;
+    if (!accessToken) return { ok: false, error: "Session expired. Please sign in again." };
+    try {
+      return await setMemberPassword({ data: { accessToken, userId, password: newPassword } });
+    } catch (err) {
+      console.error("Password reset failed:", err);
+      return { ok: false, error: err?.message || "Failed to reset password." };
+    }
+  }
+
   const isPending = auth.status === "pending";
   const isRejected = auth.status === "rejected";
   const isInactive = auth.status === "inactive";
@@ -740,6 +756,7 @@ export default function App() {
             onSetRole={handleSetRole}
             onSetStatus={handleSetStatus}
             onSetBirthday={handleSetBirthday}
+            onResetPassword={setPasswordTarget}
           />
         )}
         {screen === "pendingUsers" && isLeader && (
@@ -777,6 +794,13 @@ export default function App() {
         <SnapshotUploadModal onClose={() => setShowSnapshotForm(false)} remaining={Math.max(0, SNAPSHOT_LIMIT - snapshots.length)} onSave={async (files, meta) => { const ok = await snapshotsApi.add(files, meta); if (ok) setShowSnapshotForm(false); }} />
       )}
       {showAbout && <AboutModal onClose={() => setShowAbout(false)} />}
+      {passwordTarget && (
+        <ResetPasswordModal
+          account={passwordTarget}
+          onClose={() => setPasswordTarget(null)}
+          onSubmit={handleResetPassword}
+        />
+      )}
     </div>
   );
 }

@@ -93,7 +93,11 @@ export function LoginModal({ logo, error, busy, onSubmit, onClose, onRequestClic
           </button>
         </form>
 
-        <button type="button" onClick={onRequestClick} className="w-full mt-4 text-xs font-medium text-emerald-800 hover:underline">
+        <p className="text-[11px] text-stone-400 mt-3 leading-relaxed">
+          Nakalimutan ang password? I-contact ang superadmin para ma-reset.
+        </p>
+
+        <button type="button" onClick={onRequestClick} className="w-full mt-3 text-xs font-medium text-emerald-800 hover:underline">
           New member? Request account access
         </button>
 

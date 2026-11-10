@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { Check, Lock, ShieldCheck, UserCheck } from "lucide-react";
+import { toast } from "sonner";
+import { Check, Copy, Eye, EyeOff, KeyRound, Lock, ShieldAlert, ShieldCheck, UserCheck, X } from "lucide-react";
 import { GRANTABLE_FEATURES, MANAGED_ROLES, PRESETS, ROLE_LABELS, ROLE_OPTIONS } from "../constants.js";
 import { fmtBirthday } from "../lib/utils.js";
-import { Badge, EmptyState, MobileActions, MobileCard, MobileField, MobileFields, PageHeader, inputCls } from "./ui.jsx";
+import { Badge, EmptyState, MobileActions, MobileCard, MobileField, MobileFields, PageHeader, btnPrimary, btnSecondary, inputCls } from "./ui.jsx";
 import { useSubmitLock, submittingCls } from "../hooks/useSubmitLock.jsx";
 
 function initialsOf(name, email) {
@@ -347,7 +348,181 @@ export function FeatureAccess({ extras, onSave }) {
   );
 }
 
-export function UserManagement({ accounts, loading, selfId, onSetRole, onSetStatus, onSetBirthday }) {
+// ---------- Superadmin: reset a member's password ----------
+// Ang lumang password ay HINDI maipapakita kahit kanino (bcrypt hash sa
+// Supabase). Ang tanging legit na paraan ay palitan ito ng bago.
+const PASSWORD_SETS = [
+  "ABCDEFGHJKLMNPQRSTUVWXYZ",
+  "abcdefghijkmnopqrstuvwxyz",
+  "23456789",
+  "!@#$%&*",
+];
+
+function randomInt(max) {
+  const buffer = new Uint32Array(1);
+  globalThis.crypto.getRandomValues(buffer);
+  return buffer[0] % max;
+}
+
+function makeTempPassword(length = 12) {
+  const all = PASSWORD_SETS.join("");
+  const chars = PASSWORD_SETS.map((set) => set[randomInt(set.length)]);
+  while (chars.length < length) chars.push(all[randomInt(all.length)]);
+  for (let i = chars.length - 1; i > 0; i -= 1) {
+    const j = randomInt(i + 1);
+    [chars[i], chars[j]] = [chars[j], chars[i]];
+  }
+  return chars.join("");
+}
+
+export function ResetPasswordModal({ account, onClose, onSubmit }) {
+  const [password, setPassword] = useState("");
+  const [show, setShow] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  async function submit(e) {
+    e.preventDefault();
+    setError("");
+    if (password.length < 8) {
+      setError("At least 8 characters ang bagong password.");
+      return;
+    }
+    if (!/[A-Za-z]/.test(password) || !/[0-9]/.test(password)) {
+      setError("Dapat may kahit isang letter at isang number.");
+      return;
+    }
+    setBusy(true);
+    try {
+      const result = await onSubmit(account.userId, password);
+      if (!result?.ok) {
+        setError(result?.error || "Failed to reset password.");
+        return;
+      }
+      setDone(true);
+    } catch (err) {
+      setError(err?.message || "Failed to reset password.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function copyPassword() {
+    try {
+      await navigator.clipboard.writeText(password);
+      setCopied(true);
+      toast.success("Password copied.");
+    } catch {
+      toast.error("Copy failed — paki-select na lang manually.");
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 bg-emerald-950/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto" onClick={onClose}>
+      <div className="bg-white rounded-[1.75rem] shadow-2xl w-full max-w-md relative my-auto max-h-[90dvh] overflow-hidden border border-stone-100 flex flex-col" onClick={(e) => e.stopPropagation()}>
+        <div className="sticky top-0 z-10 flex items-start justify-between gap-3 px-5 sm:px-6 pt-5 pb-4 bg-gradient-to-b from-emerald-50/90 to-white border-b border-emerald-100/70">
+          <div className="flex items-start gap-3 min-w-0 text-left">
+            <div className="w-11 h-11 rounded-2xl bg-emerald-900 text-amber-200 flex items-center justify-center shrink-0 shadow-sm">
+              {done ? <Check size={20} /> : <KeyRound size={20} />}
+            </div>
+            <div className="min-w-0">
+              <h1 className="font-serif text-[1.65rem] leading-tight font-medium text-emerald-950">
+                {done ? "Password Reset" : "Reset Password"}
+              </h1>
+              <p className="text-xs text-stone-500 mt-1 leading-relaxed break-words">
+                {done ? "I-share ito nang private sa member." : <>Para kay <b className="text-emerald-900">{account.name || "member"}</b>{account.email ? ` (${account.email})` : ""}</>}
+              </p>
+            </div>
+          </div>
+          <button type="button" onClick={onClose} className="w-9 h-9 rounded-full hover:bg-white flex items-center justify-center text-stone-400 hover:text-stone-700 shrink-0" aria-label="Close">
+            <X size={18} />
+          </button>
+        </div>
+
+        {done ? (
+          <div className="px-5 sm:px-6 py-5 overflow-y-auto">
+            <div className="bg-emerald-50/70 border border-emerald-100 rounded-2xl p-4 text-left">
+              <div className="text-[11px] font-semibold text-emerald-800 uppercase tracking-wide mb-2.5">Bagong Login Details</div>
+              <div className="space-y-2.5 text-sm">
+                <div>
+                  <div className="text-[11px] text-stone-500">Email</div>
+                  <div className="font-semibold text-emerald-950 break-all">{account.email || "—"}</div>
+                </div>
+                <div>
+                  <div className="text-[11px] text-stone-500">New password</div>
+                  <div className="flex items-center gap-2">
+                    <code className="font-mono font-semibold text-emerald-950 break-all flex-1">{password}</code>
+                    <button type="button" onClick={copyPassword} className="shrink-0 inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-700 bg-white border border-emerald-200 rounded-lg px-2 py-1.5 hover:bg-emerald-50">
+                      <Copy size={12} /> {copied ? "Copied" : "Copy"}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="bg-amber-50 border border-amber-200 text-amber-900 text-xs rounded-2xl p-3.5 mt-3 text-left leading-relaxed">
+              <b>Isulat o i-screenshot agad.</b> Hindi na ito maipapakita muli at hindi rin makikita ang dating password — naka-hash ito sa Supabase. Ibigay ito nang private sa member at ipaalala na huwag itong i-share.
+            </div>
+            <button type="button" onClick={onClose} className={`${btnPrimary} w-full mt-4`}>Got it</button>
+          </div>
+        ) : (
+          <form onSubmit={submit} className="flex flex-col min-h-0 flex-1" autoComplete="off">
+            <div className="px-5 sm:px-6 py-4 overflow-y-auto text-left space-y-3.5">
+              <div className="bg-stone-50 border border-stone-200 text-stone-600 text-[11px] rounded-xl p-3 flex items-start gap-2 leading-relaxed">
+                <ShieldAlert size={14} className="mt-0.5 shrink-0 text-amber-600" />
+                <span>Para sa nakalimutang password lang. Hindi makikita ang lumang password; papalitan lang ito ng bago.</span>
+              </div>
+
+              {error && <div className="bg-rose-50 text-rose-700 text-xs rounded-xl p-2.5 text-left">{error}</div>}
+
+              <label className="block">
+                <span className="text-[11px] font-semibold uppercase tracking-wide text-stone-500">Bagong password</span>
+                <div className="relative mt-1">
+                  <input
+                    type={show ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Minimum 8 characters"
+                    minLength={8}
+                    required
+                    autoComplete="new-password"
+                    className={`${inputCls} pr-12`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShow((v) => !v)}
+                    aria-label={show ? "Hide password" : "Show password"}
+                    aria-pressed={show}
+                    className="absolute right-1.5 top-1/2 -translate-y-1/2 h-9 w-9 rounded-lg text-stone-400 hover:text-emerald-800 hover:bg-emerald-50 flex items-center justify-center"
+                  >
+                    {show ? <EyeOff size={16} /> : <Eye size={16} />}
+                  </button>
+                </div>
+                <p className="mt-1 text-[11px] text-stone-400">Hindi bababa sa 8 characters, may letter at number.</p>
+              </label>
+
+              <button
+                type="button"
+                onClick={() => { setPassword(makeTempPassword()); setShow(true); }}
+                className={`${btnSecondary} w-full`}
+              >
+                <KeyRound size={15} /> Generate temporary password
+              </button>
+            </div>
+            <div className="px-5 sm:px-6 py-4 border-t border-stone-100 bg-white">
+              <button type="submit" disabled={busy} className={`${btnPrimary} w-full disabled:opacity-60`}>
+                {busy ? "Resetting…" : "Set New Password"}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
+export function UserManagement({ accounts, loading, selfId, onSetRole, onSetStatus, onSetBirthday, onResetPassword }) {
   const activeSuperadmins = accounts.filter(a => a.role === "superadmin" && a.status === "active").length;
   const statusLabels = { active: "Active", pending: "Pending", rejected: "Rejected", inactive: "Inactive" };
   const statusTone = (status) => (status === "active" ? "active" : status === "pending" ? "neutral" : "inactive");
@@ -437,8 +612,17 @@ export function UserManagement({ accounts, loading, selfId, onSetRole, onSetStat
                     </div>
                   </div>
 
-                  <div className="mt-3 border-t border-stone-100 pt-3">
+                  <div className="mt-3 border-t border-stone-100 pt-3 space-y-2">
                     {statusAction(a, locked, isSelf)}
+                    {a.role !== "superadmin" && onResetPassword && (
+                      <button
+                        type="button"
+                        onClick={() => onResetPassword(a)}
+                        className="min-h-11 w-full rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-700 text-sm font-semibold hover:bg-emerald-100 inline-flex items-center justify-center gap-1.5"
+                      >
+                        <KeyRound size={14} /> Reset password
+                      </button>
+                    )}
                   </div>
                 </MobileCard>
               );
@@ -486,15 +670,26 @@ export function UserManagement({ accounts, loading, selfId, onSetRole, onSetStat
                       </td>
                       <td className="p-3"><Badge tone={statusTone(a.status)}>{statusLabels[a.status] || a.status}</Badge></td>
                       <td className="p-3 whitespace-nowrap">
-                        {locked ? (
-                          <span className="text-xs text-stone-400">{isSelf ? "Ikaw ito" : "Huling superadmin"}</span>
-                        ) : a.status === "active" ? (
-                          <button type="button" onClick={() => onSetStatus(a.userId, "inactive")} className="text-rose-600 text-xs font-medium">Deactivate</button>
-                        ) : a.status === "pending" ? (
-                          <span className="text-xs text-stone-400">I-approve sa Pending Users</span>
-                        ) : (
-                          <button type="button" onClick={() => onSetStatus(a.userId, "active")} className="text-emerald-700 text-xs font-medium">Activate</button>
-                        )}
+                        <div className="flex flex-col items-start gap-2">
+                          {locked ? (
+                            <span className="text-xs text-stone-400">{isSelf ? "Ikaw ito" : "Huling superadmin"}</span>
+                          ) : a.status === "active" ? (
+                            <button type="button" onClick={() => onSetStatus(a.userId, "inactive")} className="text-rose-600 text-xs font-medium">Deactivate</button>
+                          ) : a.status === "pending" ? (
+                            <span className="text-xs text-stone-400">I-approve sa Pending Users</span>
+                          ) : (
+                            <button type="button" onClick={() => onSetStatus(a.userId, "active")} className="text-emerald-700 text-xs font-medium">Activate</button>
+                          )}
+                          {a.role !== "superadmin" && onResetPassword && (
+                            <button
+                              type="button"
+                              onClick={() => onResetPassword(a)}
+                              className="text-emerald-700 text-xs font-medium inline-flex items-center gap-1 hover:underline"
+                            >
+                              <KeyRound size={12} /> Reset password
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   );
